@@ -18,8 +18,7 @@ const LogoSection = () => {
 
   const logoSectionInView = useInView(logoSectionRef, { once: false, margin: '-100px' });
 
-  // Only pass the ref to useScroll after the DOM node exists. This ensures we don't
-  // hand a defined but not-yet-hydrated ref to framer-motion, which triggers an invariant.
+  
   const scrollTarget = logoSectionRef.current ? logoSectionRef : undefined;
   if (typeof window !== 'undefined') {
     // eslint-disable-next-line no-console
