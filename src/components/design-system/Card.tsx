@@ -14,12 +14,12 @@ export default function Card({
   className = '',
   onClick,
 }: CardProps) {
-  const baseStyles = 'rounded-2xl transition-all duration-200';
+  const baseStyles = 'rounded-xl transition-all duration-200';
   
   const variantStyles = {
-    default: 'bg-white shadow-sm hover:shadow-md',
-    hover: 'bg-white border border-gray-200 hover:border-black cursor-pointer',
-    bordered: 'bg-white border-2 border-black',
+    default: 'bg-white border border-gray-200 hover:border-gray-300',
+    hover: 'bg-white border border-gray-200 hover:border-black cursor-pointer hover:shadow-sm',
+    bordered: 'bg-white border border-black',
   };
 
   if (onClick) {
@@ -27,8 +27,8 @@ export default function Card({
       <motion.div
         className={`${baseStyles} ${variantStyles[variant]} ${className}`}
         onClick={onClick}
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.99 }}
+        whileHover={{ scale: 1.005 }}
+        whileTap={{ scale: 0.995 }}
       >
         {children}
       </motion.div>

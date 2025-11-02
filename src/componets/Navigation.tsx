@@ -47,49 +47,38 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo - Just text, black and white */}
+      <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo - Smaller refined text */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <span className="text-2xl font-black text-black tracking-tighter">VeroLinkr</span>
+              <span className="text-[18px] font-black text-black tracking-tighter">VeroLinkr</span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {itemsToShow.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-600 hover:text-black px-3 py-2 text-base font-medium transition-colors duration-200"
+                className="text-gray-600 hover:text-black text-[13px] font-medium transition-colors duration-200"
               >
                 {item.name}
               </Link>
             ))}
             
             {!isLoggedIn && (
-              <div className="flex items-center space-x-4 ml-4">
-                <Link href="/auth" className="text-gray-600 hover:text-black px-4 py-2 text-base font-medium transition-colors duration-200">
+              <div className="flex items-center space-x-3 ml-3">
+                <Link href="/auth" className="text-gray-600 hover:text-black text-[13px] font-medium transition-colors duration-200">
                   Login
                 </Link>
                 <Link href="/auth">
                   <motion.button
-                    className="px-6 py-3 bg-black text-white rounded-full font-bold text-base relative overflow-hidden group"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-2.5 bg-black text-white rounded-full font-bold text-[13px] relative premium-glow-button"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    {/* Gradient glow background */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 blur-xl -z-10"
-                      animate={{
-                        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                      }}
-                    />
                     <span className="relative z-10">Get Started</span>
                   </motion.button>
                 </Link>
@@ -97,16 +86,16 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
             )}
             
             {isLoggedIn && (
-              <div className="flex items-center space-x-4 ml-4">
+              <div className="flex items-center space-x-3 ml-3">
                 <div className="flex items-center space-x-2">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                    <UserIcon className="w-5 h-5 text-gray-600" />
+                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                    <UserIcon className="w-4 h-4 text-gray-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-[13px] font-medium text-gray-700">
                     {userType === 'brand' ? 'Brand' : 'Creator'}
                   </span>
                 </div>
-                <button className="text-gray-600 hover:text-black px-3 py-2 text-sm font-medium transition-colors duration-200">
+                <button className="text-gray-600 hover:text-black text-[13px] font-medium transition-colors duration-200">
                   Logout
                 </button>
               </div>
@@ -117,12 +106,12 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-600 hover:text-black p-2 transition-colors duration-200"
+              className="text-gray-600 hover:text-black p-1.5 transition-colors duration-200"
             >
               {isMenuOpen ? (
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-5 h-5" />
               ) : (
-                <Bars3Icon className="w-6 h-6" />
+                <Bars3Icon className="w-5 h-5" />
               )}
             </button>
           </div>
@@ -135,14 +124,14 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-gray-200 py-6"
+              className="md:hidden border-t border-gray-200 py-4"
             >
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {itemsToShow.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="text-gray-600 hover:text-black block px-3 py-3 text-base font-medium transition-colors duration-200"
+                    className="text-gray-600 hover:text-black block py-2.5 text-[13px] font-medium transition-colors duration-200"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
@@ -150,28 +139,18 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
                 ))}
                 
                 {!isLoggedIn && (
-                  <div className="pt-4 border-t border-gray-200 space-y-3 px-3">
+                  <div className="pt-3 border-t border-gray-200 space-y-2">
                     <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
-                      <button className="w-full text-gray-600 hover:text-black px-4 py-3 text-base font-medium transition-colors duration-200">
+                      <button className="w-full text-gray-600 hover:text-black py-2.5 text-[13px] font-medium transition-colors duration-200 text-left">
                         Login
                       </button>
                     </Link>
                     <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
                       <motion.button
-                        className="w-full px-6 py-3 bg-black text-white rounded-full font-bold text-base relative overflow-hidden group"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        className="w-full px-6 py-2.5 bg-black text-white rounded-full font-bold text-[13px] relative premium-glow-button"
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
                       >
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 blur-xl -z-10"
-                          animate={{
-                            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                          }}
-                        />
                         <span className="relative z-10">Get Started</span>
                       </motion.button>
                     </Link>
@@ -179,16 +158,16 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
                 )}
                 
                 {isLoggedIn && (
-                  <div className="pt-4 border-t border-gray-200 space-y-3 px-3">
-                    <div className="flex items-center space-x-2 px-3 py-2">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                        <UserIcon className="w-5 h-5 text-gray-600" />
+                  <div className="pt-3 border-t border-gray-200 space-y-2">
+                    <div className="flex items-center space-x-2 py-2">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                        <UserIcon className="w-4 h-4 text-gray-600" />
                       </div>
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-[13px] font-medium text-gray-700">
                         {userType === 'brand' ? 'Brand' : 'Creator'}
                       </span>
                     </div>
-                    <button className="text-gray-600 hover:text-black block px-3 py-3 text-base font-medium transition-colors duration-200">
+                    <button className="text-gray-600 hover:text-black block py-2.5 text-[13px] font-medium transition-colors duration-200">
                       Logout
                     </button>
                   </div>
