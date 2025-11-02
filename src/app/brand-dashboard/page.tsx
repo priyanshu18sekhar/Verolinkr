@@ -18,9 +18,14 @@ import {
   UserGroupIcon,
   DocumentCheckIcon,
   ArrowUpIcon,
+  ArrowDownIcon,
   StarIcon,
   FireIcon,
-  SparklesIcon
+  SparklesIcon,
+  FunnelIcon,
+  ArrowDownTrayIcon,
+  BellIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import FloatingNav from '../../componets/ui/FloatingNav';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -28,6 +33,11 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 function BrandDashboardContent() {
   const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'create'>('overview');
   const [isLoading, setIsLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  const [selectedCampaigns, setSelectedCampaigns] = useState<number[]>([]);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('date');
 
   // Simple loading simulation
   useEffect(() => {
@@ -129,6 +139,43 @@ function BrandDashboardContent() {
       deadline: '2024-01-10'
     }
   ];
+
+  // Spending trends data
+  const spendingTrends = [
+    { month: 'Jan', spent: 95000, budget: 100000 },
+    { month: 'Feb', spent: 110000, budget: 120000 },
+    { month: 'Mar', spent: 125000, budget: 130000 },
+    { month: 'Apr', spent: 105000, budget: 120000 },
+    { month: 'May', spent: 135000, budget: 140000 },
+    { month: 'Jun', spent: 125000, budget: 130000 },
+  ];
+
+  // ROI trends data
+  const roiTrends = [
+    { month: 'Jan', roi: 320 },
+    { month: 'Feb', roi: 340 },
+    { month: 'Mar', roi: 335 },
+    { month: 'Apr', roi: 350 },
+    { month: 'May', roi: 345 },
+    { month: 'Jun', roi: 340 },
+  ];
+
+  // Campaign performance comparison
+  const campaignPerformance = [
+    { name: 'CPV Campaigns', value: 420, change: '+12%', color: 'bg-purple-500' },
+    { name: 'Gigs', value: 180, change: '+5%', color: 'bg-blue-500' },
+    { name: 'One-Time', value: 285, change: '+18%', color: 'bg-green-500' },
+  ];
+
+  // Engagement metrics
+  const engagementData = [
+    { platform: 'Instagram', engagement: 9.2, views: 1200000 },
+    { platform: 'YouTube', engagement: 8.5, views: 800000 },
+    { platform: 'TikTok', engagement: 12.3, views: 400000 },
+  ];
+
+  const maxSpending = Math.max(...spendingTrends.map(s => Math.max(s.spent, s.budget)));
+  const maxROI = Math.max(...roiTrends.map(r => r.roi));
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -366,6 +413,245 @@ function BrandDashboardContent() {
           <div className="p-6">
             {activeTab === 'overview' && (
               <div className="space-y-8">
+                {/* Control Bar with Filters, Export, and Time Range */}
+                <motion.div
+                  className="bg-white border border-gray-200 rounded-lg p-4 flex flex-wrap items-center justify-between gap-4"
+                  {...fadeInUp}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                >
+                  <div className="flex items-center space-x-3 flex-wrap gap-3">
+                    <div className="flex items-center space-x-2">
+                      <FunnelIcon className="w-4 h-4 text-gray-600" />
+                      <span className="text-[12px] font-semibold text-gray-700">Filters:</span>
+                    </div>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="text-[12px] font-semibold text-black border border-gray-300 rounded-lg px-3 py-1.5 hover:border-black transition-colors"
+                    >
+                      <option value="all">All Status</option>
+                      <option value="active">Active</option>
+                      <option value="completed">Completed</option>
+                      <option value="pending">Pending</option>
+                    </select>
+                    <select
+                      value={filterType}
+                      onChange={(e) => setFilterType(e.target.value)}
+                      className="text-[12px] font-semibold text-black border border-gray-300 rounded-lg px-3 py-1.5 hover:border-black transition-colors"
+                    >
+                      <option value="all">All Types</option>
+                      <option value="cpv">CPV</option>
+                      <option value="gigs">Gigs</option>
+                      <option value="onetime">One-Time</option>
+                    </select>
+                    <select
+                      value={timeRange}
+                      onChange={(e) => setTimeRange(e.target.value as any)}
+                      className="text-[12px] font-semibold text-black border border-gray-300 rounded-lg px-3 py-1.5 hover:border-black transition-colors"
+                    >
+                      <option value="7d">Last 7 days</option>
+                      <option value="30d">Last 30 days</option>
+                      <option value="90d">Last 90 days</option>
+                      <option value="1y">Last year</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {selectedCampaigns.length > 0 && (
+                      <motion.button
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="px-3 py-1.5 bg-gray-100 text-black rounded-lg text-[11px] font-semibold hover:bg-gray-200 transition-colors flex items-center space-x-1"
+                      >
+                        <span>{selectedCampaigns.length} selected</span>
+                        <XMarkIcon className="w-3 h-3" onClick={() => setSelectedCampaigns([])} />
+                      </motion.button>
+                    )}
+                    <motion.button
+                      className="px-4 py-2 bg-white border border-gray-300 text-black rounded-lg text-[12px] font-semibold hover:border-black transition-colors flex items-center space-x-2"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <ArrowDownTrayIcon className="w-4 h-4" />
+                      <span>Export</span>
+                    </motion.button>
+                    <motion.button
+                      className="px-4 py-2 bg-white border border-gray-300 text-black rounded-lg text-[12px] font-semibold hover:border-black transition-colors flex items-center space-x-2"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <BellIcon className="w-4 h-4" />
+                      <span>Alerts</span>
+                    </motion.button>
+                  </div>
+                </motion.div>
+
+                {/* Graphs Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Spending Trends Graph */}
+                  <motion.div
+                    className="bg-white border border-gray-200 rounded-lg p-6"
+                    {...fadeInUp}
+                    transition={{ duration: 0.5, delay: 0.15 }}
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="text-[18px] font-bold text-black">Spending Trends</h3>
+                        <p className="text-[11px] text-gray-500 mt-1">Budget vs Actual</p>
+                      </div>
+                      <div className="flex items-center space-x-4 text-[11px]">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 bg-black rounded"></div>
+                          <span className="text-gray-600">Budget</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 bg-gray-400 rounded"></div>
+                          <span className="text-gray-600">Spent</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-end justify-between h-[200px] space-x-2 px-2">
+                      {spendingTrends.map((data, index) => {
+                        const budgetHeight = (data.budget / maxSpending) * 100;
+                        const spentHeight = (data.spent / maxSpending) * 100;
+                        return (
+                          <div key={index} className="flex-1 flex flex-col items-center justify-end h-full max-w-[80px]">
+                            <div className="w-full h-full flex flex-col justify-end" style={{ minHeight: '150px' }}>
+                              <div className="w-full flex flex-col justify-end gap-0.5">
+                                <motion.div
+                                  className="w-full bg-gray-300 rounded-t"
+                                  initial={{ height: 0 }}
+                                  animate={{ height: `${Math.max(budgetHeight, 3)}%` }}
+                                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                                  style={{ minHeight: '4px' }}
+                                />
+                                <motion.div
+                                  className="w-full bg-black rounded-t"
+                                  initial={{ height: 0 }}
+                                  animate={{ height: `${Math.max(spentHeight, 3)}%` }}
+                                  transition={{ duration: 0.8, delay: index * 0.1 + 0.2 }}
+                                  style={{ minHeight: '4px' }}
+                                />
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-600 mt-2 text-center w-full">{data.month}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+
+                  {/* ROI Trends Graph */}
+                  <motion.div
+                    className="bg-white border border-gray-200 rounded-lg p-6"
+                    {...fadeInUp}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="text-[18px] font-bold text-black">ROI Trends</h3>
+                        <p className="text-[11px] text-gray-500 mt-1">Average ROI over time</p>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <ArrowUpIcon className="w-3 h-3 text-black" />
+                        <span className="text-[10px] font-semibold text-black">+6%</span>
+                      </div>
+                    </div>
+                    <div className="flex items-end justify-between h-[200px] space-x-2 px-2">
+                      {roiTrends.map((data, index) => {
+                        const roiHeight = (data.roi / maxROI) * 100;
+                        return (
+                          <div key={index} className="flex-1 flex flex-col items-center justify-end h-full max-w-[80px]">
+                            <div className="w-full h-full flex items-end justify-center" style={{ minHeight: '150px' }}>
+                              <motion.div
+                                className="w-full bg-gradient-to-t from-black to-gray-700 rounded-t"
+                                initial={{ height: 0 }}
+                                animate={{ height: `${Math.max(roiHeight, 10)}%` }}
+                                transition={{ duration: 0.8, delay: index * 0.1 }}
+                                style={{ minHeight: '8px' }}
+                              />
+                            </div>
+                            <div className="mt-2 text-center w-full">
+                              <span className="text-[10px] font-medium text-gray-600 block">{data.month}</span>
+                              <span className="text-[11px] font-bold text-black">{data.roi}%</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+
+                  {/* Campaign Performance Comparison */}
+                  <motion.div
+                    className="bg-white border border-gray-200 rounded-lg p-6"
+                    {...fadeInUp}
+                    transition={{ duration: 0.5, delay: 0.25 }}
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="text-[18px] font-bold text-black">Campaign Performance</h3>
+                        <p className="text-[11px] text-gray-500 mt-1">Average ROI by type</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {campaignPerformance.map((campaign, index) => (
+                        <div key={index}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[13px] font-medium text-gray-700">{campaign.name}</span>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-[11px] font-semibold text-black">{campaign.change}</span>
+                              <span className="text-[14px] font-bold text-black">{campaign.value}%</span>
+                            </div>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-3">
+                            <motion.div
+                              className={`${campaign.color} h-3 rounded-full`}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${(campaign.value / 420) * 100}%` }}
+                              transition={{ duration: 0.8, delay: index * 0.1 }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  {/* Engagement Metrics */}
+                  <motion.div
+                    className="bg-white border border-gray-200 rounded-lg p-6"
+                    {...fadeInUp}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="text-[18px] font-bold text-black">Engagement Metrics</h3>
+                        <p className="text-[11px] text-gray-500 mt-1">By platform</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {engagementData.map((platform, index) => (
+                        <div key={index} className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0">
+                          <div className="flex-1">
+                            <p className="text-[14px] font-bold text-black mb-1">{platform.platform}</p>
+                            <div className="flex items-center space-x-4 text-[11px] text-gray-600">
+                              <span>{platform.engagement}% engagement</span>
+                              <span>•</span>
+                              <span>{(platform.views / 1000).toFixed(0)}K views</span>
+                            </div>
+                          </div>
+                          <div className="w-20 bg-gray-100 rounded-full h-2">
+                            <motion.div
+                              className="bg-black h-2 rounded-full"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${(platform.engagement / 15) * 100}%` }}
+                              transition={{ duration: 0.8, delay: index * 0.1 }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </div>
+
                 {/* Campaign Types */}
                 <div>
                   <h3 className="text-[24px] font-bold text-black mb-6">Choose Your Campaign Type</h3>
@@ -413,7 +699,21 @@ function BrandDashboardContent() {
 
                 {/* Recent Campaigns */}
                 <div>
-                  <h3 className="text-[24px] font-bold text-black mb-6">Recent Campaigns</h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-[24px] font-bold text-black">Recent Campaigns</h3>
+                    <div className="flex items-center space-x-2">
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="text-[12px] font-semibold text-black border border-gray-300 rounded-lg px-3 py-1.5 hover:border-black transition-colors"
+                      >
+                        <option value="date">Sort by Date</option>
+                        <option value="budget">Sort by Budget</option>
+                        <option value="roi">Sort by ROI</option>
+                        <option value="engagement">Sort by Engagement</option>
+                      </select>
+                    </div>
+                  </div>
                   <div className="space-y-3">
                     {recentCampaigns.map((campaign) => (
                       <motion.div
@@ -424,6 +724,18 @@ function BrandDashboardContent() {
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-3">
+                              <input
+                                type="checkbox"
+                                checked={selectedCampaigns.includes(campaign.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedCampaigns([...selectedCampaigns, campaign.id]);
+                                  } else {
+                                    setSelectedCampaigns(selectedCampaigns.filter(id => id !== campaign.id));
+                                  }
+                                }}
+                                className="w-4 h-4 border-gray-300 rounded text-black focus:ring-black"
+                              />
                               <h4 className="text-[16px] font-bold text-black">{campaign.title}</h4>
                               <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-700 uppercase">
                                 {campaign.type}
@@ -464,25 +776,100 @@ function BrandDashboardContent() {
 
             {activeTab === 'campaigns' && (
               <div className="space-y-4">
+                {/* Enhanced Controls for Campaigns Tab */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4 flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center space-x-3 flex-wrap gap-3">
+                    <div className="flex items-center space-x-2">
+                      <FunnelIcon className="w-4 h-4 text-gray-600" />
+                      <span className="text-[12px] font-semibold text-gray-700">Filters:</span>
+                    </div>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="text-[12px] font-semibold text-black border border-gray-300 rounded-lg px-3 py-1.5 hover:border-black transition-colors"
+                    >
+                      <option value="all">All Status</option>
+                      <option value="active">Active</option>
+                      <option value="completed">Completed</option>
+                      <option value="pending">Pending</option>
+                    </select>
+                    <select
+                      value={filterType}
+                      onChange={(e) => setFilterType(e.target.value)}
+                      className="text-[12px] font-semibold text-black border border-gray-300 rounded-lg px-3 py-1.5 hover:border-black transition-colors"
+                    >
+                      <option value="all">All Types</option>
+                      <option value="cpv">CPV</option>
+                      <option value="gigs">Gigs</option>
+                      <option value="onetime">One-Time</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {selectedCampaigns.length > 0 && (
+                      <>
+                        <motion.button
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="px-3 py-1.5 bg-black text-white rounded-lg text-[11px] font-semibold hover:bg-gray-900 transition-colors"
+                        >
+                          Bulk Actions ({selectedCampaigns.length})
+                        </motion.button>
+                        <motion.button
+                          className="px-3 py-1.5 bg-gray-100 text-black rounded-lg text-[11px] font-semibold hover:bg-gray-200 transition-colors"
+                          onClick={() => setSelectedCampaigns([])}
+                        >
+                          Clear
+                        </motion.button>
+                      </>
+                    )}
+                    <motion.button
+                      className="px-4 py-2 bg-white border border-gray-300 text-black rounded-lg text-[12px] font-semibold hover:border-black transition-colors flex items-center space-x-2"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <ArrowDownTrayIcon className="w-4 h-4" />
+                      <span>Export</span>
+                    </motion.button>
+                  </div>
+                </div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-[20px] font-bold text-black">My Campaigns</h3>
                   <div className="flex items-center space-x-2">
                     <span className="text-[12px] text-gray-600">Sort by:</span>
-                    <select className="text-[12px] font-semibold text-black border border-gray-300 rounded px-2 py-1">
-                      <option>Date</option>
-                      <option>Budget</option>
-                      <option>ROI</option>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="text-[12px] font-semibold text-black border border-gray-300 rounded-lg px-3 py-1.5 hover:border-black transition-colors"
+                    >
+                      <option value="date">Date</option>
+                      <option value="budget">Budget</option>
+                      <option value="roi">ROI</option>
+                      <option value="engagement">Engagement</option>
                     </select>
                   </div>
                 </div>
                 {recentCampaigns.map((campaign) => (
                   <div
                     key={campaign.id}
-                    className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
+                    className={`bg-white border rounded-lg p-5 hover:border-black transition-all duration-200 ${
+                      selectedCampaigns.includes(campaign.id) ? 'border-black bg-gray-50' : 'border-gray-200'
+                    }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedCampaigns.includes(campaign.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedCampaigns([...selectedCampaigns, campaign.id]);
+                              } else {
+                                setSelectedCampaigns(selectedCampaigns.filter(id => id !== campaign.id));
+                              }
+                            }}
+                            className="w-4 h-4 border-gray-300 rounded text-black focus:ring-black"
+                          />
                           <h4 className="text-[16px] font-bold text-black">{campaign.title}</h4>
                           <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-700 uppercase">
                             {campaign.type}
