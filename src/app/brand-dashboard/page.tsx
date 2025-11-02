@@ -200,19 +200,22 @@ function BrandDashboardContent() {
     }
   };
 
-  // Skeleton Loading Component
+  // Enhanced Skeleton Loading Component
   const SkeletonLoader = () => (
-    <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8 animate-pulse">
+    <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8">
       {/* Header Skeleton */}
       <div className="bg-white border-b border-gray-200 -mx-8 md:-mx-16 lg:-mx-24 px-8 md:px-16 lg:px-24 mb-8">
         <div className="py-8">
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <div className="h-3 bg-gray-200 rounded w-32 mb-3"></div>
-              <div className="h-12 bg-gray-200 rounded w-96 mb-3"></div>
-              <div className="h-3 bg-gray-200 rounded w-64"></div>
+              <div className="h-14 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg w-96 mb-3 animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-64 mb-3 animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-48 animate-shimmer bg-[length:200%_100%]"></div>
             </div>
-            <div className="h-12 w-40 bg-gray-200 rounded-full"></div>
+            <div className="flex gap-3">
+              <div className="h-12 w-32 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-full animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-12 w-40 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-full animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -221,34 +224,115 @@ function BrandDashboardContent() {
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
-            <div className="h-8 w-8 bg-gray-200 rounded-lg mb-2"></div>
-            <div className="h-6 bg-gray-200 rounded w-20 mb-2"></div>
-            <div className="h-3 bg-gray-200 rounded w-16"></div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="h-8 w-8 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
+            <div className="h-8 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-24 mb-2 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-20 mb-1 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-16 animate-shimmer bg-[length:200%_100%]"></div>
           </div>
         ))}
       </div>
 
-      {/* Main Content Skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="h-4 bg-gray-200 rounded w-32 mb-6"></div>
-            <div className="h-40 bg-gray-200 rounded"></div>
+      {/* Tab Navigation Skeleton */}
+      <div className="bg-white border border-gray-200 rounded-lg mb-8">
+        <div className="border-b border-gray-200 px-6 py-4">
+          <div className="flex space-x-8">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-6 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-24 animate-shimmer bg-[length:200%_100%]"></div>
+            ))}
           </div>
         </div>
-        <div className="space-y-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="h-4 bg-gray-200 rounded w-32 mb-4"></div>
-              <div className="space-y-3">
-                {[...Array(3)].map((_, j) => (
-                  <div key={j} className="h-16 bg-gray-200 rounded"></div>
-                ))}
-              </div>
+        <div className="p-6">
+          {/* Filters Skeleton */}
+          <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="h-8 w-20 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-8 w-32 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+              ))}
+              <div className="h-8 w-24 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
             </div>
-          ))}
+          </div>
+
+          {/* Graphs Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="space-y-2">
+                    <div className="h-5 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-40 animate-shimmer bg-[length:200%_100%]"></div>
+                    <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-24 animate-shimmer bg-[length:200%_100%]"></div>
+                  </div>
+                  <div className="flex gap-2">
+                    {[...Array(2)].map((_, j) => (
+                      <div key={j} className="h-4 w-20 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                    ))}
+                  </div>
+                </div>
+                <div className="h-48 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Campaign Types Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                  <div className="h-5 w-20 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                </div>
+                <div className="h-6 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-40 mb-2 animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-full mb-2 animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-3/4 mb-4 animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="space-y-2 mb-4">
+                  {[...Array(4)].map((_, j) => (
+                    <div key={j} className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-full animate-shimmer bg-[length:200%_100%]"></div>
+                  ))}
+                </div>
+                <div className="h-10 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Campaigns List Skeleton */}
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-5">
+                <div className="flex items-center space-x-2 mb-3">
+                  <div className="h-4 w-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                  <div className="h-5 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-48 animate-shimmer bg-[length:200%_100%]"></div>
+                  <div className="h-5 w-20 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                  <div className="h-5 w-20 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, j) => (
+                    <div key={j} className="space-y-1">
+                      <div className="h-2 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-16 animate-shimmer bg-[length:200%_100%]"></div>
+                      <div className="h-5 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-20 animate-shimmer bg-[length:200%_100%]"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes shimmer {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+      `}</style>
     </div>
   );
 

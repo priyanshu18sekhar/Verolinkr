@@ -40,7 +40,8 @@ import {
   BuildingOfficeIcon,
   UsersIcon,
   IdentificationIcon,
-  FileTextIcon
+  FileTextIcon,
+  BriefcaseIcon
 } from '@heroicons/react/24/outline';
 import FloatingNav from '../../../componets/ui/FloatingNav';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
@@ -68,6 +69,9 @@ function BrandProfileContent() {
     showStats: true,
     showCampaigns: true
   });
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [newMemberEmail, setNewMemberEmail] = useState('');
+  const [activityFilter, setActivityFilter] = useState('all');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -93,6 +97,33 @@ function BrandProfileContent() {
       panCard: 'ABCDE1234F',
       cin: 'U12345KA2018PTC123456'
     },
+    activityTimeline: [
+      { id: 1, type: 'campaign', action: 'Created campaign', details: 'Skincare Product Launch', timestamp: '2 hours ago', user: 'Rajesh Kumar' },
+      { id: 2, type: 'team', action: 'Invited team member', details: 'Priya Sharma joined', timestamp: '1 day ago', user: 'Rajesh Kumar' },
+      { id: 3, type: 'payment', action: 'Payment processed', details: '₹50,000 for Campaign #123', timestamp: '2 days ago', user: 'System' },
+      { id: 4, type: 'profile', action: 'Updated profile', details: 'Company information updated', timestamp: '3 days ago', user: 'Amit Patel' },
+      { id: 5, type: 'campaign', action: 'Campaign completed', details: 'Tech Review Campaign finished', timestamp: '5 days ago', user: 'System' }
+    ],
+    brandInsights: {
+      performanceScore: 92,
+      growthTrend: '+18%',
+      topPerformingCampaign: 'Tech Review Campaign',
+      recommendedActions: [
+        { id: 1, action: 'Increase budget for top performers', priority: 'high', impact: 'High ROI potential' },
+        { id: 2, action: 'Expand creator network in beauty category', priority: 'medium', impact: 'Market opportunity' },
+        { id: 3, action: 'Review underperforming campaigns', priority: 'medium', impact: 'Cost optimization' }
+      ],
+      upcomingDeadlines: [
+        { id: 1, task: 'Campaign review due', date: '2024-01-22', campaign: 'Skincare Product Launch' },
+        { id: 2, task: 'Payment processing', date: '2024-01-25', campaign: 'Winter Collection' }
+      ]
+    },
+    documents: [
+      { id: 1, name: 'Company Certificate.pdf', type: 'certificate', uploaded: '2024-01-01', size: '2.4 MB', category: 'Legal' },
+      { id: 2, name: 'Brand Guidelines.pdf', type: 'guidelines', uploaded: '2024-01-05', size: '5.2 MB', category: 'Marketing' },
+      { id: 3, name: 'Contract Template.docx', type: 'contract', uploaded: '2024-01-10', size: '1.8 MB', category: 'Legal' },
+      { id: 4, name: 'Product Images.zip', type: 'assets', uploaded: '2024-01-15', size: '45.6 MB', category: 'Assets' }
+    ],
     verification: {
       status: kycStatus,
       identityVerified: false,
@@ -151,7 +182,10 @@ function BrandProfileContent() {
     { id: 'payment', label: 'Payment', icon: CreditCardIcon },
     { id: 'team', label: 'Team', icon: UsersIcon },
     { id: 'settings', label: 'Settings', icon: BoltIcon },
-    { id: 'stats', label: 'Statistics', icon: ChartBarIcon }
+    { id: 'stats', label: 'Statistics', icon: ChartBarIcon },
+    { id: 'activity', label: 'Activity Timeline', icon: ClockIcon },
+    { id: 'insights', label: 'Brand Insights', icon: SparklesIcon },
+    { id: 'documents', label: 'Document Library', icon: BuildingLibraryIcon }
   ];
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -189,25 +223,76 @@ function BrandProfileContent() {
     setTimeout(() => setShowSuccessModal(false), 3000);
   };
 
-  // Skeleton Loading Component
+  // Enhanced Skeleton Loading Component
   const SkeletonLoader = () => (
-    <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8 animate-pulse">
+    <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8">
+      {/* Header Skeleton */}
       <div className="bg-white border-b border-gray-200 -mx-8 md:-mx-16 lg:-mx-24 px-8 md:px-16 lg:px-24 mb-8">
         <div className="py-8">
-          <div className="h-12 bg-gray-200 rounded w-96 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-64"></div>
-        </div>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-lg p-8 mb-8">
-        <div className="flex items-center space-x-6">
-          <div className="w-32 h-32 bg-gray-200 rounded-full"></div>
-          <div className="flex-1">
-            <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-48 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-full"></div>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="h-14 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg w-96 mb-3 animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-64 animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
+            <div className="h-12 w-40 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-full animate-shimmer bg-[length:200%_100%]"></div>
           </div>
         </div>
       </div>
+
+      {/* Profile Header Skeleton */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+        <div className="flex items-start space-x-6">
+          <div className="relative">
+            <div className="w-32 h-32 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-full animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-full animate-shimmer bg-[length:200%_100%]"></div>
+          </div>
+          <div className="flex-1 space-y-3">
+            <div className="h-8 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg w-64 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-full animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-3/4 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="flex items-center space-x-4 mt-4">
+              <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-32 animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-32 animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-32 animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Navigation Skeleton */}
+      <div className="bg-white border border-gray-200 rounded-lg mb-8">
+        <div className="border-b border-gray-200 px-6 py-4">
+          <div className="flex space-x-8">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-6 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-24 animate-shimmer bg-[length:200%_100%]"></div>
+            ))}
+          </div>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-32 animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="h-6 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-full animate-shimmer bg-[length:200%_100%]"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes shimmer {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+      `}</style>
     </div>
   );
 
@@ -619,37 +704,58 @@ function BrandProfileContent() {
             {activeTab === 'team' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-[20px] font-bold text-black">Team Members</h3>
+                  <div>
+                    <h3 className="text-[20px] font-bold text-black">Team Members</h3>
+                    <p className="text-[12px] text-gray-600 mt-1">{brandData.team.members.length} active members</p>
+                  </div>
                   <motion.button
                     className="bg-black text-white px-6 py-3 rounded-lg font-semibold text-[13px] hover:bg-gray-900 transition-colors duration-200 flex items-center space-x-2"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowInviteModal(true)}
                   >
                     <PlusIcon className="w-4 h-4" />
                     <span>Invite Member</span>
                   </motion.button>
                 </div>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {brandData.team.members.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-black transition-all duration-200">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-black to-gray-700 rounded-full flex items-center justify-center text-white font-bold">
-                          {member.name.split(' ').map(n => n[0]).join('')}
+                    <motion.div 
+                      key={member.id} 
+                      className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-14 h-14 bg-gradient-to-br from-black to-gray-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div>
+                            <p className="text-[16px] font-bold text-black">{member.name}</p>
+                            <p className="text-[12px] text-gray-600">{member.role}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[16px] font-bold text-black">{member.name}</p>
-                          <p className="text-[12px] text-gray-600">{member.role} • {member.email}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-[11px] font-semibold uppercase">
-                          {member.access} access
-                        </span>
-                        <button className="text-gray-600 hover:text-black">
+                        <button className="text-gray-400 hover:text-black transition-colors">
                           <PencilIcon className="w-4 h-4" />
                         </button>
                       </div>
-                    </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-[12px] text-gray-600">
+                          <EnvelopeIcon className="w-4 h-4" />
+                          <span>{member.email}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                          <span className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold uppercase ${
+                            member.access === 'full' ? 'bg-black text-white' : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {member.access} access
+                          </span>
+                          <div className="flex items-center space-x-2">
+                            <button className="text-[11px] font-semibold text-blue-600 hover:text-blue-800">View Activity</button>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -715,30 +821,222 @@ function BrandProfileContent() {
             {activeTab === 'stats' && (
               <div className="space-y-6">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                    <p className="text-[11px] text-gray-500 font-medium uppercase mb-2">Total Spent</p>
-                    <p className="text-[32px] font-black text-black">₹{brandData.stats.totalSpent.toLocaleString()}</p>
-                  </div>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                  <motion.div 
+                    className="bg-gradient-to-br from-black to-gray-800 border border-gray-200 rounded-lg p-6 text-white"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <p className="text-[11px] text-gray-300 font-medium uppercase mb-2">Total Spent</p>
+                    <p className="text-[32px] font-black text-white">₹{brandData.stats.totalSpent.toLocaleString()}</p>
+                    <div className="flex items-center space-x-1 mt-2">
+                      <ArrowUpIcon className="w-3 h-3 text-green-400" />
+                      <span className="text-[10px] text-green-400 font-semibold">+24%</span>
+                    </div>
+                  </motion.div>
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:border-black transition-all duration-200">
                     <p className="text-[11px] text-gray-500 font-medium uppercase mb-2">Total Campaigns</p>
                     <p className="text-[32px] font-black text-black">{brandData.stats.totalCampaigns}</p>
+                    <p className="text-[10px] text-gray-600 mt-1">{brandData.stats.activeCampaigns} active</p>
                   </div>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:border-black transition-all duration-200">
                     <p className="text-[11px] text-gray-500 font-medium uppercase mb-2">Active Campaigns</p>
                     <p className="text-[32px] font-black text-black">{brandData.stats.activeCampaigns}</p>
+                    <p className="text-[10px] text-gray-600 mt-1">Running now</p>
                   </div>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:border-black transition-all duration-200">
                     <p className="text-[11px] text-gray-500 font-medium uppercase mb-2">Total Reach</p>
                     <p className="text-[32px] font-black text-black">{(brandData.stats.totalReach / 1000000).toFixed(1)}M</p>
+                    <div className="flex items-center space-x-1 mt-1">
+                      <ArrowUpIcon className="w-3 h-3 text-black" />
+                      <span className="text-[10px] font-semibold text-black">+18%</span>
+                    </div>
                   </div>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:border-black transition-all duration-200">
                     <p className="text-[11px] text-gray-500 font-medium uppercase mb-2">Average ROI</p>
                     <p className="text-[32px] font-black text-black">{brandData.stats.avgROI}%</p>
+                    <p className="text-[10px] text-gray-600 mt-1">Industry leading</p>
                   </div>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:border-black transition-all duration-200">
                     <p className="text-[11px] text-gray-500 font-medium uppercase mb-2">Total Creators</p>
                     <p className="text-[32px] font-black text-black">{brandData.stats.totalCreators}</p>
+                    <p className="text-[10px] text-gray-600 mt-1">Partners</p>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Activity Timeline Tab */}
+            {activeTab === 'activity' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-[20px] font-bold text-black">Activity Timeline</h3>
+                  <select
+                    value={activityFilter}
+                    onChange={(e) => setActivityFilter(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px] font-semibold"
+                  >
+                    <option value="all">All Activities</option>
+                    <option value="campaign">Campaigns</option>
+                    <option value="team">Team</option>
+                    <option value="payment">Payments</option>
+                    <option value="profile">Profile</option>
+                  </select>
+                </div>
+                <div className="space-y-4">
+                  {brandData.activityTimeline
+                    .filter(activity => activityFilter === 'all' || activity.type === activityFilter)
+                    .map((activity, index) => (
+                      <motion.div
+                        key={activity.id}
+                        className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:border-black transition-all duration-200"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          {activity.type === 'campaign' && <BriefcaseIcon className="w-5 h-5 text-black" />}
+                          {activity.type === 'team' && <UsersIcon className="w-5 h-5 text-black" />}
+                          {activity.type === 'payment' && <CreditCardIcon className="w-5 h-5 text-black" />}
+                          {activity.type === 'profile' && <PencilIcon className="w-5 h-5 text-black" />}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <p className="text-[14px] font-bold text-black">{activity.action}</p>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-700 uppercase">
+                              {activity.type}
+                            </span>
+                          </div>
+                          <p className="text-[13px] text-gray-600 mb-1">{activity.details}</p>
+                          <div className="flex items-center space-x-4 text-[11px] text-gray-500">
+                            <span>{activity.timestamp}</span>
+                            <span>•</span>
+                            <span>{activity.user}</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Brand Insights Tab */}
+            {activeTab === 'insights' && (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-br from-black to-gray-800 rounded-lg p-8 text-white">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-[24px] font-black text-white mb-2">Brand Performance Score</h3>
+                      <p className="text-gray-300">Based on campaign performance and growth metrics</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[64px] font-black text-white">{brandData.brandInsights.performanceScore}</p>
+                      <p className="text-gray-300">Out of 100</p>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-4 mb-4">
+                    <motion.div
+                      className="bg-white h-4 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${brandData.brandInsights.performanceScore}%` }}
+                      transition={{ duration: 1, delay: 0.3 }}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <SparklesIcon className="w-5 h-5 text-white" />
+                    <span className="text-[14px] font-semibold">Growth Trend: {brandData.brandInsights.growthTrend}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h4 className="text-[18px] font-bold text-black mb-4">Recommended Actions</h4>
+                    <div className="space-y-4">
+                      {brandData.brandInsights.recommendedActions.map((action) => (
+                        <div key={action.id} className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                          <div className="flex items-start justify-between mb-2">
+                            <p className="text-[14px] font-semibold text-black">{action.action}</p>
+                            <span className={`px-2 py-1 rounded text-[10px] font-semibold ${
+                              action.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {action.priority}
+                            </span>
+                          </div>
+                          <p className="text-[12px] text-gray-600">{action.impact}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h4 className="text-[18px] font-bold text-black mb-4">Upcoming Deadlines</h4>
+                    <div className="space-y-4">
+                      {brandData.brandInsights.upcomingDeadlines.map((deadline) => (
+                        <div key={deadline.id} className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                          <div>
+                            <p className="text-[14px] font-semibold text-black">{deadline.task}</p>
+                            <p className="text-[12px] text-gray-600">{deadline.campaign}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[13px] font-bold text-black">{deadline.date}</p>
+                            <p className="text-[11px] text-gray-500">Due soon</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h4 className="text-[18px] font-bold text-black mb-4">Top Performing Campaign</h4>
+                  <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[20px] font-black text-black">{brandData.brandInsights.topPerformingCampaign}</p>
+                        <p className="text-[12px] text-gray-600 mt-1">Highest ROI this month</p>
+                      </div>
+                      <TrophyIcon className="w-12 h-12 text-yellow-500" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Document Library Tab */}
+            {activeTab === 'documents' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-[20px] font-bold text-black">Document Library</h3>
+                  <motion.button
+                    className="bg-black text-white px-6 py-3 rounded-lg font-semibold text-[13px] hover:bg-gray-900 transition-colors duration-200 flex items-center space-x-2"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <ArrowUpTrayIcon className="w-4 h-4" />
+                    <span>Upload Document</span>
+                  </motion.button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {brandData.documents.map((doc) => (
+                    <motion.div
+                      key={doc.id}
+                      className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200 cursor-pointer"
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <DocumentTextIcon className="w-6 h-6 text-black" />
+                        </div>
+                        <button className="text-gray-400 hover:text-black">
+                          <ShareIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <h4 className="text-[14px] font-bold text-black mb-2">{doc.name}</h4>
+                      <div className="flex items-center justify-between text-[11px] text-gray-600">
+                        <span className="px-2 py-1 bg-gray-100 rounded uppercase font-semibold">{doc.category}</span>
+                        <span>{doc.size}</span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 mt-2">Uploaded {doc.uploaded}</p>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
             )}
@@ -797,6 +1095,75 @@ function BrandProfileContent() {
                   whileTap={{ scale: 0.98 }}
                 >
                   Submit Documents
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Invite Team Member Modal */}
+      <AnimatePresence>
+        {showInviteModal && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowInviteModal(false)}
+          >
+            <motion.div
+              className="bg-white rounded-lg p-8 max-w-md w-full"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-[24px] font-bold text-black">Invite Team Member</h3>
+                <button onClick={() => setShowInviteModal(false)}>
+                  <XMarkIcon className="w-6 h-6 text-gray-600" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 uppercase mb-2">Email Address</label>
+                  <input
+                    type="email"
+                    value={newMemberEmail}
+                    onChange={(e) => setNewMemberEmail(e.target.value)}
+                    placeholder="member@example.com"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 uppercase mb-2">Access Level</label>
+                  <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]">
+                    <option>Campaigns Only</option>
+                    <option>Full Access</option>
+                    <option>Analytics Only</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-6 flex items-center justify-end space-x-3">
+                <button
+                  onClick={() => setShowInviteModal(false)}
+                  className="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-[13px] hover:border-black transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <motion.button
+                  onClick={() => {
+                    setShowInviteModal(false);
+                    setSuccessMessage('✓ Invitation sent successfully');
+                    setShowSuccessModal(true);
+                    setTimeout(() => setShowSuccessModal(false), 3000);
+                  }}
+                  className="bg-black text-white px-6 py-3 rounded-lg font-semibold text-[13px] hover:bg-gray-900 transition-colors duration-200"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Send Invitation
                 </motion.button>
               </div>
             </motion.div>

@@ -14,7 +14,14 @@ import {
   ChatBubbleLeftRightIcon,
   PlusIcon,
   CheckCircleIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  SparklesIcon,
+  ArrowsRightLeftIcon,
+  BookmarkIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  FireIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import FloatingNav from '../../../componets/ui/FloatingNav';
 
@@ -24,6 +31,11 @@ export default function BrandCreators() {
   const [filterFollowers, setFilterFollowers] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
   const [isLoading, setIsLoading] = useState(true);
+  const [favorites, setFavorites] = useState<number[]>([]);
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedForCompare, setSelectedForCompare] = useState<number[]>([]);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showAIRecs, setShowAIRecs] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -140,26 +152,129 @@ export default function BrandCreators() {
     animate: { opacity: 1, y: 0 }
   };
 
+  const [aiRecommendations] = useState([
+    { id: 1, name: 'Sarah Johnson', matchScore: 98, reason: 'Perfect match for beauty campaigns' },
+    { id: 3, name: 'Emma Wilson', matchScore: 95, reason: 'High engagement in food category' },
+    { id: 2, name: 'Mike Chen', matchScore: 92, reason: 'Strong tech review performance' }
+  ]);
+
   const getCategoryColor = (category: string) => {
     return 'bg-gray-100 text-gray-700';
   };
 
-  // Skeleton Loading Component
+  const toggleFavorite = (creatorId: number) => {
+    setFavorites(prev => 
+      prev.includes(creatorId) 
+        ? prev.filter(id => id !== creatorId)
+        : [...prev, creatorId]
+    );
+  };
+
+  const toggleCompare = (creatorId: number) => {
+    if (selectedForCompare.includes(creatorId)) {
+      setSelectedForCompare(prev => prev.filter(id => id !== creatorId));
+    } else if (selectedForCompare.length < 3) {
+      setSelectedForCompare(prev => [...prev, creatorId]);
+    }
+  };
+
+  // Enhanced Skeleton Loading Component
   const SkeletonLoader = () => (
-    <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8 animate-pulse">
+    <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8">
+      {/* Header Skeleton */}
       <div className="bg-white border-b border-gray-200 -mx-8 md:-mx-16 lg:-mx-24 px-8 md:px-16 lg:px-24 mb-8">
         <div className="py-8">
-          <div className="h-12 bg-gray-200 rounded w-96 mb-3"></div>
-          <div className="h-4 bg-gray-200 rounded w-64"></div>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="h-14 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg w-96 mb-3 animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-64 animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
+            <div className="h-12 w-48 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-full animate-shimmer bg-[length:200%_100%]"></div>
+          </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="h-20 bg-gray-200 rounded"></div>
+
+      {/* Filters Skeleton */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+        <div className="flex flex-col lg:flex-row gap-4 mb-4">
+          <div className="flex-1">
+            <div className="h-12 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+          </div>
+          <div className="flex gap-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-12 w-32 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+          <div className="flex gap-3">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="h-8 w-20 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+            ))}
+          </div>
+          <div className="flex gap-3">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="h-8 w-28 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Skeleton */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="h-8 w-8 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg mb-3 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="h-8 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-20 mb-2 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-24 animate-shimmer bg-[length:200%_100%]"></div>
           </div>
         ))}
       </div>
+
+      {/* Creators Grid Skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="bg-white border border-gray-200 rounded-lg p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-full animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-32 animate-shimmer bg-[length:200%_100%]"></div>
+                  <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-24 animate-shimmer bg-[length:200%_100%]"></div>
+                </div>
+              </div>
+              <div className="h-5 w-16 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
+            <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-20 mb-4 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {[...Array(4)].map((_, j) => (
+                <div key={j} className="space-y-1">
+                  <div className="h-2 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-16 animate-shimmer bg-[length:200%_100%]"></div>
+                  <div className="h-5 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-12 animate-shimmer bg-[length:200%_100%]"></div>
+                </div>
+              ))}
+            </div>
+            <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-full mb-2 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded w-3/4 mb-4 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="h-16 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg mb-4 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="h-10 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+          </div>
+        ))}
+      </div>
+
+      <style jsx>{`
+        @keyframes shimmer {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+      `}</style>
     </div>
   );
 
@@ -213,13 +328,81 @@ export default function BrandCreators() {
       </motion.div>
 
       <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8">
+        {/* AI Recommendations Banner */}
+        {showAIRecs && (
+          <motion.div
+            className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6 mb-8"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <SparklesIcon className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-[16px] font-bold text-black mb-1">AI Recommended Creators</h3>
+                  <p className="text-[12px] text-gray-600">Top matches based on your campaign history</p>
+                </div>
+              </div>
+              <button onClick={() => setShowAIRecs(false)}>
+                <XMarkIcon className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              {aiRecommendations.map((rec) => (
+                <div key={rec.id} className="bg-white rounded-lg p-4 border border-purple-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[14px] font-bold text-black">{rec.name}</span>
+                    <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-[10px] font-semibold">
+                      {rec.matchScore}% match
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-gray-600">{rec.reason}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Compare Mode Banner */}
+        {compareMode && selectedForCompare.length > 0 && (
+          <motion.div
+            className="bg-black text-white rounded-lg p-4 mb-8 flex items-center justify-between"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center space-x-4">
+              <ArrowsRightLeftIcon className="w-5 h-5" />
+              <span className="font-semibold">
+                Comparing {selectedForCompare.length} creator{selectedForCompare.length > 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => setCompareMode(false)}
+                className="px-4 py-2 bg-white text-black rounded-lg text-[12px] font-semibold hover:bg-gray-100"
+              >
+                Compare Now
+              </button>
+              <button onClick={() => {
+                setCompareMode(false);
+                setSelectedForCompare([]);
+              }}>
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Filters and Search */}
         <motion.div
           className="bg-white border border-gray-200 rounded-lg p-6 mb-8"
           {...fadeInUp}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-4 mb-4">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
@@ -271,6 +454,50 @@ export default function BrandCreators() {
               </select>
             </div>
           </div>
+
+          {/* View Mode and Actions */}
+          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold ${
+                  viewMode === 'grid' ? 'bg-black text-white' : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                Grid
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold ${
+                  viewMode === 'list' ? 'bg-black text-white' : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                List
+              </button>
+            </div>
+            <div className="flex items-center space-x-3">
+              <motion.button
+                onClick={() => setCompareMode(!compareMode)}
+                className={`px-4 py-2 rounded-lg text-[12px] font-semibold flex items-center space-x-2 ${
+                  compareMode ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <ArrowsRightLeftIcon className="w-4 h-4" />
+                <span>Compare</span>
+              </motion.button>
+              {favorites.length > 0 && (
+                <motion.button
+                  className="px-4 py-2 bg-red-50 text-red-700 rounded-lg text-[12px] font-semibold flex items-center space-x-2"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <BookmarkIcon className="w-4 h-4 fill-current" />
+                  <span>Favorites ({favorites.length})</span>
+                </motion.button>
+              )}
+            </div>
+          </div>
         </motion.div>
 
         {/* Creator Stats */}
@@ -304,7 +531,11 @@ export default function BrandCreators() {
           {filteredCreators.map((creator, index) => (
             <motion.div
               key={creator.id}
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200 cursor-pointer group"
+              className={`bg-white border rounded-lg p-5 hover:border-black transition-all duration-200 cursor-pointer group relative ${
+                compareMode && selectedForCompare.includes(creator.id)
+                  ? 'border-black border-2 bg-gray-50'
+                  : 'border-gray-200'
+              }`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -380,13 +611,47 @@ export default function BrandCreators() {
                 <button className="flex-1 bg-black text-white py-2.5 rounded-lg font-semibold text-[12px] hover:bg-gray-900 transition-colors duration-200">
                   View Profile
                 </button>
-                <button className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
-                  <ChatBubbleLeftRightIcon className="w-4 h-4 text-black" />
-                </button>
-                <button className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
-                  <HeartIcon className="w-4 h-4 text-black" />
-                </button>
+                {compareMode ? (
+                  <button
+                    onClick={() => toggleCompare(creator.id)}
+                    className={`px-3 py-2.5 rounded-lg transition-colors duration-200 ${
+                      selectedForCompare.includes(creator.id)
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 text-black'
+                    }`}
+                  >
+                    <ArrowsRightLeftIcon className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <>
+                    <button className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
+                      <ChatBubbleLeftRightIcon className="w-4 h-4 text-black" />
+                    </button>
+                    <button
+                      onClick={() => toggleFavorite(creator.id)}
+                      className={`px-3 py-2.5 rounded-lg transition-colors duration-200 ${
+                        favorites.includes(creator.id)
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-gray-100 hover:bg-gray-200 text-black'
+                      }`}
+                    >
+                      {favorites.includes(creator.id) ? (
+                        <BookmarkIcon className="w-4 h-4 fill-current" />
+                      ) : (
+                        <HeartIcon className="w-4 h-4" />
+                      )}
+                    </button>
+                  </>
+                )}
               </div>
+
+              {/* Performance Badge */}
+              {creator.authenticityScore >= 95 && (
+                <div className="absolute top-4 right-4 bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold flex items-center space-x-1">
+                  <FireIcon className="w-3 h-3" />
+                  <span>Top Performer</span>
+                </div>
+              )}
             </motion.div>
           ))}
         </motion.div>

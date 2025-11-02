@@ -18,10 +18,10 @@ const StatsSection = () => {
   });
 
   const stats = [
-    { number: 10000, suffix: '+', label: "Active Creators", key: 'creators' },
-    { number: 500, suffix: '+', label: "Brand Partners", key: 'brands' },
+    { number: 100, suffix: '+', label: "Active Creators", key: 'creators' },
+    { number: 5, suffix: '+', label: "Brand Partners", key: 'brands' },
     { number: 98, suffix: '%', label: "Success Rate", key: 'success' },
-    { number: 5, suffix: 'M+', label: "Processed", key: 'processed' },
+    { number: 1, suffix: 'M+', label: "Processed", key: 'processed' },
   ];
 
   // Parallax effects
