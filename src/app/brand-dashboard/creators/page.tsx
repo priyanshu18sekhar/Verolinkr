@@ -17,6 +17,7 @@ import {
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import FloatingNav from '../../../componets/ui/FloatingNav';
+import { AnimatedParticles } from '../../../components/onboarding';
 
 export default function BrandCreators() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -154,7 +155,10 @@ export default function BrandCreators() {
   });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Subtle background elements matching Hero */}
+      <AnimatedParticles count={60} />
+      
       {/* Header */}
       <motion.div
         className="bg-white border-b border-gray-100"
@@ -164,10 +168,10 @@ export default function BrandCreators() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-6xl font-black text-gray-900 tracking-tight leading-none mb-4">
+              <h1 className="text-[72px] md:text-[64px] font-black text-gray-900 tracking-tighter leading-none mb-6">
                 Discover Creators
               </h1>
-              <p className="text-xl text-gray-600 font-light">
+              <p className="text-2xl md:text-xl text-gray-600 font-light">
                 Find the perfect creators for your campaigns
               </p>
             </div>
@@ -184,10 +188,10 @@ export default function BrandCreators() {
         </div>
       </motion.div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 relative z-10">
         {/* Filters and Search */}
         <motion.div
-          className="bg-white rounded-2xl border border-gray-100 p-8 mb-8"
+          className="bg-white rounded-2xl border-2 border-gray-200 p-8 mb-8 hover:border-black transition-all duration-200"
           {...fadeInUp}
           transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
         >
@@ -266,11 +270,11 @@ export default function BrandCreators() {
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
-              className="bg-gray-50 rounded-2xl p-6"
+              className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
               variants={fadeInUp}
             >
-              <p className="text-sm font-medium text-gray-500 mb-2">{stat.label}</p>
-              <p className="text-3xl font-black text-gray-900">{stat.value}</p>
+              <p className="text-sm font-bold text-gray-600 mb-2">{stat.label}</p>
+              <p className="text-4xl font-black text-gray-900">{stat.value}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -291,7 +295,7 @@ export default function BrandCreators() {
           {filteredCreators.map((creator, index) => (
             <motion.div
               key={creator.id}
-              className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+              className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black hover:shadow-xl transition-all duration-300 cursor-pointer group"
               variants={fadeInUp}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -305,7 +309,7 @@ export default function BrandCreators() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-gray-900">{creator.name}</h3>
+                    <h3 className="text-2xl font-black text-gray-900">{creator.name}</h3>
                     <p className="text-gray-600 font-medium">{creator.username}</p>
                   </div>
                 </div>
@@ -331,23 +335,23 @@ export default function BrandCreators() {
               {/* Stats */}
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Followers</p>
-                  <p className="text-lg font-black text-gray-900">{(creator.followers / 1000).toFixed(0)}K</p>
+                  <p className="text-sm text-gray-600 font-bold">Followers</p>
+                  <p className="text-2xl font-black text-gray-900">{(creator.followers / 1000).toFixed(0)}K</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Engagement</p>
-                  <p className="text-lg font-black text-gray-900">{creator.engagement}%</p>
+                  <p className="text-sm text-gray-600 font-bold">Engagement</p>
+                  <p className="text-2xl font-black text-gray-900">{creator.engagement}%</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Rating</p>
+                  <p className="text-sm text-gray-600 font-bold">Rating</p>
                   <div className="flex items-center space-x-1">
-                    <StarIcon className="w-4 h-4 text-yellow-500" />
-                    <span className="font-bold text-gray-900">{creator.rating}</span>
+                    <StarIcon className="w-5 h-5 text-yellow-500" />
+                    <span className="text-xl font-black text-gray-900">{creator.rating}</span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Campaigns</p>
-                  <p className="text-lg font-black text-gray-900">{creator.completedCampaigns}</p>
+                  <p className="text-sm text-gray-600 font-bold">Campaigns</p>
+                  <p className="text-2xl font-black text-gray-900">{creator.completedCampaigns}</p>
                 </div>
               </div>
 
@@ -355,9 +359,9 @@ export default function BrandCreators() {
               <p className="text-gray-600 text-sm mb-6 leading-relaxed">{creator.bio}</p>
 
               {/* Price Range */}
-              <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                <p className="text-sm text-gray-500 font-medium mb-1">Price Range</p>
-                <p className="text-lg font-bold text-gray-900">{creator.priceRange}</p>
+              <div className="bg-white border-2 border-gray-200 rounded-xl p-4 mb-6 hover:border-black transition-all duration-200">
+                <p className="text-sm text-gray-600 font-bold mb-1">Price Range</p>
+                <p className="text-xl font-black text-gray-900">{creator.priceRange}</p>
               </div>
 
               {/* Action Buttons */}

@@ -21,6 +21,7 @@ import {
   UsersIcon
 } from '@heroicons/react/24/outline';
 import FloatingNav from '../../../componets/ui/FloatingNav';
+import { AnimatedParticles } from '../../../components/onboarding';
 
 export default function BrandCampaigns() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -134,7 +135,10 @@ export default function BrandCampaigns() {
   });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Subtle background elements matching Hero */}
+      <AnimatedParticles count={60} />
+      
       {/* Header */}
       <motion.div
         className="bg-white border-b border-gray-100"
@@ -144,10 +148,10 @@ export default function BrandCampaigns() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-6xl font-black text-gray-900 tracking-tight leading-none mb-4">
+              <h1 className="text-[72px] md:text-[64px] font-black text-gray-900 tracking-tighter leading-none mb-6">
                 Campaign Management
               </h1>
-              <p className="text-xl text-gray-600 font-light">
+              <p className="text-2xl md:text-xl text-gray-600 font-light">
                 Manage all your campaigns across different types
               </p>
             </div>
@@ -164,10 +168,10 @@ export default function BrandCampaigns() {
         </div>
       </motion.div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 relative z-10">
         {/* Filters and Search */}
         <motion.div
-          className="bg-white rounded-2xl border border-gray-100 p-8 mb-8"
+          className="bg-white rounded-2xl border-2 border-gray-200 p-8 mb-8 hover:border-black transition-all duration-200"
           {...fadeInUp}
           transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
         >
@@ -234,11 +238,11 @@ export default function BrandCampaigns() {
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
-              className="bg-gray-50 rounded-2xl p-6"
+              className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
               variants={fadeInUp}
             >
-              <p className="text-sm font-medium text-gray-500 mb-2">{stat.label}</p>
-              <p className="text-3xl font-black text-gray-900">{stat.value}</p>
+              <p className="text-sm font-bold text-gray-600 mb-2">{stat.label}</p>
+              <p className="text-4xl font-black text-gray-900">{stat.value}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -254,7 +258,7 @@ export default function BrandCampaigns() {
             return (
               <motion.div
                 key={campaign.id}
-                className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-all duration-300"
+                className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black hover:shadow-xl transition-all duration-300"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -266,7 +270,7 @@ export default function BrandCampaigns() {
                       <TypeIcon className="w-8 h-8 text-gray-600" />
                     </div>
                     <div>
-                      <h3 className="text-3xl font-black text-gray-900 mb-2">{campaign.name}</h3>
+                      <h3 className="text-4xl font-black text-gray-900 mb-2">{campaign.name}</h3>
                       <div className="flex items-center space-x-3">
                         <span className={`px-3 py-1 rounded-full text-sm font-bold ${getTypeColor(campaign.type)}`}>
                           {campaign.type.toUpperCase()}
@@ -295,20 +299,20 @@ export default function BrandCampaigns() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
                   <div>
-                    <p className="text-sm text-gray-500 font-medium mb-1">Budget</p>
-                    <p className="text-xl font-black text-gray-900">₹{campaign.budget.toLocaleString()}</p>
+                    <p className="text-sm text-gray-600 font-bold mb-1">Budget</p>
+                    <p className="text-2xl font-black text-gray-900">₹{campaign.budget.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 font-medium mb-1">Spent</p>
-                    <p className="text-xl font-black text-gray-900">₹{campaign.spent.toLocaleString()}</p>
+                    <p className="text-sm text-gray-600 font-bold mb-1">Spent</p>
+                    <p className="text-2xl font-black text-gray-900">₹{campaign.spent.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 font-medium mb-1">Verified Views</p>
-                    <p className="text-xl font-black text-gray-900">{(campaign.verifiedViews / 1000).toFixed(0)}K</p>
+                    <p className="text-sm text-gray-600 font-bold mb-1">Verified Views</p>
+                    <p className="text-2xl font-black text-gray-900">{(campaign.verifiedViews / 1000).toFixed(0)}K</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 font-medium mb-1">ROI</p>
-                    <p className="text-xl font-black text-green-600">{campaign.roi}%</p>
+                    <p className="text-sm text-gray-600 font-bold mb-1">ROI</p>
+                    <p className="text-2xl font-black text-green-600">{campaign.roi}%</p>
                   </div>
                 </div>
 

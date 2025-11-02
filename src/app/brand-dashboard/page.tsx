@@ -19,6 +19,7 @@ import {
   DocumentCheckIcon
 } from '@heroicons/react/24/outline';
 import FloatingNav from '../../componets/ui/FloatingNav';
+import { AnimatedParticles } from '../../components/onboarding';
 
 export default function BrandDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'create'>('overview');
@@ -147,7 +148,10 @@ export default function BrandDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Subtle background elements matching Hero */}
+      <AnimatedParticles count={60} />
+      
       {/* Header */}
       <motion.div
         className="bg-white border-b border-gray-100"
@@ -163,10 +167,10 @@ export default function BrandDashboard() {
                   <span className="text-sm font-medium text-green-600 uppercase tracking-wide">Verified Brand</span>
                 </div>
               </div>
-              <h1 className="text-6xl font-black text-gray-900 tracking-tight leading-none mb-4">
+              <h1 className="text-[72px] md:text-[64px] font-black text-gray-900 tracking-tighter leading-none mb-6">
                 Brand Dashboard
               </h1>
-              <p className="text-xl text-gray-600 font-light max-w-2xl">
+              <p className="text-2xl md:text-xl text-gray-600 font-light max-w-2xl">
                 Scale your reach with authentic creators and measurable campaigns
               </p>
             </div>
@@ -183,7 +187,7 @@ export default function BrandDashboard() {
         </div>
       </motion.div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 relative z-10">
         {/* Stats Overview */}
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16"
@@ -192,65 +196,65 @@ export default function BrandDashboard() {
           animate="animate"
         >
           <motion.div
-            className="bg-gray-50 rounded-2xl p-8"
+            className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
             variants={fadeInUp}
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                 <BanknotesIcon className="w-6 h-6 text-green-600" />
               </div>
-              <span className="text-sm font-medium text-gray-500">Total Spent</span>
+              <span className="text-sm font-bold text-gray-600">Total Spent</span>
             </div>
-            <p className="text-3xl font-black text-gray-900">₹{brandStats.totalSpent.toLocaleString()}</p>
-            <p className="text-sm text-green-600 font-medium">+24% this month</p>
+            <p className="text-4xl font-black text-gray-900">₹{brandStats.totalSpent.toLocaleString()}</p>
+            <p className="text-sm text-green-600 font-bold">+24% this month</p>
           </motion.div>
 
           <motion.div
-            className="bg-gray-50 rounded-2xl p-8"
+            className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
             variants={fadeInUp}
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                 <ArrowTrendingUpIcon className="w-6 h-6 text-blue-600" />
               </div>
-              <span className="text-sm font-medium text-gray-500">Average ROI</span>
+              <span className="text-sm font-bold text-gray-600">Average ROI</span>
             </div>
-            <p className="text-3xl font-black text-gray-900">{brandStats.avgROI}%</p>
-            <p className="text-sm text-blue-600 font-medium">+15% improvement</p>
+            <p className="text-4xl font-black text-gray-900">{brandStats.avgROI}%</p>
+            <p className="text-sm text-blue-600 font-bold">+15% improvement</p>
           </motion.div>
 
           <motion.div
-            className="bg-gray-50 rounded-2xl p-8"
+            className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
             variants={fadeInUp}
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                 <EyeIcon className="w-6 h-6 text-purple-600" />
               </div>
-              <span className="text-sm font-medium text-gray-500">Verified Views</span>
+              <span className="text-sm font-bold text-gray-600">Verified Views</span>
             </div>
-            <p className="text-3xl font-black text-gray-900">{(brandStats.verifiedViews / 1000).toFixed(0)}K</p>
-            <p className="text-sm text-purple-600 font-medium">AI-verified only</p>
+            <p className="text-4xl font-black text-gray-900">{(brandStats.verifiedViews / 1000).toFixed(0)}K</p>
+            <p className="text-sm text-purple-600 font-bold">AI-verified only</p>
           </motion.div>
 
           <motion.div
-            className="bg-gray-50 rounded-2xl p-8"
+            className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
             variants={fadeInUp}
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                 <UserGroupIcon className="w-6 h-6 text-orange-600" />
               </div>
-              <span className="text-sm font-medium text-gray-500">Active Creators</span>
+              <span className="text-sm font-bold text-gray-600">Active Creators</span>
             </div>
-            <p className="text-3xl font-black text-gray-900">{brandStats.activeCampaigns * 3}</p>
-            <p className="text-sm text-orange-600 font-medium">Working on campaigns</p>
+            <p className="text-4xl font-black text-gray-900">{brandStats.activeCampaigns * 3}</p>
+            <p className="text-sm text-orange-600 font-bold">Working on campaigns</p>
           </motion.div>
         </motion.div>
 
         {/* Tab Navigation */}
         <motion.div
-          className="bg-white rounded-2xl border border-gray-100 mb-12"
+          className="bg-white rounded-2xl border-2 border-gray-200 mb-12 hover:border-black transition-all duration-200"
           {...fadeInUp}
           transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
         >
@@ -282,12 +286,12 @@ export default function BrandDashboard() {
               <div className="space-y-12">
                 {/* Campaign Types */}
                 <div>
-                  <h3 className="text-4xl font-black text-gray-900 mb-8">Choose Your Campaign Type</h3>
+                  <h3 className="text-5xl font-black text-gray-900 mb-12">Choose Your Campaign Type</h3>
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {campaignTypes.map((type) => (
                       <motion.div
                         key={type.id}
-                        className="bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                        className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black hover:shadow-xl transition-all duration-300 cursor-pointer group"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -300,12 +304,12 @@ export default function BrandDashboard() {
                           </span>
                         </div>
                         
-                        <h4 className="text-2xl font-black text-gray-900 mb-3">{type.title}</h4>
-                        <p className="text-gray-600 mb-6 leading-relaxed">{type.description}</p>
+                        <h4 className="text-3xl font-black text-gray-900 mb-4">{type.title}</h4>
+                        <p className="text-lg text-gray-600 mb-8 leading-relaxed">{type.description}</p>
                         
-                        <div className="mb-6">
-                          <p className="text-sm font-medium text-gray-500 mb-2">Price Range</p>
-                          <p className="text-xl font-bold text-gray-900">{type.stats}</p>
+                        <div className="mb-8">
+                          <p className="text-sm font-bold text-gray-600 mb-2">Price Range</p>
+                          <p className="text-2xl font-black text-gray-900">{type.stats}</p>
                         </div>
                         
                         <div className="space-y-2 mb-8">
@@ -327,18 +331,18 @@ export default function BrandDashboard() {
 
                 {/* Recent Campaigns */}
                 <div>
-                  <h3 className="text-4xl font-black text-gray-900 mb-8">Recent Campaigns</h3>
+                  <h3 className="text-5xl font-black text-gray-900 mb-12">Recent Campaigns</h3>
                   <div className="space-y-6">
                     {recentCampaigns.map((campaign) => (
                       <motion.div
                         key={campaign.id}
-                        className="bg-gray-50 rounded-2xl p-8 hover:bg-gray-100 transition-all duration-200"
+                        className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
                         whileHover={{ scale: 1.01 }}
                       >
                         <div className="flex justify-between items-start mb-6">
                           <div>
-                            <div className="flex items-center space-x-4 mb-3">
-                              <h4 className="text-2xl font-black text-gray-900">{campaign.title}</h4>
+                            <div className="flex items-center space-x-4 mb-4">
+                              <h4 className="text-3xl font-black text-gray-900">{campaign.title}</h4>
                               <span className={`px-3 py-1 rounded-full text-sm font-bold ${getTypeColor(campaign.type)}`}>
                                 {campaign.type.toUpperCase()}
                               </span>
@@ -348,20 +352,20 @@ export default function BrandDashboard() {
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
                               <div>
-                                <p className="text-gray-500 font-medium">Budget</p>
-                                <p className="text-xl font-black text-gray-900">₹{campaign.budget.toLocaleString()}</p>
+                                <p className="text-gray-600 font-bold">Budget</p>
+                                <p className="text-2xl font-black text-gray-900">₹{campaign.budget.toLocaleString()}</p>
                               </div>
                               <div>
-                                <p className="text-gray-500 font-medium">Views</p>
-                                <p className="text-xl font-black text-gray-900">{(campaign.views / 1000).toFixed(0)}K</p>
+                                <p className="text-gray-600 font-bold">Views</p>
+                                <p className="text-2xl font-black text-gray-900">{(campaign.views / 1000).toFixed(0)}K</p>
                               </div>
                               <div>
-                                <p className="text-gray-500 font-medium">ROI</p>
-                                <p className="text-xl font-black text-green-600">{campaign.roi}%</p>
+                                <p className="text-gray-600 font-bold">ROI</p>
+                                <p className="text-2xl font-black text-green-600">{campaign.roi}%</p>
                               </div>
                               <div>
-                                <p className="text-gray-500 font-medium">Creators</p>
-                                <p className="text-xl font-black text-gray-900">{campaign.creators}</p>
+                                <p className="text-gray-600 font-bold">Creators</p>
+                                <p className="text-2xl font-black text-gray-900">{campaign.creators}</p>
                               </div>
                             </div>
                           </div>
@@ -378,14 +382,14 @@ export default function BrandDashboard() {
 
             {activeTab === 'campaigns' && (
               <div>
-                <h3 className="text-4xl font-black text-gray-900 mb-8">Campaign Management</h3>
+                <h3 className="text-5xl font-black text-gray-900 mb-12">Campaign Management</h3>
                 <div className="space-y-6">
                   {recentCampaigns.map((campaign) => (
-                    <div key={campaign.id} className="bg-gray-50 rounded-2xl p-8">
+                    <div key={campaign.id} className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200">
                       <div className="flex justify-between items-start mb-6">
                         <div>
-                          <div className="flex items-center space-x-4 mb-3">
-                            <h4 className="text-2xl font-black text-gray-900">{campaign.title}</h4>
+                          <div className="flex items-center space-x-4 mb-4">
+                            <h4 className="text-3xl font-black text-gray-900">{campaign.title}</h4>
                             <span className={`px-3 py-1 rounded-full text-sm font-bold ${getTypeColor(campaign.type)}`}>
                               {campaign.type.toUpperCase()}
                             </span>
@@ -435,7 +439,7 @@ export default function BrandDashboard() {
 
             {activeTab === 'create' && (
               <div>
-                <h3 className="text-4xl font-black text-gray-900 mb-8">Create New Campaign</h3>
+                <h3 className="text-5xl font-black text-gray-900 mb-12">Create New Campaign</h3>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {campaignTypes.map((type) => (
                     <motion.div
@@ -453,8 +457,8 @@ export default function BrandDashboard() {
                         </span>
                       </div>
                       
-                      <h4 className="text-2xl font-black text-gray-900 mb-3">{type.title}</h4>
-                      <p className="text-gray-600 mb-6 leading-relaxed">{type.description}</p>
+                      <h4 className="text-3xl font-black text-gray-900 mb-4">{type.title}</h4>
+                      <p className="text-lg text-gray-600 mb-8 leading-relaxed">{type.description}</p>
                       
                       <div className="space-y-2 mb-8">
                         {type.features.map((feature, index) => (

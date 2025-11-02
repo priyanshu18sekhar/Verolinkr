@@ -18,6 +18,8 @@ import {
   PauseIcon,
   StopIcon
 } from '@heroicons/react/24/outline';
+import FloatingNav from '../../../componets/ui/FloatingNav';
+import { AnimatedParticles } from '../../../components/onboarding';
 
 export default function AnalyticsDashboard() {
   const [selectedCampaign, setSelectedCampaign] = useState(1);
@@ -99,7 +101,10 @@ export default function AnalyticsDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Subtle background elements matching Hero */}
+      <AnimatedParticles count={60} />
+      
       {/* Header */}
       <motion.div
         className="bg-white border-b border-gray-100"
@@ -109,10 +114,10 @@ export default function AnalyticsDashboard() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-6xl font-black text-gray-900 tracking-tight leading-none mb-4">
+              <h1 className="text-[72px] md:text-[64px] font-black text-gray-900 tracking-tighter leading-none mb-6">
                 Campaign Analytics
               </h1>
-              <p className="text-xl text-gray-600 font-light">
+              <p className="text-2xl md:text-xl text-gray-600 font-light">
                 Real-time view tracking with AI-powered verification
               </p>
             </div>
@@ -145,7 +150,7 @@ export default function AnalyticsDashboard() {
         </div>
       </motion.div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 relative z-10">
         {/* Real-time Metrics */}
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12"
@@ -154,75 +159,75 @@ export default function AnalyticsDashboard() {
           animate="animate"
         >
           <motion.div
-            className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-8"
+            className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
             variants={fadeInUp}
           >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-blue-200 rounded-xl flex items-center justify-center">
-                <EyeIcon className="w-6 h-6 text-blue-700" />
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <EyeIcon className="w-6 h-6 text-blue-600" />
               </div>
               <div className="flex items-center space-x-1">
                 <PlayIcon className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-bold text-green-600">LIVE</span>
+                <span className="text-sm font-black text-green-600">LIVE</span>
               </div>
             </div>
-            <p className="text-sm font-medium text-blue-700 mb-1">Views Today</p>
-            <p className="text-3xl font-black text-blue-900">{realTimeMetrics.viewsToday.toLocaleString()}</p>
-            <p className="text-sm text-blue-600 font-medium">+12% from yesterday</p>
+            <p className="text-sm font-bold text-gray-600 mb-1">Views Today</p>
+            <p className="text-4xl font-black text-gray-900">{realTimeMetrics.viewsToday.toLocaleString()}</p>
+            <p className="text-sm text-green-600 font-bold">+12% from yesterday</p>
           </motion.div>
 
           <motion.div
-            className="bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-8"
+            className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
             variants={fadeInUp}
           >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-200 rounded-xl flex items-center justify-center">
-                <ShieldCheckIcon className="w-6 h-6 text-green-700" />
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <ShieldCheckIcon className="w-6 h-6 text-green-600" />
               </div>
               <div className="flex items-center space-x-1">
                 <CheckCircleIcon className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-bold text-green-600">VERIFIED</span>
+                <span className="text-sm font-black text-green-600">VERIFIED</span>
               </div>
             </div>
-            <p className="text-sm font-medium text-green-700 mb-1">Verified Views</p>
-            <p className="text-3xl font-black text-green-900">{realTimeMetrics.verifiedViewsToday.toLocaleString()}</p>
-            <p className="text-sm text-green-600 font-medium">93% authenticity rate</p>
+            <p className="text-sm font-bold text-gray-600 mb-1">Verified Views</p>
+            <p className="text-4xl font-black text-gray-900">{realTimeMetrics.verifiedViewsToday.toLocaleString()}</p>
+            <p className="text-sm text-green-600 font-bold">93% authenticity rate</p>
           </motion.div>
 
           <motion.div
-            className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-2xl p-8"
+            className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
             variants={fadeInUp}
           >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-200 rounded-xl flex items-center justify-center">
-                <UsersIcon className="w-6 h-6 text-purple-700" />
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                <UsersIcon className="w-6 h-6 text-purple-600" />
               </div>
               <div className="flex items-center space-x-1">
                 <ArrowTrendingUpIcon className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-bold text-purple-600">ACTIVE</span>
+                <span className="text-sm font-black text-purple-600">ACTIVE</span>
               </div>
             </div>
-            <p className="text-sm font-medium text-purple-700 mb-1">Active Creators</p>
-            <p className="text-3xl font-black text-purple-900">{realTimeMetrics.activeCreators}</p>
-            <p className="text-sm text-purple-600 font-medium">Creating content</p>
+            <p className="text-sm font-bold text-gray-600 mb-1">Active Creators</p>
+            <p className="text-4xl font-black text-gray-900">{realTimeMetrics.activeCreators}</p>
+            <p className="text-sm text-purple-600 font-bold">Creating content</p>
           </motion.div>
 
           <motion.div
-            className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-2xl p-8"
+            className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
             variants={fadeInUp}
           >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-orange-200 rounded-xl flex items-center justify-center">
-                <ChartBarIcon className="w-6 h-6 text-orange-700" />
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                <ChartBarIcon className="w-6 h-6 text-orange-600" />
               </div>
               <div className="flex items-center space-x-1">
                 <ArrowTrendingUpIcon className="w-4 h-4 text-orange-600" />
-                <span className="text-sm font-bold text-orange-600">+{realTimeMetrics.avgEngagement}%</span>
+                <span className="text-sm font-black text-orange-600">+{realTimeMetrics.avgEngagement}%</span>
               </div>
             </div>
-            <p className="text-sm font-medium text-orange-700 mb-1">Avg. Engagement</p>
-            <p className="text-3xl font-black text-orange-900">{realTimeMetrics.avgEngagement}%</p>
-            <p className="text-sm text-orange-600 font-medium">Above industry avg</p>
+            <p className="text-sm font-bold text-gray-600 mb-1">Avg. Engagement</p>
+            <p className="text-4xl font-black text-gray-900">{realTimeMetrics.avgEngagement}%</p>
+            <p className="text-sm text-orange-600 font-bold">Above industry avg</p>
           </motion.div>
         </motion.div>
 
@@ -233,9 +238,9 @@ export default function AnalyticsDashboard() {
           transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
         >
           {/* View Breakdown */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-8">
+          <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 hover:border-black transition-all duration-200">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-black text-gray-900">View Breakdown</h3>
+              <h3 className="text-3xl font-black text-gray-900">View Breakdown</h3>
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                 <span className="text-sm font-medium text-gray-600">Verified</span>
@@ -291,8 +296,8 @@ export default function AnalyticsDashboard() {
           </div>
 
           {/* Performance Metrics */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-8">
-            <h3 className="text-2xl font-black text-gray-900 mb-8">Performance Metrics</h3>
+          <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 hover:border-black transition-all duration-200">
+            <h3 className="text-3xl font-black text-gray-900 mb-8">Performance Metrics</h3>
             
             <div className="space-y-6">
               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
@@ -334,12 +339,12 @@ export default function AnalyticsDashboard() {
 
         {/* Creator Performance */}
         <motion.div
-          className="bg-white rounded-2xl border border-gray-100 p-8"
+          className="bg-white rounded-2xl border-2 border-gray-200 p-8 hover:border-black transition-all duration-200"
           {...fadeInUp}
           transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
         >
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl font-black text-gray-900">Creator Performance</h3>
+            <h3 className="text-3xl font-black text-gray-900">Creator Performance</h3>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">Real-time tracking</span>
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -439,6 +444,9 @@ export default function AnalyticsDashboard() {
           </div>
         </motion.div>
       </div>
+
+      {/* Floating Navigation */}
+      <FloatingNav userType="brand" />
     </div>
   );
 }
