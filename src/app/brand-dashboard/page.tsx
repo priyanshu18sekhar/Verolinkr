@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   CurrencyDollarIcon, 
@@ -16,14 +16,27 @@ import {
   BanknotesIcon,
   ArrowTrendingUpIcon,
   UserGroupIcon,
-  DocumentCheckIcon
+  DocumentCheckIcon,
+  ArrowUpIcon,
+  StarIcon,
+  FireIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import FloatingNav from '../../componets/ui/FloatingNav';
-import { AnimatedParticles } from '../../components/onboarding';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 
 function BrandDashboardContent() {
   const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'create'>('overview');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simple loading simulation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Mock data for brand dashboard
   const brandStats = {
@@ -118,16 +131,8 @@ function BrandDashboardContent() {
   ];
 
   const fadeInUp = {
-    initial: { opacity: 0, y: 30 },
+    initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 }
-  };
-
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
   };
 
   const getStatusColor = (status: string) => {
@@ -139,24 +144,87 @@ function BrandDashboardContent() {
     }
   };
 
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'gigs': return 'bg-gray-100 text-gray-700';
+      case 'cpv': return 'bg-gray-100 text-gray-700';
+      case 'onetime': return 'bg-gray-100 text-gray-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  // Skeleton Loading Component
+  const SkeletonLoader = () => (
+    <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8 animate-pulse">
+      {/* Header Skeleton */}
+      <div className="bg-white border-b border-gray-200 -mx-8 md:-mx-16 lg:-mx-24 px-8 md:px-16 lg:px-24 mb-8">
+        <div className="py-8">
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="h-3 bg-gray-200 rounded w-32 mb-3"></div>
+              <div className="h-12 bg-gray-200 rounded w-96 mb-3"></div>
+              <div className="h-3 bg-gray-200 rounded w-64"></div>
+            </div>
+            <div className="h-12 w-40 bg-gray-200 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Skeleton */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="h-8 w-8 bg-gray-200 rounded-lg mb-2"></div>
+            <div className="h-6 bg-gray-200 rounded w-20 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-16"></div>
+          </div>
+        ))}
+      </div>
+
+      {/* Main Content Skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="h-4 bg-gray-200 rounded w-32 mb-6"></div>
+            <div className="h-40 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+        <div className="space-y-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="h-4 bg-gray-200 rounded w-32 mb-4"></div>
+              <div className="space-y-3">
+                {[...Array(3)].map((_, j) => (
+                  <div key={j} className="h-16 bg-gray-200 rounded"></div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Show skeleton loading
+  if (isLoading) {
+    return <SkeletonLoader />;
+  }
+
   return (
-    <>
-      {/* Subtle background elements matching Hero */}
-      <AnimatedParticles count={60} />
-      
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Header */}
       <motion.div
         className="bg-white border-b border-gray-200"
         {...fadeInUp}
-        transition={{ duration: 0.5, ease: [0.6, -0.05, 0.01, 0.99] }}
+        transition={{ duration: 0.5 }}
       >
         <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto">
           <div className="flex justify-between items-start py-8">
             <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-3">
-                <ShieldCheckIcon className="w-4 h-4 text-black" />
-                <span className="text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Verified Brand</span>
-              </div>
               <h1 className="text-[48px] md:text-[56px] font-black text-black tracking-tighter leading-none mb-3">
                 Brand Dashboard
               </h1>
@@ -164,82 +232,106 @@ function BrandDashboardContent() {
                 Scale your reach with authentic creators and measurable campaigns
               </p>
             </div>
-            <motion.button
-              className="bg-black text-white px-6 py-3 rounded-full text-[13px] font-bold hover:bg-gray-900 transition-all duration-200 flex items-center space-x-2 premium-glow-button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setActiveTab('create')}
-            >
-              <PlusIcon className="w-4 h-4" />
-              <span className="relative z-10">Create Campaign</span>
-            </motion.button>
+            <div className="flex items-center space-x-6">
+              <div className="text-right border-l border-gray-200 pl-6">
+                <p className="text-[11px] text-gray-500 font-medium uppercase tracking-wider mb-1">Available Budget</p>
+                <p className="text-[32px] font-black text-black leading-none">₹{(brandStats.totalSpent * 2).toLocaleString()}</p>
+                <p className="text-[11px] text-gray-600 font-medium mt-1">Ready to spend</p>
+              </div>
+              <motion.button
+                className="bg-black text-white px-6 py-3 rounded-full text-[13px] font-bold hover:bg-gray-900 transition-all duration-200 premium-glow-button"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setActiveTab('create')}
+              >
+                <span className="relative z-10 flex items-center space-x-2">
+                  <PlusIcon className="w-4 h-4" />
+                  <span>Create Campaign</span>
+                </span>
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.div>
 
-      <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8 relative z-10">
-        {/* Stats Overview */}
+      <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8">
+        {/* Stats Overview - Enhanced */}
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10"
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
+          className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8"
+          {...fadeInUp}
+          transition={{ duration: 0.5, delay: 0.15 }}
         >
-          <motion.div
-            className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
-            variants={fadeInUp}
-          >
+          <div className="bg-white border border-gray-200 rounded-lg p-4 hover:border-black transition-all duration-200">
             <div className="flex items-center justify-between mb-2">
               <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
                 <BanknotesIcon className="w-4 h-4 text-black" />
               </div>
-              <span className="text-[10px] font-semibold text-gray-500 uppercase">Total Spent</span>
             </div>
-            <p className="text-[28px] font-black text-black leading-none">₹{brandStats.totalSpent.toLocaleString()}</p>
-            <p className="text-[11px] text-gray-600 font-medium mt-1">+24% this month</p>
-          </motion.div>
+            <p className="text-[24px] font-black text-black leading-none">₹{brandStats.totalSpent.toLocaleString()}</p>
+            <p className="text-[10px] text-gray-500 font-medium mt-1 uppercase">Total Spent</p>
+            <div className="flex items-center space-x-1 mt-1">
+              <ArrowUpIcon className="w-3 h-3 text-black" />
+              <span className="text-[10px] font-semibold text-black">+24%</span>
+            </div>
+          </div>
 
-          <motion.div
-            className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
-            variants={fadeInUp}
-          >
+          <div className="bg-white border border-gray-200 rounded-lg p-4 hover:border-black transition-all duration-200">
             <div className="flex items-center justify-between mb-2">
               <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                <ArrowTrendingUpIcon className="w-4 h-4 text-black" />
+                <ChartBarIcon className="w-4 h-4 text-black" />
               </div>
-              <span className="text-[10px] font-semibold text-gray-500 uppercase">Avg ROI</span>
             </div>
-            <p className="text-[28px] font-black text-black leading-none">{brandStats.avgROI}%</p>
-            <p className="text-[11px] text-gray-600 font-medium mt-1">+15% improvement</p>
-          </motion.div>
+            <p className="text-[24px] font-black text-black leading-none">{brandStats.activeCampaigns}</p>
+            <p className="text-[10px] text-gray-500 font-medium mt-1 uppercase">Active Now</p>
+            <p className="text-[10px] text-gray-600 font-medium mt-1">{brandStats.completedCampaigns} completed</p>
+          </div>
 
-          <motion.div
-            className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
-            variants={fadeInUp}
-          >
+          <div className="bg-white border border-gray-200 rounded-lg p-4 hover:border-black transition-all duration-200">
             <div className="flex items-center justify-between mb-2">
               <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
                 <EyeIcon className="w-4 h-4 text-black" />
               </div>
-              <span className="text-[10px] font-semibold text-gray-500 uppercase">Views</span>
             </div>
-            <p className="text-[28px] font-black text-black leading-none">{(brandStats.verifiedViews / 1000).toFixed(0)}K</p>
-            <p className="text-[11px] text-gray-600 font-medium mt-1">AI-verified</p>
-          </motion.div>
+            <p className="text-[24px] font-black text-black leading-none">{(brandStats.totalReach / 1000000).toFixed(1)}M</p>
+            <p className="text-[10px] text-gray-500 font-medium mt-1 uppercase">Total Reach</p>
+            <div className="flex items-center space-x-1 mt-1">
+              <ArrowUpIcon className="w-3 h-3 text-black" />
+              <span className="text-[10px] font-semibold text-black">+18%</span>
+            </div>
+          </div>
 
-          <motion.div
-            className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
-            variants={fadeInUp}
-          >
+          <div className="bg-white border border-gray-200 rounded-lg p-4 hover:border-black transition-all duration-200">
             <div className="flex items-center justify-between mb-2">
               <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
                 <UserGroupIcon className="w-4 h-4 text-black" />
               </div>
-              <span className="text-[10px] font-semibold text-gray-500 uppercase">Creators</span>
             </div>
-            <p className="text-[28px] font-black text-black leading-none">{brandStats.activeCampaigns * 3}</p>
-            <p className="text-[11px] text-gray-600 font-medium mt-1">Active now</p>
-          </motion.div>
+            <p className="text-[24px] font-black text-black leading-none">{brandStats.activeCampaigns * 3}</p>
+            <p className="text-[10px] text-gray-500 font-medium mt-1 uppercase">Creators</p>
+            <p className="text-[10px] text-gray-600 font-medium mt-1">Active now</p>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-lg p-4 hover:border-black transition-all duration-200">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                <ArrowTrendingUpIcon className="w-4 h-4 text-black" />
+              </div>
+            </div>
+            <p className="text-[24px] font-black text-black leading-none">{brandStats.avgROI}%</p>
+            <p className="text-[10px] text-gray-500 font-medium mt-1 uppercase">Avg ROI</p>
+            <p className="text-[10px] text-gray-600 font-medium mt-1">+15% improvement</p>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-lg p-4 hover:border-black transition-all duration-200">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                <ShieldCheckIcon className="w-4 h-4 text-black" />
+              </div>
+            </div>
+            <p className="text-[24px] font-black text-black leading-none">{(brandStats.verifiedViews / 1000).toFixed(0)}K</p>
+            <p className="text-[10px] text-gray-500 font-medium mt-1 uppercase">Verified Views</p>
+            <p className="text-[10px] text-gray-600 font-medium mt-1">AI-verified</p>
+          </div>
         </motion.div>
 
         {/* Tab Navigation */}
@@ -371,97 +463,107 @@ function BrandDashboardContent() {
             )}
 
             {activeTab === 'campaigns' && (
-              <div>
-                <h3 className="text-5xl font-black text-gray-900 mb-12">Campaign Management</h3>
-                <div className="space-y-6">
-                  {recentCampaigns.map((campaign) => (
-                    <div key={campaign.id} className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200">
-                      <div className="flex justify-between items-start mb-6">
-                        <div>
-                          <div className="flex items-center space-x-4 mb-4">
-                            <h4 className="text-3xl font-black text-gray-900">{campaign.title}</h4>
-                            <span className={`px-3 py-1 rounded-full text-sm font-bold ${getTypeColor(campaign.type)}`}>
-                              {campaign.type.toUpperCase()}
-                            </span>
-                            <span className={`px-3 py-1 rounded-full text-sm font-bold ${getStatusColor(campaign.status)}`}>
-                              {campaign.status.toUpperCase()}
-                        </span>
-                      </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-                        <div>
-                              <p className="text-gray-500 font-medium">Spent</p>
-                              <p className="text-xl font-black text-gray-900">₹{campaign.spent.toLocaleString()}</p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[20px] font-bold text-black">My Campaigns</h3>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[12px] text-gray-600">Sort by:</span>
+                    <select className="text-[12px] font-semibold text-black border border-gray-300 rounded px-2 py-1">
+                      <option>Date</option>
+                      <option>Budget</option>
+                      <option>ROI</option>
+                    </select>
+                  </div>
+                </div>
+                {recentCampaigns.map((campaign) => (
+                  <div
+                    key={campaign.id}
+                    className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <h4 className="text-[16px] font-bold text-black">{campaign.title}</h4>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-700 uppercase">
+                            {campaign.type}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${getStatusColor(campaign.status)} uppercase`}>
+                            {campaign.status}
+                          </span>
                         </div>
-                        <div>
-                              <p className="text-gray-500 font-medium">Engagement</p>
-                              <p className="text-xl font-black text-gray-900">{campaign.engagement}%</p>
-                        </div>
-                        <div>
-                              <p className="text-gray-500 font-medium">Deadline</p>
-                              <p className="text-xl font-black text-gray-900">{campaign.deadline}</p>
-                        </div>
-                        <div>
-                              <p className="text-gray-500 font-medium">Progress</p>
-                              <p className="text-xl font-black text-gray-900">85%</p>
-                            </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div>
+                            <p className="text-[11px] text-gray-500 font-medium uppercase">Budget</p>
+                            <p className="text-[16px] font-black text-black">₹{campaign.budget.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-[11px] text-gray-500 font-medium uppercase">Spent</p>
+                            <p className="text-[16px] font-black text-black">₹{campaign.spent.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-[11px] text-gray-500 font-medium uppercase">Views</p>
+                            <p className="text-[16px] font-black text-black">{(campaign.views / 1000).toFixed(0)}K</p>
+                          </div>
+                          <div>
+                            <p className="text-[11px] text-gray-500 font-medium uppercase">ROI</p>
+                            <p className="text-[16px] font-black text-black">{campaign.roi}%</p>
                           </div>
                         </div>
                       </div>
-                      
-                      <div className="flex space-x-4">
-                        <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors duration-200">
-                          View Analytics
+                      <div className="flex flex-col space-y-2 ml-4">
+                        <button className="bg-black text-white px-4 py-2 rounded-lg font-semibold text-[12px] hover:bg-gray-900 transition-colors duration-200">
+                          View Details
                         </button>
-                        <button className="bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-bold hover:bg-gray-300 transition-colors duration-200">
-                          Edit Campaign
+                        <button className="bg-white border border-gray-300 text-black px-4 py-2 rounded-lg font-semibold text-[12px] hover:border-black transition-colors duration-200">
+                          Analytics
                         </button>
-                        {campaign.status === 'active' && (
-                          <button className="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700 transition-colors duration-200">
-                            Pause Campaign
-                          </button>
-                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
 
             {activeTab === 'create' && (
               <div>
-                <h3 className="text-5xl font-black text-gray-900 mb-12">Create New Campaign</h3>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <h3 className="text-[20px] font-bold text-black mb-6">Create New Campaign</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                   {campaignTypes.map((type) => (
                     <motion.div
                       key={type.id}
-                      className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-gray-300 transition-all duration-300 cursor-pointer group"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200 cursor-pointer group"
+                      whileHover={{ scale: 1.005 }}
+                      whileTap={{ scale: 0.995 }}
                     >
-                      <div className="flex items-center justify-between mb-6">
-                        <div className={`w-16 h-16 ${type.bgColor} rounded-2xl flex items-center justify-center`}>
-                          <type.icon className={`w-8 h-8 ${type.textColor}`} />
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <type.icon className="w-5 h-5 text-black" />
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-sm font-bold ${type.bgColor} ${type.textColor}`}>
+                        <span className="px-2 py-1 rounded-md text-[10px] font-semibold bg-gray-100 text-gray-700 uppercase">
                           {type.subtitle}
                         </span>
                       </div>
                       
-                      <h4 className="text-3xl font-black text-gray-900 mb-4">{type.title}</h4>
-                      <p className="text-lg text-gray-600 mb-8 leading-relaxed">{type.description}</p>
+                      <h4 className="text-[18px] font-bold text-black mb-2">{type.title}</h4>
+                      <p className="text-[13px] text-gray-600 mb-4 leading-relaxed">{type.description}</p>
                       
-                      <div className="space-y-2 mb-8">
+                      <div className="mb-4">
+                        <p className="text-[11px] font-semibold text-gray-500 mb-1 uppercase">Price Range</p>
+                        <p className="text-[16px] font-black text-black">{type.stats}</p>
+                      </div>
+                      
+                      <div className="space-y-1.5 mb-4">
                         {type.features.map((feature, index) => (
-                          <div key={index} className="flex items-center space-x-2">
-                            <CheckCircleIcon className="w-4 h-4 text-green-500" />
-                            <span className="text-sm text-gray-600">{feature}</span>
+                          <div key={index} className="flex items-center space-x-1.5">
+                            <CheckCircleIcon className="w-3 h-3 text-black flex-shrink-0" />
+                            <span className="text-[12px] text-gray-600">{feature}</span>
                           </div>
                         ))}
-                </div>
+                      </div>
                       
-                      <button className={`w-full bg-gradient-to-r ${type.color} text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all duration-200 group-hover:scale-105`}>
-                        Start {type.title}
-                  </button>
+                      <button className="w-full bg-black text-white py-2.5 rounded-lg font-semibold text-[13px] hover:bg-gray-900 transition-all duration-200">
+                        Create {type.title}
+                      </button>
                     </motion.div>
                   ))}
                 </div>
@@ -473,7 +575,7 @@ function BrandDashboardContent() {
 
       {/* Floating Navigation */}
       <FloatingNav userType="brand" />
-    </>
+    </motion.div>
   );
 }
 

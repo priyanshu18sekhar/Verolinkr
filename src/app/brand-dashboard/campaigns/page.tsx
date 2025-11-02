@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   PlusIcon,
@@ -18,15 +18,23 @@ import {
   ClockIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  UsersIcon
+  UsersIcon,
+  BriefcaseIcon
 } from '@heroicons/react/24/outline';
 import FloatingNav from '../../../componets/ui/FloatingNav';
-import { AnimatedParticles } from '../../../components/onboarding';
 
 export default function BrandCampaigns() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('date');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const campaigns = [
     {
@@ -96,28 +104,48 @@ export default function BrandCampaigns() {
   ];
 
   const fadeInUp = {
-    initial: { opacity: 0, y: 30 },
+    initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'gigs': return 'bg-blue-100 text-blue-800';
-      case 'cpv': return 'bg-purple-100 text-purple-800';
-      case 'onetime': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'gigs': return 'bg-gray-100 text-gray-700';
+      case 'cpv': return 'bg-gray-100 text-gray-700';
+      case 'onetime': return 'bg-gray-100 text-gray-700';
+      default: return 'bg-gray-100 text-gray-700';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
-      case 'paused': return 'bg-yellow-100 text-yellow-800';
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'active': return 'bg-black text-white';
+      case 'completed': return 'bg-gray-100 text-gray-700';
+      case 'paused': return 'bg-gray-100 text-gray-700';
+      case 'draft': return 'bg-gray-100 text-gray-700';
+      default: return 'bg-gray-100 text-gray-700';
     }
   };
+
+  // Skeleton Loading Component
+  const SkeletonLoader = () => (
+    <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8 animate-pulse">
+      <div className="bg-white border-b border-gray-200 -mx-8 md:-mx-16 lg:-mx-24 px-8 md:px-16 lg:px-24 mb-8">
+        <div className="py-8">
+          <div className="h-12 bg-gray-200 rounded w-96 mb-3"></div>
+          <div className="h-4 bg-gray-200 rounded w-64"></div>
+        </div>
+      </div>
+      <div className="space-y-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+            <div className="h-20 bg-gray-200 rounded"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -134,68 +162,73 @@ export default function BrandCampaigns() {
     return matchesSearch && matchesFilter;
   });
 
+  if (isLoading) {
+    return <SkeletonLoader />;
+  }
+
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
-      {/* Subtle background elements matching Hero */}
-      <AnimatedParticles count={60} />
-      
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Header */}
       <motion.div
-        className="bg-white border-b border-gray-100"
+        className="bg-white border-b border-gray-200"
         {...fadeInUp}
-        transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
+        transition={{ duration: 0.5 }}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-[72px] md:text-[64px] font-black text-gray-900 tracking-tighter leading-none mb-6">
+        <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto">
+          <div className="flex justify-between items-start py-8">
+            <div className="flex-1">
+              <h1 className="text-[48px] md:text-[56px] font-black text-black tracking-tighter leading-none mb-3">
                 Campaign Management
               </h1>
-              <p className="text-2xl md:text-xl text-gray-600 font-light">
+              <p className="text-[14px] text-gray-600 font-normal max-w-lg">
                 Manage all your campaigns across different types
               </p>
             </div>
             
             <motion.button
-              className="bg-black text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-3"
+              className="bg-black text-white px-6 py-3 rounded-full text-[13px] font-bold hover:bg-gray-900 transition-all duration-200 premium-glow-button flex items-center space-x-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <PlusIcon className="w-5 h-5" />
-              <span>Create Campaign</span>
+              <PlusIcon className="w-4 h-4" />
+              <span className="relative z-10">Create Campaign</span>
             </motion.button>
           </div>
         </div>
       </motion.div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 relative z-10">
+      <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8">
         {/* Filters and Search */}
         <motion.div
-          className="bg-white rounded-2xl border-2 border-gray-200 p-8 mb-8 hover:border-black transition-all duration-200"
+          className="bg-white border border-gray-200 rounded-lg p-6 mb-8"
           {...fadeInUp}
-          transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
+          transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search campaigns..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                 />
               </div>
             </div>
 
             {/* Filters */}
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black font-semibold text-[12px]"
               >
                 <option value="all">All Types</option>
                 <option value="gigs">Gigs</option>
@@ -206,7 +239,7 @@ export default function BrandCampaigns() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black font-semibold text-[12px]"
               >
                 <option value="date">Sort by Date</option>
                 <option value="budget">Sort by Budget</option>
@@ -219,124 +252,96 @@ export default function BrandCampaigns() {
 
         {/* Campaign Stats */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
-          variants={{
-            animate: {
-              transition: {
-                staggerChildren: 0.1
-              }
-            }
-          }}
-          initial="initial"
-          animate="animate"
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+          {...fadeInUp}
+          transition={{ duration: 0.5, delay: 0.15 }}
         >
           {[
-            { label: 'Total Campaigns', value: campaigns.length, color: 'blue' },
-            { label: 'Active Campaigns', value: campaigns.filter(c => c.status === 'active').length, color: 'green' },
-            { label: 'Total Budget', value: `₹${campaigns.reduce((sum, c) => sum + c.budget, 0).toLocaleString()}`, color: 'purple' },
-            { label: 'Avg ROI', value: `${Math.round(campaigns.reduce((sum, c) => sum + c.roi, 0) / campaigns.length)}%`, color: 'orange' }
+            { label: 'Total Campaigns', value: campaigns.length },
+            { label: 'Active Campaigns', value: campaigns.filter(c => c.status === 'active').length },
+            { label: 'Total Budget', value: `₹${campaigns.reduce((sum, c) => sum + c.budget, 0).toLocaleString()}` },
+            { label: 'Avg ROI', value: `${Math.round(campaigns.reduce((sum, c) => sum + c.roi, 0) / campaigns.length)}%` }
           ].map((stat, index) => (
-            <motion.div
+            <div
               key={stat.label}
-              className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black transition-all duration-200"
-              variants={fadeInUp}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:border-black transition-all duration-200"
             >
-              <p className="text-sm font-bold text-gray-600 mb-2">{stat.label}</p>
-              <p className="text-4xl font-black text-gray-900">{stat.value}</p>
-            </motion.div>
+              <p className="text-[10px] text-gray-500 font-medium uppercase mb-1">{stat.label}</p>
+              <p className="text-[24px] font-black text-black leading-none">{stat.value}</p>
+            </div>
           ))}
         </motion.div>
 
         {/* Campaigns Grid */}
         <motion.div
-          className="space-y-6"
+          className="space-y-4"
           {...fadeInUp}
-          transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
           {filteredCampaigns.map((campaign, index) => {
             const TypeIcon = getTypeIcon(campaign.type);
             return (
               <motion.div
                 key={campaign.id}
-                className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-black hover:shadow-xl transition-all duration-300"
+                className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                whileHover={{ scale: 1.01 }}
               >
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center">
-                      <TypeIcon className="w-8 h-8 text-gray-600" />
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <TypeIcon className="w-5 h-5 text-black" />
+                      </div>
+                      <div>
+                        <h3 className="text-[16px] font-bold text-black">{campaign.name}</h3>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${getTypeColor(campaign.type)} uppercase`}>
+                            {campaign.type}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${getStatusColor(campaign.status)} uppercase`}>
+                            {campaign.status}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-4xl font-black text-gray-900 mb-2">{campaign.name}</h3>
-                      <div className="flex items-center space-x-3">
-                        <span className={`px-3 py-1 rounded-full text-sm font-bold ${getTypeColor(campaign.type)}`}>
-                          {campaign.type.toUpperCase()}
-                        </span>
-                        <span className={`px-3 py-1 rounded-full text-sm font-bold ${getStatusColor(campaign.status)}`}>
-                          {campaign.status.toUpperCase()}
-                        </span>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                      <div>
+                        <p className="text-[11px] text-gray-500 font-medium uppercase">Budget</p>
+                        <p className="text-[16px] font-black text-black">₹{campaign.budget.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] text-gray-500 font-medium uppercase">Spent</p>
+                        <p className="text-[16px] font-black text-black">₹{campaign.spent.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] text-gray-500 font-medium uppercase">Verified Views</p>
+                        <p className="text-[16px] font-black text-black">{(campaign.verifiedViews / 1000).toFixed(0)}K</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] text-gray-500 font-medium uppercase">ROI</p>
+                        <p className="text-[16px] font-black text-black">{campaign.roi}%</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4 text-[11px] text-gray-600">
+                      <div className="flex items-center space-x-1">
+                        <UsersIcon className="w-3 h-3" />
+                        <span>{campaign.creators} creators</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <ClockIcon className="w-3 h-3" />
+                        <span>{campaign.startDate} - {campaign.endDate}</span>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <button className="p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors duration-200">
-                      <EyeIcon className="w-5 h-5 text-gray-600" />
+                  <div className="flex flex-col space-y-2 ml-4">
+                    <button className="bg-black text-white px-4 py-2 rounded-lg font-semibold text-[12px] hover:bg-gray-900 transition-colors duration-200">
+                      View Details
                     </button>
-                    <button className="p-3 bg-blue-100 hover:bg-blue-200 rounded-xl transition-colors duration-200">
-                      <PencilIcon className="w-5 h-5 text-blue-600" />
+                    <button className="bg-white border border-gray-300 text-black px-4 py-2 rounded-lg font-semibold text-[12px] hover:border-black transition-colors duration-200">
+                      Analytics
                     </button>
-                    {campaign.status === 'active' && (
-                      <button className="p-3 bg-yellow-100 hover:bg-yellow-200 rounded-xl transition-colors duration-200">
-                        <PauseIcon className="w-5 h-5 text-yellow-600" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-                  <div>
-                    <p className="text-sm text-gray-600 font-bold mb-1">Budget</p>
-                    <p className="text-2xl font-black text-gray-900">₹{campaign.budget.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 font-bold mb-1">Spent</p>
-                    <p className="text-2xl font-black text-gray-900">₹{campaign.spent.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 font-bold mb-1">Verified Views</p>
-                    <p className="text-2xl font-black text-gray-900">{(campaign.verifiedViews / 1000).toFixed(0)}K</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 font-bold mb-1">ROI</p>
-                    <p className="text-2xl font-black text-green-600">{campaign.roi}%</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-6 text-sm text-gray-600">
-                    <div className="flex items-center space-x-2">
-                      <UsersIcon className="w-4 h-4" />
-                      <span>{campaign.creators} creators</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <ClockIcon className="w-4 h-4" />
-                      <span>{campaign.startDate} - {campaign.endDate}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors duration-200">
-                      View Analytics
-                    </button>
-                    {campaign.status === 'active' && (
-                      <button className="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700 transition-colors duration-200">
-                        Manage
-                      </button>
-                    )}
                   </div>
                 </div>
               </motion.div>
@@ -349,22 +354,26 @@ export default function BrandCampaigns() {
           <motion.div
             className="text-center py-16"
             {...fadeInUp}
-            transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
+            transition={{ duration: 0.5 }}
           >
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <BriefcaseIcon className="w-12 h-12 text-gray-400" />
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <BriefcaseIcon className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">No campaigns found</h3>
-            <p className="text-gray-600 mb-8">Try adjusting your search or filter criteria</p>
-            <button className="bg-black text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-800 transition-all duration-200">
+            <h3 className="text-[18px] font-bold text-black mb-2">No campaigns found</h3>
+            <p className="text-[13px] text-gray-600 mb-6">Try adjusting your search or filter criteria</p>
+            <motion.button
+              className="bg-black text-white px-6 py-3 rounded-full text-[13px] font-bold hover:bg-gray-900 transition-all duration-200"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
               Create Your First Campaign
-            </button>
+            </motion.button>
           </motion.div>
         )}
       </div>
 
       {/* Floating Navigation */}
       <FloatingNav userType="brand" />
-    </div>
+    </motion.div>
   );
 }

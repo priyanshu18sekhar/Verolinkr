@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 import { 
   HomeIcon,
@@ -15,7 +15,8 @@ import {
   CogIcon,
   BellIcon,
   ShieldCheckIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  IdentificationIcon
 } from '@heroicons/react/24/outline';
 import { 
   HomeIcon as HomeIconSolid,
@@ -29,7 +30,8 @@ import {
   CogIcon as CogIconSolid,
   BellIcon as BellIconSolid,
   ShieldCheckIcon as ShieldCheckIconSolid,
-  DocumentTextIcon as DocumentTextIconSolid
+  DocumentTextIcon as DocumentTextIconSolid,
+  IdentificationIcon as IdentificationIconSolid
 } from '@heroicons/react/24/solid';
 
 interface FloatingNavProps {
@@ -39,6 +41,35 @@ interface FloatingNavProps {
 const FloatingNav: React.FC<FloatingNavProps> = ({ userType }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Always show at the top
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      } 
+      // Hide when scrolling down (after 100px), show when scrolling up
+      else if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setIsVisible(false);
+      } 
+      // Show when scrolling up
+      else if (currentScrollY < lastScrollY.current) {
+        setIsVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const brandNavItems = [
     {
@@ -74,12 +105,12 @@ const FloatingNav: React.FC<FloatingNavProps> = ({ userType }) => {
       tooltip: 'Discover Creators'
     },
     {
-      id: 'kyc',
-      label: 'KYC',
-      path: '/brand-registration/kyc',
-      icon: ShieldCheckIcon,
-      activeIcon: ShieldCheckIconSolid,
-      tooltip: 'Verification Status'
+      id: 'profile',
+      label: 'Profile',
+      path: '/brand-dashboard/profile',
+      icon: IdentificationIcon,
+      activeIcon: IdentificationIconSolid,
+      tooltip: 'Brand Profile'
     }
   ];
 
@@ -140,12 +171,15 @@ const FloatingNav: React.FC<FloatingNavProps> = ({ userType }) => {
   };
 
   return (
-    <motion.nav 
-      className="fixed bottom-4 lg:bottom-8 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-50"
-      initial={{ opacity: 0, y: 100 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.6, -0.05, 0.01, 0.99] }}
-    >
+    <AnimatePresence>
+      {isVisible && (
+        <motion.nav 
+          className="fixed bottom-4 lg:bottom-8 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-50"
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
+        >
       <div className="relative">
         {/* Background with glassmorphism effect */}
         <div className="absolute inset-0 bg-white/10 backdrop-blur-2xl rounded-full border border-white/20 shadow-2xl" />
@@ -206,17 +240,10 @@ const FloatingNav: React.FC<FloatingNavProps> = ({ userType }) => {
             );
           })}
         </div>
-
-        {/* Floating notification badge */}
-        <motion.div
-          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          3
-        </motion.div>
       </div>
-    </motion.nav>
+      </motion.nav>
+      )}
+    </AnimatePresence>
   );
 };
 
