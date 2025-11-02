@@ -1,120 +1,161 @@
 "use client";
 
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
 
 const StatsSection = () => {
-  const sectionRef = useRef(null);
-  const sectionInView = useInView(sectionRef, { once: false, margin: '-100px' });
-
+  const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
+    target: containerRef,
+    offset: ['start end', 'end start']
   });
 
-  // Section-level subtle parallax
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.6, 1, 1, 0.6]);
-  const sectionScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
-
-  // Individual stat parallax
-  const statY = (index: number) =>
-    useTransform(scrollYProgress, [0, 1], [30 + index * 10, -30 - index * 10]);
+  const [countedStats, setCountedStats] = useState({
+    creators: 0,
+    brands: 0,
+    success: 0,
+    processed: 0,
+  });
 
   const stats = [
-    { number: "10K+", label: "Active Creators", progress: 85 },
-    { number: "500+", label: "Brand Partners", progress: 75 },
-    { number: "98%", label: "Success Rate", progress: 98 },
-    { number: "$5M+", label: "Processed", progress: 90 },
+    { number: 10000, suffix: '+', label: "Active Creators", key: 'creators' },
+    { number: 500, suffix: '+', label: "Brand Partners", key: 'brands' },
+    { number: 98, suffix: '%', label: "Success Rate", key: 'success' },
+    { number: 5, suffix: 'M+', label: "Processed", key: 'processed' },
   ];
 
+  // Parallax effects
+  const sectionY = useTransform(scrollYProgress, [0, 1], [100, -100]);
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
+
+  // Counter animation trigger
+  const shouldAnimate = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+
+  useEffect(() => {
+    const unsubscribe = shouldAnimate.on('change', (value) => {
+      if (value > 0.5) {
+        const duration = 2000;
+        const steps = 60;
+        const interval = duration / steps;
+
+        const timers = stats.map((stat) => {
+          const maxValue = stat.number;
+          let currentStep = 0;
+
+          return setInterval(() => {
+            currentStep++;
+            if (currentStep > steps) return;
+            const progress = currentStep / steps;
+            const currentValue = Math.floor(maxValue * progress);
+
+            setCountedStats(prev => ({
+              ...prev,
+              [stat.key]: currentValue
+            }));
+          }, interval);
+        });
+
+        return () => timers.forEach(timer => clearInterval(timer));
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   return (
-    <motion.section
-      ref={sectionRef}
-      className="py-32 px-6 bg-white relative overflow-hidden"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.3 }}
-      style={{
-        opacity: sectionOpacity,
-        scale: sectionScale,
-      }}
-      transition={{ duration: 1.5, ease: 'easeOut' }}
-    >
-      {/* Subtle background accent lines */}
+    <section ref={containerRef} className="py-40 bg-white relative overflow-hidden">
+      {/* Decorative background elements */}
       <motion.div
-        className="absolute inset-0 pointer-events-none opacity-5"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-          y: useTransform(scrollYProgress, [0, 1], [0, -60]),
+          opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.2, 0]),
         }}
-      />
-
-      <div className="max-w-7xl mx-auto">
-        <motion.h2
-          className="text-5xl md:text-7xl font-extrabold text-center mb-20 text-black tracking-tight uppercase"
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, type: 'spring', stiffness: 100 }}
-        >
-          Our Impact
+      >
+        {/* Grid pattern */}
+        {[...Array(20)].map((_, i) => (
           <motion.div
-            className="w-24 h-1 bg-black mx-auto mt-4"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+            key={i}
+            className="absolute border border-gray-200"
+            style={{
+              width: '50px',
+              height: '50px',
+              left: `${(i % 5) * 25}%`,
+              top: `${Math.floor(i / 5) * 20}%`,
+              rotate: useTransform(scrollYProgress, [0, 1], [0, 90]),
+              opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.05, 0.15, 0]),
+            }}
           />
-        </motion.h2>
+        ))}
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-16">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={index}
-              className="text-center relative"
-              style={{ y: statY(index) }}
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: index * 0.2, type: 'spring' }}
-            >
-              {/* Animated Number */}
-              <motion.div
-                className="text-5xl md:text-7xl font-extrabold mb-4 text-black"
-                initial={{ scale: 0.5, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 1, delay: index * 0.25, type: 'spring', stiffness: 120 }}
-              >
-                {stat.number}
-              </motion.div>
+        {/* Numbers pattern */}
+        {[...Array(15)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute text-6xl font-black text-gray-100"
+            style={{
+              left: `${(i * 7) % 100}%`,
+              top: `${(Math.sin(i) * 25 + 50)}%`,
+              opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.3, 0]),
+              rotate: useTransform(scrollYProgress, [0, 1], [0, 360]),
+            }}
+          >
+            {i + 1}
+          </motion.div>
+        ))}
+      </motion.div>
 
-              {/* Label */}
-              <motion.div
-                className="text-lg font-light text-gray-600 uppercase"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.3 }}
-              >
-                {stat.label}
-              </motion.div>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+        <motion.div
+          style={{
+            y: sectionY,
+            opacity: sectionOpacity,
+            scale,
+          }}
+        >
+          {/* Heading */}
+          <motion.div
+            className="text-center mb-32"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+          >
+            <h2 className="text-6xl md:text-8xl font-black mb-8 text-black tracking-tighter">
+              Our Impact
+            </h2>
+            <div className="w-24 h-1 bg-black mx-auto"></div>
+          </motion.div>
 
-              {/* Progress Bar */}
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-16">
+            {stats.map((stat, index) => (
               <motion.div
-                className="w-24 h-1 bg-gray-100 rounded-full mt-4 mx-auto overflow-hidden"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.35 }}
+                key={index}
+                className="text-center"
+                initial={{ opacity: 0, y: 50, scale: 0.8 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: index * 0.1 }}
+                whileHover={{ scale: 1.1 }}
               >
                 <motion.div
-                  className="h-full bg-black"
-                  initial={{ width: 0 }}
-                  whileInView={{ width: `${stat.progress}%` }}
-                  transition={{ duration: 1.2, delay: index * 0.4, ease: 'easeOut' }}
-                />
+                  className="text-7xl md:text-9xl font-black mb-6 text-black"
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: index * 0.2, type: 'spring', stiffness: 200 }}
+                >
+                  {countedStats[stat.key as keyof typeof countedStats].toLocaleString()}{stat.suffix}
+                </motion.div>
+                <p className="text-xl font-regular text-gray-600 uppercase tracking-wider">
+                  {stat.label}
+                </p>
               </motion.div>
-            </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
-    </motion.section>
+    </section>
   );
 };
 

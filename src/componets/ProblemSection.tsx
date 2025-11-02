@@ -1,28 +1,22 @@
 "use client";
 
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 
 const ProblemSection = () => {
-  const sectionRef = useRef(null);
-  const sectionInView = useInView(sectionRef, { once: false, margin: '-150px' });
-  
+  const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
+    target: containerRef,
+    offset: ['start end', 'end start']
   });
 
-  // Section-level subtle parallax
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.7, 1, 1, 0.7]);
-  const sectionScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
-
-  // Card subtle parallax
-  const card1Y = useTransform(scrollYProgress, [0, 1], [30, -30]);
-  const card2Y = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  // Parallax effects
+  const sectionY = useTransform(scrollYProgress, [0, 1], [150, -150]);
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
   const brandsProblems = [
     {
-      text: "Struggling to find creators who truly align with your brand’s vision.",
+      text: "Struggling to find creators who truly align with your brand's vision.",
       detail: "Over 70% of brands face challenges verifying creator authenticity."
     },
     {
@@ -51,126 +45,160 @@ const ProblemSection = () => {
   ];
 
   return (
-    <motion.section
-      ref={sectionRef}
-      className="min-h-screen flex items-center px-6 py-32 bg-white"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.3 }}
-      style={{
-        opacity: sectionOpacity,
-        scale: sectionScale,
-      }}
-      transition={{ duration: 1.5, ease: 'easeOut' }}
-    >
-      <div className="max-w-7xl mx-auto w-full">
-        <motion.h2
-          className="text-6xl md:text-8xl font-extrabold text-center mb-24 text-black tracking-tight uppercase"
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.2, type: 'spring', stiffness: 100 }}
-        >
-          The Challenge
+    <section ref={containerRef} className="py-40 bg-white relative overflow-hidden">
+      {/* Animated background elements with scroll */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.3, 0]),
+        }}
+      >
+        {/* Floating geometric shapes */}
+        {[...Array(15)].map((_, i) => (
           <motion.div
-            className="w-24 h-1 bg-black mx-auto mt-4"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+            key={i}
+            className="absolute border-2 border-gray-200"
+            style={{
+              width: `${20 + i * 5}px`,
+              height: `${20 + i * 5}px`,
+              left: `${(i * 7) % 100}%`,
+              top: `${Math.sin(i) * 50 + 50}%`,
+              rotate: useTransform(scrollYProgress, [0, 1], [i * 30, i * 30 + 360]),
+              opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.1, 0.3, 0.1]),
+            }}
           />
-        </motion.h2>
+        ))}
 
-        <div className="grid md:grid-cols-2 gap-16 md:gap-24">
+        {/* Animated lines */}
+        {[...Array(8)].map((_, i) => (
           <motion.div
-            className="bg-white p-10 rounded-2xl shadow-md"
-            style={{ y: card1Y }}
+            key={`line-${i}`}
+            className="absolute bg-gray-200"
+            style={{
+              width: '120px',
+              height: '2px',
+              left: `${(i * 12) % 100}%`,
+              top: `${(i * 11) % 100}%`,
+              rotate: 45 + i * 10,
+              opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.1, 0.25, 0]),
+              y: useTransform(scrollYProgress, [0, 1], [0, -150]),
+            }}
+          />
+        ))}
+
+        {/* Animated dots pattern */}
+        {[...Array(30)].map((_, i) => (
+          <motion.div
+            key={`dot-${i}`}
+            className="absolute w-1.5 h-1.5 bg-gray-300 rounded-full"
+            style={{
+              left: `${(i * 3.3) % 100}%`,
+              top: `${(Math.sin(i * 0.5) * 40 + 50)}%`,
+              opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.4, 0]),
+              scale: useTransform(scrollYProgress, [0, 1], [0.5, 1]),
+            }}
+            animate={{
+              scale: [1, 1.3, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              delay: i * 0.1,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <motion.div
+          style={{
+            y: sectionY,
+            opacity: sectionOpacity,
+          }}
+        >
+          {/* Section Heading */}
+          <motion.div
+            className="text-center mb-32"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
           >
-            <motion.h3
-              className="text-4xl md:text-5xl font-extrabold mb-8 text-black uppercase"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.3 }}
-            >
-              For Brands
-            </motion.h3>
-            <div className="space-y-8 text-lg font-light leading-relaxed text-black">
-              {brandsProblems.map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="relative"
-                  initial={{ opacity: 0, x: -40 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.2, duration: 0.8 }}
-                >
-                  <p className="font-medium">{item.text}</p>
-                  <motion.p
-                    className="text-base text-gray-600 mt-2"
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.3, duration: 0.5 }}
-                  >
-                    {item.detail}
-                  </motion.p>
-                  <motion.div
-                    className="absolute -left-4 top-0 h-1 w-12 bg-black"
-                    initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    transition={{ delay: index * 0.4, duration: 0.6 }}
-                  />
-                </motion.div>
-              ))}
-            </div>
+            <h2 className="text-6xl md:text-8xl font-black mb-8 text-black tracking-tighter">
+              The Challenge
+            </h2>
+            <div className="w-24 h-1 bg-black mx-auto"></div>
           </motion.div>
 
-          <motion.div
-            className="bg-white p-10 rounded-2xl shadow-md"
-            style={{ y: card2Y }}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.4 }}
-          >
-            <motion.h3
-              className="text-4xl md:text-5xl font-extrabold mb-8 text-black uppercase"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.5 }}
+          {/* Two Column Grid */}
+          <div className="grid md:grid-cols-2 gap-16 md:gap-24">
+            {/* For Brands */}
+            <motion.div
+              initial={{ opacity: 0, x: -100 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
             >
-              For Creators
-            </motion.h3>
-            <div className="space-y-8 text-lg font-light leading-relaxed text-black">
-              {creatorsProblems.map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="relative"
-                  initial={{ opacity: 0, x: 40 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.2, duration: 0.8 }}
-                >
-                  <p className="font-medium">{item.text}</p>
-                  <motion.p
-                    className="text-base text-gray-600 mt-2"
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.3, duration: 0.5 }}
-                  >
-                    {item.detail}
-                  </motion.p>
+              <h3 className="text-4xl md:text-5xl font-black mb-12 text-black">
+                For Brands
+              </h3>
+              <div className="space-y-12">
+                {brandsProblems.map((item, index) => (
                   <motion.div
-                    className="absolute -right-4 top-0 h-1 w-12 bg-black"
-                    initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    transition={{ delay: index * 0.4, duration: 0.6 }}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
+                    key={index}
+                    className="border-l-4 border-black pl-8"
+                    initial={{ opacity: 0, x: -50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.2 }}
+                    whileHover={{ x: 10 }}
+                  >
+                    <p className="text-2xl font-regular leading-relaxed mb-4 text-black">
+                      {item.text}
+                    </p>
+                    <p className="text-lg text-gray-600">
+                      {item.detail}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* For Creators */}
+            <motion.div
+              initial={{ opacity: 0, x: 100 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+            >
+              <h3 className="text-4xl md:text-5xl font-black mb-12 text-black">
+                For Creators
+              </h3>
+              <div className="space-y-12">
+                {creatorsProblems.map((item, index) => (
+                  <motion.div
+                    key={index}
+                    className="border-l-4 border-black pl-8"
+                    initial={{ opacity: 0, x: 50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.2 }}
+                    whileHover={{ x: -10 }}
+                  >
+                    <p className="text-2xl font-regular leading-relaxed mb-4 text-black">
+                      {item.text}
+                    </p>
+                    <p className="text-lg text-gray-600">
+                      {item.detail}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
-    </motion.section>
+    </section>
   );
 };
 

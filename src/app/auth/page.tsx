@@ -1,240 +1,349 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Input, Button, Container, Typography } from '../../components/design-system';
+import { AnimatedParticles } from '../../components/onboarding';
+import { fadeInUp } from '../../utils/animations';
 
 export default function AuthPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: ''
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = (isSignup: boolean = false) => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+
+    if (isSignup) {
+      if (!formData.confirmPassword) {
+        newErrors.confirmPassword = 'Please confirm your password';
+      } else if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'Passwords do not match';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
-  };
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 30 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: "easeOut" }
+    const isSignup = activeTab === 'signup';
+    
+    if (validateForm(isSignup)) {
+      // Store user data
+      localStorage.setItem('authData', JSON.stringify({
+        email: formData.email,
+        userType: null // Will be set during onboarding
+      }));
+      
+      if (isSignup) {
+        // Redirect to onboarding role selection
+        router.push('/onboarding/role-selection');
+      } else {
+        // Redirect to dashboard (will need auth check)
+        router.push('/creator-dashboard');
+      }
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
-      <motion.div
-        className="w-full max-w-md"
-        {...fadeInUp}
-      >
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome to VeroLinkr
-          </h1>
-          <p className="text-gray-600">
-            Connect brands with authentic creators
-          </p>
-        </div>
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-20 relative overflow-hidden">
+      {/* Subtle background elements matching Hero */}
+      <AnimatedParticles count={40} />
 
-        {/* Auth Card */}
+      <Container size="sm">
         <motion.div
-          className="bg-white rounded-2xl shadow-xl p-8"
-          whileHover={{ y: -2 }}
-          transition={{ duration: 0.2 }}
+          initial="initial"
+          animate="animate"
+          variants={fadeInUp}
+          className="w-full relative z-10"
         >
-          {/* Tab Navigation */}
-          <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setActiveTab('login')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'login'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
+          {/* Header - Matching Hero style */}
+          <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
             >
-              Login
-            </button>
-            <button
-              onClick={() => setActiveTab('signup')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'signup'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Sign Up
-            </button>
+              <Typography variant="h2" className="mb-6 font-black">
+              Welcome to VeroLinkr
+            </Typography>
+              <Typography variant="lead" className="text-gray-600 font-light">
+                The Premium Platform for Authentic Influencer Marketing
+            </Typography>
+            </motion.div>
           </div>
 
-          {activeTab === 'login' ? (
-            /* Login Form */
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="Enter your password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? (
-                      <EyeSlashIcon className="h-5 w-5" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-600">Remember me</span>
-                </label>
-                <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
-                  Forgot password?
-                </Link>
-              </div>
-
-              <motion.button
-                type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+          {/* Auth Card */}
+          <motion.div
+            className="bg-white border-2 border-gray-200 rounded-3xl p-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            {/* Tab Navigation */}
+            <div className="flex mb-12 bg-gray-50 rounded-2xl p-1">
+              <button
+                onClick={() => setActiveTab('login')}
+                className={`flex-1 py-4 px-6 rounded-xl text-lg font-black transition-all duration-200 ${
+                  activeTab === 'login'
+                    ? 'bg-white text-black shadow-sm'
+                    : 'text-gray-600 hover:text-black'
+                }`}
               >
-                Sign In
-              </motion.button>
-            </form>
-          ) : (
-            /* Sign Up Form */
-            <div className="space-y-6">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Choose your role
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Select how you'd like to use VeroLinkr
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <Link href="/brand-registration/step1">
-                  <motion.div
-                    className="p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 cursor-pointer group"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-4 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                      </div>
-                      <h4 className="font-semibold text-gray-900 mb-2">I'm a Brand</h4>
-                      <p className="text-sm text-gray-600">
-                        Connect with authentic creators for your campaigns
-                      </p>
-                    </div>
-                  </motion.div>
-                </Link>
-
-                <Link href="/creator-registration/step1">
-                  <motion.div
-                    className="p-6 border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all duration-200 cursor-pointer group"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-purple-100 rounded-lg mx-auto mb-4 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                        <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                      </div>
-                      <h4 className="font-semibold text-gray-900 mb-2">I'm a Creator</h4>
-                      <p className="text-sm text-gray-600">
-                        Find brand partnerships and monetize your content
-                      </p>
-                    </div>
-                  </motion.div>
-                </Link>
-              </div>
-
-              <div className="text-center">
-                <p className="text-sm text-gray-600">
-                  Already have an account?{' '}
-                  <button
-                    onClick={() => setActiveTab('login')}
-                    className="text-blue-600 hover:text-blue-500 font-medium"
-                  >
-                    Sign in here
-                  </button>
-                </p>
-              </div>
+                Login
+              </button>
+              <button
+                onClick={() => setActiveTab('signup')}
+                className={`flex-1 py-4 px-6 rounded-xl text-lg font-black transition-all duration-200 ${
+                  activeTab === 'signup'
+                    ? 'bg-white text-black shadow-sm'
+                    : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                Sign Up
+              </button>
             </div>
-          )}
-        </motion.div>
 
-        {/* Footer Links */}
-        <div className="text-center mt-8 space-y-2">
-          <Link href="/contact" className="text-sm text-gray-600 hover:text-gray-900">
-            Contact Support
-          </Link>
-          <div className="text-xs text-gray-500">
-            By continuing, you agree to our{' '}
-            <Link href="/terms" className="underline hover:text-gray-700">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="underline hover:text-gray-700">
-              Privacy Policy
+            <AnimatePresence mode="wait">
+              {activeTab === 'login' ? (
+                <motion.div
+                  key="login"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    <Input
+                      label="Email Address"
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="you@example.com"
+                      error={errors.email}
+                      required
+                    />
+
+                    <div>
+                      <div className="relative">
+                      <Input
+                        label="Password"
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder="Enter your password"
+                          error={errors.password}
+                        required
+                      />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-12 text-gray-500 hover:text-black"
+                        >
+                          {showPassword ? (
+                            <EyeSlashIcon className="w-6 h-6" />
+                          ) : (
+                            <EyeIcon className="w-6 h-6" />
+                          )}
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between mt-4">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="h-5 w-5 rounded border-gray-300 text-black focus:ring-black"
+                          />
+                          <span className="text-sm font-medium text-gray-700">Remember me</span>
+                        </label>
+                        <Link href="/forgot-password" className="text-sm font-bold text-black hover:underline">
+                          Forgot password?
+                        </Link>
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      type="submit"
+                      className="w-full"
+                    >
+                      Sign In
+                    </Button>
+                  </form>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="signup"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    <Input
+                      label="Email Address"
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="you@example.com"
+                      error={errors.email}
+                      required
+                    />
+
+                    <div>
+                      <div className="relative">
+                        <Input
+                          label="Password"
+                          type={showPassword ? 'text' : 'password'}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          placeholder="Create a strong password"
+                          error={errors.password}
+                          hint="Must be at least 8 characters long"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-12 text-gray-500 hover:text-black"
+                        >
+                          {showPassword ? (
+                            <EyeSlashIcon className="w-6 h-6" />
+                          ) : (
+                            <EyeIcon className="w-6 h-6" />
+                          )}
+                        </button>
+                          </div>
+                        </div>
+
+                    <div>
+                      <div className="relative">
+                        <Input
+                          label="Confirm Password"
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          placeholder="Confirm your password"
+                          error={errors.confirmPassword}
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-4 top-12 text-gray-500 hover:text-black"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeSlashIcon className="w-6 h-6" />
+                          ) : (
+                            <EyeIcon className="w-6 h-6" />
+                          )}
+                        </button>
+                          </div>
+                        </div>
+
+                    {/* Terms and Conditions */}
+                    <div className="flex items-start space-x-4">
+                      <input
+                        type="checkbox"
+                        id="terms"
+                        className="mt-2 h-5 w-5 rounded border-gray-300 text-black focus:ring-black"
+                        required
+                      />
+                      <label htmlFor="terms" className="text-sm text-gray-600">
+                        I agree to the{' '}
+                        <Link href="/terms" className="text-black font-bold hover:underline">
+                          Terms of Service
+                        </Link>{' '}
+                        and{' '}
+                        <Link href="/privacy" className="text-black font-bold hover:underline">
+                          Privacy Policy
+                    </Link>
+                      </label>
+                  </div>
+
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      type="submit"
+                      className="w-full"
+                    >
+                      Create Account
+                    </Button>
+                  </form>
+
+                  <div className="text-center pt-4">
+                    <Typography variant="caption" className="text-gray-600">
+                      Already have an account?{' '}
+                      <button
+                        onClick={() => setActiveTab('login')}
+                        className="text-black font-bold hover:underline"
+                      >
+                        Sign in here
+                      </button>
+                    </Typography>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Footer Links */}
+          <div className="text-center mt-12 space-y-4">
+            <Link href="/contact" className="text-sm font-medium text-gray-600 hover:text-black block">
+              Contact Support
             </Link>
+            <div className="text-xs text-gray-500">
+              By continuing, you agree to our{' '}
+              <Link href="/terms" className="underline hover:text-gray-700">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="underline hover:text-gray-700">
+                Privacy Policy
+              </Link>
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </Container>
     </div>
   );
 }

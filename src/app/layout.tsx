@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navigation from "../componets/Navigation";
+import ConditionalNavigation from "../componets/ConditionalNavigation";
+import { CurrencyProvider } from "../contexts/CurrencyContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,8 +30,10 @@ export default function RootLayout({
         suppressHydrationWarning={true}
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navigation />
-        {children}
+        <CurrencyProvider>
+          <ConditionalNavigation />
+          {children}
+        </CurrencyProvider>
       </body>
     </html>
   );

@@ -1,114 +1,165 @@
 "use client";
 
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
+import Link from 'next/link';
 
 const CTASection = () => {
-  const sectionRef = useRef(null);
-  const sectionInView = useInView(sectionRef, { once: false, margin: '-150px' });
-
+  const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
+    target: containerRef,
+    offset: ['start end', 'end start']
   });
 
-  // Section-level subtle parallax
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.6, 1, 1, 0.6]);
-  const sectionScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.94, 1, 0.94]);
+  // Pop animation for heading
+  const headingScale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.8, 1, 1, 1.2]);
+  const headingY = useTransform(scrollYProgress, [0, 0.5, 1], [100, 0, -100]);
+  const headingOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
-  // Button and text parallax
-  const buttonY = useTransform(scrollYProgress, [0, 1], [50, -50]);
-  const headingY = useTransform(scrollYProgress, [0, 1], [30, -30]);
-
-  // Button component (replacing Button3D)
-  const CTAButton = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-    <motion.button
-      className={`px-20 py-8 text-2xl font-bold text-white bg-black rounded-full shadow-lg uppercase tracking-wide ${className}`}
-      initial={{ scale: 0.9, opacity: 0 }}
-      whileInView={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 1, type: 'spring', stiffness: 100 }}
-      whileHover={{
-        scale: 1.05,
-        boxShadow: '0 15px 30px -5px rgba(0,0,0,0.3)',
-        transition: { duration: 0.3 },
-      }}
-      whileTap={{ scale: 0.95 }}
-      style={{ y: buttonY }}
-    >
-      {children}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0"
-        whileHover={{ opacity: 0.2, x: ['-100%', '100%'] }}
-        transition={{ duration: 0.6 }}
-      />
-    </motion.button>
-  );
+  // Button animations
+  const buttonsY = useTransform(scrollYProgress, [0, 1], [150, -100]);
+  const buttonsOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
 
   return (
-    <motion.section
-      ref={sectionRef}
-      className="min-h-screen flex flex-col justify-center items-center px-6 py-40 bg-white text-center relative overflow-hidden"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.3 }}
-      style={{
-        opacity: sectionOpacity,
-        scale: sectionScale,
-      }}
-      transition={{ duration: 1.8, ease: 'easeOut' }}
-    >
-      {/* Subtle background lines */}
+    <section ref={containerRef} className="min-h-screen py-40 bg-white flex items-center relative overflow-hidden">
+      {/* Decorative elements */}
       <motion.div
-        className="absolute inset-0 pointer-events-none opacity-5"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-          y: useTransform(scrollYProgress, [0, 1], [0, -60]),
+          opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.3, 0]),
         }}
-      />
-
-      <motion.h2
-        className="text-6xl md:text-8xl lg:text-9xl font-extrabold max-w-6xl leading-tight mb-20 text-black tracking-tight uppercase"
-        initial={{ opacity: 0, y: 60 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.3, type: 'spring', stiffness: 90 }}
-        style={{ y: headingY }}
       >
-        Ready to Transform Your Partnerships?
+        {/* Burst lines */}
+        {[...Array(20)].map((_, i) => {
+          const angle = (i / 20) * 360;
+          const distance = 200;
+          
+          return (
+            <motion.div
+              key={i}
+              className="absolute border border-gray-300"
+              style={{
+                width: '60px',
+                height: '60px',
+                left: '50%',
+                top: '50%',
+                rotate: angle,
+                x: Math.cos(angle * Math.PI / 180) * distance,
+                y: Math.sin(angle * Math.PI / 180) * distance,
+                opacity: useTransform(scrollYProgress, [0, 1], [0, 0.3]),
+              }}
+            />
+          );
+        })}
+
+        {/* Pulsing circles */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute border-2 border-gray-200 rounded-full"
+            style={{
+              width: 100 + i * 100,
+              height: 100 + i * 100,
+              left: '50%',
+              top: '50%',
+              x: '-50%',
+              y: '-50%',
+              opacity: useTransform(scrollYProgress, [0, 1], [0, 0.2]),
+            }}
+            animate={{
+              scale: [1, 1.3, 1],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              delay: i * 0.5,
+            }}
+          />
+        ))}
+
+        {/* Floating diamonds */}
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute border-2 border-gray-300"
+            style={{
+              width: '20px',
+              height: '20px',
+              left: `${(i * 8) % 100}%`,
+              top: `${Math.sin(i) * 30 + 50}%`,
+              rotate: 45,
+              opacity: useTransform(scrollYProgress, [0, 1], [0, 0.3]),
+            }}
+            animate={{
+              y: [0, -30, 0],
+              rotate: [45, 225, 45],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              delay: i * 0.2,
+            }}
+          />
+        ))}
+      </motion.div>
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
+        {/* Ultra large pop heading */}
         <motion.div
-          className="w-32 h-1 bg-black mx-auto mt-4"
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
-        />
-      </motion.h2>
+          style={{
+            scale: headingScale,
+            y: headingY,
+            opacity: headingOpacity,
+          }}
+        >
+          <motion.h2
+            className="text-[80px] md:text-[120px] lg:text-[160px] font-black mb-16 text-black leading-none tracking-tighter"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+          >
+            Ready to Transform
+            <br />
+            Your Partnerships?
+          </motion.h2>
+        </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.3, type: 'spring' }}
-      >
-        <CTAButton>Join VeroLinkr Today</CTAButton>
-      </motion.div>
+        {/* CTA Buttons */}
+        <motion.div
+          style={{
+            y: buttonsY,
+            opacity: buttonsOpacity,
+          }}
+          className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
+        >
+          <Link href="/auth">
+            <motion.button
+              className="px-16 py-6 bg-black text-white rounded-full text-2xl font-black hover:bg-gray-800 transition-all duration-200 shadow-xl hover:shadow-2xl relative overflow-hidden group"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span className="relative z-10">Join VeroLinkr Today</span>
+            </motion.button>
+          </Link>
+        </motion.div>
 
-      {/* Animated accent texts */}
-      <motion.div
-        className="absolute top-20 left-20 text-sm font-light text-black uppercase tracking-wide"
-        style={{ y: useTransform(scrollYProgress, [0, 1], [20, -20]) }}
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        Start Free
-      </motion.div>
-      <motion.div
-        className="absolute bottom-20 right-20 text-sm font-light text-black uppercase tracking-wide"
-        style={{ y: useTransform(scrollYProgress, [0, 1], [-20, 20]) }}
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        No Setup Fees
-      </motion.div>
-    </motion.section>
+        {/* Trust badges */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="flex justify-center items-center gap-8 text-sm text-gray-500 flex-wrap"
+        >
+          <span className="text-lg">✓ Start Free</span>
+          <span className="text-2xl">•</span>
+          <span className="text-lg">✓ No Setup Fees</span>
+          <span className="text-2xl">•</span>
+          <span className="text-lg">✓ Secure Payments</span>
+        </motion.div>
+      </div>
+    </section>
   );
 };
 

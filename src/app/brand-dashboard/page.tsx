@@ -211,7 +211,7 @@ export default function BrandDashboard() {
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <TrendingUpIcon className="w-6 h-6 text-blue-600" />
+                <ArrowTrendingUpIcon className="w-6 h-6 text-blue-600" />
               </div>
               <span className="text-sm font-medium text-gray-500">Average ROI</span>
             </div>

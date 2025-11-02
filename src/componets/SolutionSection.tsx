@@ -1,25 +1,18 @@
 "use client";
 
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 
 const SolutionSection = () => {
-  const sectionRef = useRef(null);
-  const sectionInView = useInView(sectionRef, { once: false, margin: '-150px' });
-  
+  const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
+    target: containerRef,
+    offset: ['start end', 'end start']
   });
 
-  // Section-level subtle parallax
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.6, 1, 1, 0.6]);
-  const sectionScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.92, 1, 0.92]);
-
-  // Card parallax
-  const card1Y = useTransform(scrollYProgress, [0, 1], [40, -40]);
-  const card2Y = useTransform(scrollYProgress, [0, 1], [60, -60]);
-  const card3Y = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const sectionY = useTransform(scrollYProgress, [0, 1], [100, -100]);
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
 
   const solutions = [
     {
@@ -40,109 +33,106 @@ const SolutionSection = () => {
   ];
 
   return (
-    <motion.section
-      ref={sectionRef}
-      className="min-h-screen flex items-center px-6 py-40 bg-white relative overflow-hidden"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.3 }}
-      style={{
-        opacity: sectionOpacity,
-        scale: sectionScale,
-      }}
-      transition={{ duration: 1.8, ease: 'easeOut' }}
-    >
-      {/* Subtle background lines for luxury depth */}
+    <section ref={containerRef} className="py-40 bg-white relative overflow-hidden">
+      {/* Animated background - cinematic elements */}
       <motion.div
-        className="absolute inset-0 pointer-events-none opacity-10"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)',
-          backgroundSize: '50px 50px',
-          y: useTransform(scrollYProgress, [0, 1], [0, -50]),
+          opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.2, 0]),
         }}
-      />
-
-      <div className="max-w-7xl mx-auto w-full z-10">
-        <motion.h2
-          className="text-6xl md:text-8xl font-extrabold text-center mb-28 text-black tracking-tight uppercase"
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.3, type: 'spring', stiffness: 90 }}
-        >
-          Our Solution
+      >
+        {/* Video reels effect */}
+        {[...Array(8)].map((_, i) => (
           <motion.div
-            className="w-32 h-1 bg-black mx-auto mt-4"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+            key={i}
+            className="absolute border-2 border-gray-300"
+            style={{
+              width: '60px',
+              height: '100px',
+              borderRadius: '8px',
+              left: `${(i * 12) % 100}%`,
+              top: `${Math.cos(i * 0.5) * 30 + 50}%`,
+              rotate: useTransform(scrollYProgress, [0, 1], [0, 360]),
+              opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.1, 0.3, 0]),
+              y: useTransform(scrollYProgress, [0, 1], [0, -50]),
+            }}
+          >
+            {/* Reel detail */}
+            <div className="absolute inset-0 flex flex-col items-center justify-around p-2">
+              {[0, 1, 2, 3].map((j) => (
+                <div key={j} className="w-full h-0.5 bg-gray-200" />
+              ))}
+            </div>
+          </motion.div>
+        ))}
+
+        {/* Floating boxes */}
+        {[...Array(10)].map((_, i) => (
+          <motion.div
+            key={`box-${i}`}
+            className="absolute border-2 border-gray-300"
+            style={{
+              width: '40px',
+              height: '40px',
+              left: `${(i * 10) % 100}%`,
+              top: `${Math.cos(i * 0.8) * 30 + 50}%`,
+              rotate: useTransform(scrollYProgress, [0, 1], [0, 180]),
+              opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.1, 0.25, 0]),
+              y: useTransform(scrollYProgress, [0, 1], [0, -100]),
+            }}
           />
-        </motion.h2>
+        ))}
+      </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-12 md:gap-16">
-          {solutions.map((solution, index) => (
-            <motion.div
-              key={index}
-              className="bg-white p-8 rounded-2xl shadow-lg relative"
-              style={{ y: index === 0 ? card1Y : index === 1 ? card2Y : card3Y }}
-              initial={{ opacity: 0, y: 80 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: index * 0.2 }}
-            >
-              {/* Animated border accent */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+        <motion.div
+          style={{
+            y: sectionY,
+            opacity: sectionOpacity,
+            scale,
+          }}
+        >
+          {/* Section Heading */}
+          <motion.div
+            className="text-center mb-32"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+          >
+            <h2 className="text-6xl md:text-8xl font-black mb-8 text-black tracking-tighter">
+              Our Solution
+            </h2>
+            <div className="w-24 h-1 bg-black mx-auto"></div>
+          </motion.div>
+
+          {/* Three Column Grid */}
+          <div className="grid md:grid-cols-3 gap-12 md:gap-16">
+            {solutions.map((solution, index) => (
               <motion.div
-                className="absolute top-0 left-0 h-1 w-16 bg-black"
-                initial={{ scaleX: 0 }}
-                whileInView={{ scaleX: 1 }}
-                transition={{ duration: 0.8, delay: index * 0.3 }}
-              />
-
-              <motion.h3
-                className="text-3xl md:text-4xl font-bold mb-6 text-black uppercase"
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.25 }}
-              >
-                {solution.title}
-              </motion.h3>
-
-              <motion.p
-                className="text-lg font-light leading-relaxed text-black mb-4"
-                initial={{ opacity: 0, y: 20 }}
+                key={index}
+                className="border-b-4 border-black pb-8"
+                initial={{ opacity: 0, y: 100 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.3 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                whileHover={{ scale: 1.05, y: -10 }}
               >
-                {solution.content}
-              </motion.p>
-
-              <motion.div
-                className="text-sm font-medium text-gray-600 uppercase"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: index * 0.35, type: 'spring' }}
-              >
-                {solution.stat}
+                <h4 className="text-4xl font-black mb-6 text-black">
+                  {solution.title}
+                </h4>
+                <p className="text-xl font-regular leading-relaxed text-gray-700 mb-8">
+                  {solution.content}
+                </p>
+                <p className="text-sm font-black text-black uppercase tracking-widest">
+                  {solution.stat}
+                </p>
               </motion.div>
-
-              {/* Subtle scroll-driven progress bar */}
-              <motion.div
-                className="w-full h-1 bg-gray-100 rounded-full mt-4 overflow-hidden"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.4 }}
-              >
-                <motion.div
-                  className="h-full bg-black"
-                  initial={{ width: 0 }}
-                  whileInView={{ width: `${80 + index * 5}%` }}
-                  transition={{ duration: 1, delay: index * 0.45, ease: 'easeOut' }}
-                />
-              </motion.div>
-            </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
-    </motion.section>
+    </section>
   );
 };
 

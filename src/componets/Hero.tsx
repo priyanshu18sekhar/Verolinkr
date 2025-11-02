@@ -1,179 +1,229 @@
 "use client";
 
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import Link from 'next/link';
+import { Button } from '../components/design-system';
 
-const Hero = () => {
-  const sectionRef = useRef(null);
-  const sectionInView = useInView(sectionRef, { once: false, margin: '-150px' });
+interface HeroProps {
+  mousePosition?: { x: number; y: number };
+}
 
+const Hero = ({ mousePosition }: HeroProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { once: true, amount: 0.3 });
+  
   const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
+    target: containerRef,
+    offset: ['start start', 'end start']
   });
 
-  // Section-level parallax
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.6, 1, 1, 0.6]);
-  const sectionScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.92, 1, 0.92]);
-  const sectionRotateX = useTransform(scrollYProgress, [0, 0.5, 1], [10, 0, -10]);
-
-  // Heading and button parallax
-  const headingY = useTransform(scrollYProgress, [0, 1], [60, -60]);
-  const buttonY = useTransform(scrollYProgress, [0, 1], [40, -40]);
-
-  // DNA-like cinema reel animation parameters
-  const reelRotate = useTransform(scrollYProgress, [0, 1], [0, 360]);
-  const reelScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 0.8]);
-  const reelOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.5, 1, 1, 0.5]);
-
-  // Button component
-  const HeroButton = ({ children, primary = false }: { children: React.ReactNode; primary?: boolean }) => (
-    <motion.button
-      className={`px-12 py-6 text-lg font-extrabold uppercase tracking-wide rounded-full shadow-2xl ${
-        primary ? 'bg-black text-white' : 'bg-white text-black border-2 border-black'
-      }`}
-      initial={{ scale: 0.8, opacity: 0 }}
-      whileInView={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 1.2, type: 'spring', stiffness: 120 }}
-      whileHover={{
-        scale: 1.1,
-        boxShadow: '0 15px 30px -5px rgba(0,0,0,0.3)',
-        transition: { duration: 0.3 },
-      }}
-      whileTap={{ scale: 0.95 }}
-      style={{ y: buttonY }}
-    >
-      {children}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0"
-        whileHover={{ opacity: 1, x: ['-100%', '100%'] }}
-        transition={{ duration: 0.5 }}
-      />
-    </motion.button>
-  );
+  const springConfig = { stiffness: 100, damping: 30, mass: 1 };
+  
+  // Title animations - will track through scroll
+  const titleY = useSpring(useTransform(scrollYProgress, [0, 0.8], [0, -400]), springConfig);
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.5, 0.9, 1], [1, 1, 0.3, 0]);
+  const titleScale = useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.9, 0.7]);
+  
+  // Subheading
+  const subheadingY = useSpring(useTransform(scrollYProgress, [0, 0.8], [0, -300]), springConfig);
+  const subheadingOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+  
+  // CTA buttons
+  const buttonsY = useSpring(useTransform(scrollYProgress, [0, 0.8], [0, -200]), springConfig);
+  const buttonsOpacity = useTransform(scrollYProgress, [0, 0.4, 0.8, 1], [0, 1, 1, 0]);
 
   return (
-    <motion.section
-      ref={sectionRef}
-      className="min-h-screen flex flex-col justify-center items-center px-6 text-center relative z-20 bg-white overflow-hidden"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.3 }}
-      style={{
-        opacity: sectionOpacity,
-        scale: sectionScale,
-        rotateX: sectionRotateX,
-        transformStyle: 'preserve-3d',
-      }}
-      transition={{ duration: 2, ease: 'easeOut' }}
+    <section 
+      ref={containerRef}
+      className="min-h-screen flex items-center justify-center bg-white relative overflow-hidden"
     >
-      {/* Subtle background lines */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none opacity-10"
-        style={{
-          background: 'linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)',
-          backgroundSize: '80px 80px',
-          y: useTransform(scrollYProgress, [0, 1], [0, -80]),
-        }}
-      />
-
-      {/* DNA-like cinema reel animation */}
+      {/* Subtle gradient background */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
         style={{
-          rotate: reelRotate,
-          scale: reelScale,
-          opacity: reelOpacity,
-          transformStyle: 'preserve-3d',
+          background: `radial-gradient(circle at ${mousePosition?.x || '50%'} ${mousePosition?.y || '50%'}, rgba(37, 99, 235, 0.02), transparent 70%)`,
         }}
-      >
-        {[...Array(12)].map((_, i) => (
+      />
+
+      {/* Floating particles */}
+      {[...Array(60)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-gray-300 rounded-full"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}
+          animate={{
+            y: [0, -50, 0],
+            opacity: [0.2, 0.6, 0.2],
+            scale: [1, 1.5, 1],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 2,
+            repeat: Infinity,
+            delay: Math.random() * 4,
+          }}
+        />
+      ))}
+
+      {/* Animated geometric shapes */}
+      {[...Array(12)].map((_, i) => {
+        const size = 30 + i * 8;
+        const x = useTransform(scrollYProgress, [0, 1], [i * 80, i * 80 + 100]);
+        const y = useTransform(scrollYProgress, [0, 1], [i * 50, i * 50 - 80]);
+        const rotate = useTransform(scrollYProgress, [0, 1], [0, 180]);
+        
+        return (
           <motion.div
             key={i}
-            className="absolute w-6 h-6 rounded-full bg-black/20"
+            className="absolute border-2 border-gray-200"
             style={{
-              left: '50%',
-              top: '50%',
-              x: '-50%',
-              y: '-50%',
-              transform: `rotate(${i * 30}deg) translate(${50 + Math.sin(i * 0.5) * 20}px, ${Math.cos(i * 0.5) * 100}px) rotate(-${i * 30}deg)`,
-            }}
-            animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.3, 0.8, 0.3],
-              rotateX: [0, 360],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              delay: i * 0.15,
-              ease: 'easeInOut',
+              width: size,
+              height: size,
+              x,
+              y,
+              rotate,
+              opacity: useTransform(scrollYProgress, [0, 1], [0.2, 0]),
             }}
           />
-        ))}
-      </motion.div>
+        );
+      })}
 
-      <motion.h1
-        className="text-7xl md:text-9xl lg:text-[14rem] font-extrabold tracking-tight leading-none mb-12 text-black uppercase relative z-10"
-        initial={{ opacity: 0, y: 80 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.5, type: 'spring', stiffness: 100 }}
-        style={{ y: headingY, transformStyle: 'preserve-3d' }}
-      >
-        <span className="inline-block relative">
-          Vero
-          <motion.div
-            className="absolute -bottom-3 left-0 w-full h-1.5 bg-black"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            transition={{ duration: 1.2, delay: 0.4, ease: 'easeOut' }}
-          />
-        </span>
-        <motion.span
-          className="inline-block"
-          animate={{ scale: [1, 1.05, 1], rotateY: [0, 5, 0, -5, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+      {/* Floating orbs with different sizes */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={`orb-${i}`}
+          className="absolute border-2 border-gray-200 rounded-full"
+          style={{
+            width: 40 + i * 15,
+            height: 40 + i * 15,
+            left: `${(i * 12) % 100}%`,
+            top: `${Math.sin(i) * 30 + 50}%`,
+            opacity: useTransform(scrollYProgress, [0, 1], [0.15, 0]),
+          }}
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 360],
+          }}
+          transition={{
+            duration: 8 + i * 2,
+            repeat: Infinity,
+            delay: i * 0.5,
+          }}
+        />
+      ))}
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        {/* Main Heading - Larger and more prominent */}
+        <motion.div
+          style={{
+            y: titleY,
+            opacity: titleOpacity,
+            scale: titleScale,
+          }}
+          className="mb-16"
         >
-          Linkr
-        </motion.span>
-      </motion.h1>
+          <motion.h1
+            className="text-[90px] md:text-[160px] lg:text-[200px] xl:text-[220px] font-black tracking-tighter leading-none text-black"
+            initial={{ opacity: 0, y: 80 }}
+            animate={isInView ? { 
+              opacity: 1, 
+              y: 0, 
+            } : {}}
+            transition={{ duration: 1.2, ease: [0.6, -0.05, 0.01, 0.99] }}
+          >
+            {/* Individual letters with stagger */}
+            {'VeroLinkr'.split('').map((letter, index) => (
+              <motion.span
+                key={index}
+                className="inline-block"
+                initial={{ 
+                  y: 100, 
+                  opacity: 0,
+                  rotateX: -90 
+                }}
+                animate={isInView ? { 
+                  y: 0, 
+                  opacity: 1,
+                  rotateX: 0
+                } : {}}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: index * 0.04,
+                  ease: [0.6, -0.05, 0.01, 0.99]
+                }}
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                {letter === ' ' ? '\u00A0' : letter}
+              </motion.span>
+            ))}
+          </motion.h1>
+        </motion.div>
 
-      <motion.p
-        className="text-2xl md:text-3xl font-light text-gray-600 max-w-4xl mb-16 leading-relaxed"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.3 }}
-        style={{ y: useTransform(scrollYProgress, [0, 1], [20, -20]) }}
-      >
-        The ultimate platform uniting verified brands with authentic creators
-      </motion.p>
+        {/* Subheading - Cleaner and more refined */}
+        <motion.div
+          style={{
+            y: subheadingY,
+            opacity: subheadingOpacity,
+          }}
+        >
+          <motion.p
+            className="text-2xl md:text-4xl lg:text-5xl font-light text-gray-600 max-w-4xl mx-auto mb-20 leading-tight"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 1, delay: 0.8 }}
+          >
+            The Premium Platform for
+            <br />
+            <span className="font-black text-black">Authentic Influencer Marketing</span>
+          </motion.p>
+        </motion.div>
 
+        {/* CTA Buttons */}
+        <motion.div
+          style={{
+            y: buttonsY,
+            opacity: buttonsOpacity,
+          }}
+          className="flex flex-col sm:flex-row gap-8 justify-center items-center"
+        >
+          <Link href="/auth">
+            <motion.button
+              className="px-12 py-5 bg-black text-white rounded-full font-black text-xl hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl relative overflow-hidden group"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span className="relative z-10">Get Started</span>
+            </motion.button>
+          </Link>
+        </motion.div>
+      </div>
+
+      {/* Enhanced scroll indicator */}
       <motion.div
-        className="flex flex-col sm:flex-row gap-8"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.5 }}
-      >
-        <HeroButton primary>I'm a Brand</HeroButton>
-        <HeroButton>I'm a Creator</HeroButton>
-      </motion.div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
+        className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20"
         initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.7 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 2 }}
       >
-        <div className="w-8 h-12 border-2 border-black rounded-full flex justify-center">
-          <motion.div
-            className="w-1.5 h-4 bg-black rounded-full mt-2"
-            animate={{ y: [0, 14, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-        </div>
+        <motion.div
+          className="flex flex-col items-center gap-3"
+          animate={{ y: [0, 15, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">Scroll</span>
+          <div className="w-8 h-14 border-2 border-gray-400 rounded-full flex justify-center">
+            <motion.div
+              className="w-2 h-4 bg-gray-400 rounded-full mt-2"
+              animate={{ y: [0, 16, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </div>
+        </motion.div>
       </motion.div>
-    </motion.section>
+    </section>
   );
 };
 

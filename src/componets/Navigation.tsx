@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { 
   Bars3Icon, 
@@ -21,41 +21,38 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navigationItems = [
-    { name: 'Home', href: '/', icon: HomeIcon },
-    { name: 'Contact', href: '/contact', icon: ChatBubbleLeftRightIcon },
+    { name: 'Home', href: '/' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   const authItems = [
-    { name: 'Login', href: '/auth', icon: UserIcon },
+    { name: 'Login', href: '/auth' },
   ];
 
   const userItems = userType === 'brand' 
     ? [
-        { name: 'Dashboard', href: '/brand-dashboard', icon: HomeIcon },
-        { name: 'Discover Creators', href: '/discover-creators', icon: UserIcon },
-        { name: 'My Campaigns', href: '/my-campaigns', icon: ChatBubbleLeftRightIcon },
+        { name: 'Dashboard', href: '/brand-dashboard' },
+        { name: 'Creators', href: '/brand-dashboard/creators' },
+        { name: 'Campaigns', href: '/brand-dashboard/campaigns' },
       ]
     : userType === 'creator'
     ? [
-        { name: 'Dashboard', href: '/creator-dashboard', icon: HomeIcon },
-        { name: 'Available Campaigns', href: '/my-campaigns', icon: ChatBubbleLeftRightIcon },
-        { name: 'Earnings', href: '/earnings', icon: UserIcon },
+        { name: 'Dashboard', href: '/creator-dashboard' },
+        { name: 'Campaigns', href: '/creator-dashboard/campaigns' },
+        { name: 'Gigs', href: '/creator-dashboard/gigs' },
       ]
     : [];
 
   const itemsToShow = isLoggedIn ? userItems : [...navigationItems, ...authItems];
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex justify-between items-center h-20">
+          {/* Logo - Just text, black and white */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">V</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900">VeroLinkr</span>
+            <Link href="/" className="flex items-center">
+              <span className="text-2xl font-black text-black tracking-tighter">VeroLinkr</span>
             </Link>
           </div>
 
@@ -65,26 +62,36 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-1"
+                className="text-gray-600 hover:text-black px-3 py-2 text-base font-medium transition-colors duration-200"
               >
-                <item.icon className="w-4 h-4" />
-                <span>{item.name}</span>
+                {item.name}
               </Link>
             ))}
             
             {!isLoggedIn && (
               <div className="flex items-center space-x-4 ml-4">
-                <Link
-                  href="/auth"
-                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                >
+                <Link href="/auth" className="text-gray-600 hover:text-black px-4 py-2 text-base font-medium transition-colors duration-200">
                   Login
                 </Link>
-                <Link
-                  href="/auth"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm hover:shadow-md"
-                >
-                  Get Started
+                <Link href="/auth">
+                  <motion.button
+                    className="px-6 py-3 bg-black text-white rounded-full font-bold text-base relative overflow-hidden group"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {/* Gradient glow background */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 blur-xl -z-10"
+                      animate={{
+                        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                      }}
+                    />
+                    <span className="relative z-10">Get Started</span>
+                  </motion.button>
                 </Link>
               </div>
             )}
@@ -92,16 +99,15 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
             {isLoggedIn && (
               <div className="flex items-center space-x-4 ml-4">
                 <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                    <UserIcon className="w-4 h-4 text-gray-600" />
+                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                    <UserIcon className="w-5 h-5 text-gray-600" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">
-                    {userType === 'brand' ? 'Brand Account' : 'Creator Account'}
+                    {userType === 'brand' ? 'Brand' : 'Creator'}
                   </span>
                 </div>
-                <button className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-1">
-                  <ArrowRightOnRectangleIcon className="w-4 h-4" />
-                  <span>Logout</span>
+                <button className="text-gray-600 hover:text-black px-3 py-2 text-sm font-medium transition-colors duration-200">
+                  Logout
                 </button>
               </div>
             )}
@@ -111,7 +117,7 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-600 hover:text-gray-900 p-2 rounded-md transition-colors duration-200"
+              className="text-gray-600 hover:text-black p-2 transition-colors duration-200"
             >
               {isMenuOpen ? (
                 <XMarkIcon className="w-6 h-6" />
@@ -123,59 +129,75 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t border-gray-200 py-4"
-          >
-            <div className="space-y-2">
-              {itemsToShow.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 flex items-center space-x-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </Link>
-              ))}
-              
-              {!isLoggedIn && (
-                <div className="pt-4 border-t border-gray-200">
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden border-t border-gray-200 py-6"
+            >
+              <div className="space-y-2">
+                {itemsToShow.map((item) => (
                   <Link
-                    href="/auth"
-                    className="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-center font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                    key={item.name}
+                    href={item.href}
+                    className="text-gray-600 hover:text-black block px-3 py-3 text-base font-medium transition-colors duration-200"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Get Started
+                    {item.name}
                   </Link>
-                </div>
-              )}
-              
-              {isLoggedIn && (
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-2 px-3 py-2">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                      <UserIcon className="w-4 h-4 text-gray-600" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">
-                      {userType === 'brand' ? 'Brand Account' : 'Creator Account'}
-                    </span>
+                ))}
+                
+                {!isLoggedIn && (
+                  <div className="pt-4 border-t border-gray-200 space-y-3 px-3">
+                    <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
+                      <button className="w-full text-gray-600 hover:text-black px-4 py-3 text-base font-medium transition-colors duration-200">
+                        Login
+                      </button>
+                    </Link>
+                    <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
+                      <motion.button
+                        className="w-full px-6 py-3 bg-black text-white rounded-full font-bold text-base relative overflow-hidden group"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 blur-xl -z-10"
+                          animate={{
+                            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                          }}
+                        />
+                        <span className="relative z-10">Get Started</span>
+                      </motion.button>
+                    </Link>
                   </div>
-                  <button className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 flex items-center space-x-2">
-                    <ArrowRightOnRectangleIcon className="w-5 h-5" />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
+                )}
+                
+                {isLoggedIn && (
+                  <div className="pt-4 border-t border-gray-200 space-y-3 px-3">
+                    <div className="flex items-center space-x-2 px-3 py-2">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                        <UserIcon className="w-5 h-5 text-gray-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">
+                        {userType === 'brand' ? 'Brand' : 'Creator'}
+                      </span>
+                    </div>
+                    <button className="text-gray-600 hover:text-black block px-3 py-3 text-base font-medium transition-colors duration-200">
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );
 }
-
