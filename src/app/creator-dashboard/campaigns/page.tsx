@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { 
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -22,27 +22,53 @@ import {
   ListBulletIcon,
   XMarkIcon,
   ArrowPathIcon,
-  BoltIcon
+  BoltIcon,
+  PlusIcon,
+  BookmarkIcon,
+  ShareIcon,
+  ArrowsRightLeftIcon,
+  ChartBarIcon,
+  FireIcon,
+  RocketLaunchIcon,
+  BuildingOfficeIcon,
+  CalendarIcon,
+  TagIcon,
+  TrophyIcon,
+  UserGroupIcon,
+  ArrowRightIcon,
+  ArrowLeftIcon,
+  CheckIcon
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import { HeartIcon as HeartIconSolid, BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 import FloatingNav from '../../../componets/ui/FloatingNav';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
-import GlassCard from '../../../components/design-system/GlassCard';
-import GlassButton from '../../../components/design-system/GlassButton';
-import GlassInput from '../../../components/design-system/GlassInput';
-import ProgressBar from '../../../components/loading/ProgressBar';
-import { useModal } from '../../../contexts/ModalContext';
 
 function CreatorCampaignsContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'grid' | 'cards' | 'stack'>('cards');
   const [showFilters, setShowFilters] = useState(false);
   const [savedCampaigns, setSavedCampaigns] = useState<number[]>([]);
-  const { openConfirm, openSuccess } = useModal();
+  const [bookmarkedCampaigns, setBookmarkedCampaigns] = useState<number[]>([]);
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedForCompare, setSelectedForCompare] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: '', message: '', campaign: null as any });
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [currentStackIndex, setCurrentStackIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Loading simulation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const availableCampaigns = [
     {
@@ -56,15 +82,16 @@ function CreatorCampaignsContent() {
       requirements: '1 unboxing video + 1 review video',
       location: 'Anywhere, India',
       deadline: '2024-01-15',
-      cpvRate: null,
-      productCost: null,
       brandRating: 4.8,
       applicants: 23,
       maxApplicants: 50,
       posted: '2 hours ago',
       matchScore: 95,
       recommended: true,
-      urgency: 'normal'
+      urgency: 'normal',
+      estimatedReach: '50K-100K',
+      campaignGoal: 'Product Awareness',
+      deliverables: ['1 Video', '3 Stories', '1 Post']
     },
     {
       id: 2,
@@ -77,15 +104,16 @@ function CreatorCampaignsContent() {
       requirements: '1 Instagram Reel showcasing features',
       location: 'Anywhere, India',
       deadline: '2024-01-20',
-      cpvRate: 0.25,
-      productCost: null,
       brandRating: 4.9,
       applicants: 45,
       maxApplicants: 100,
       posted: '5 hours ago',
       matchScore: 88,
       recommended: true,
-      urgency: 'normal'
+      urgency: 'normal',
+      estimatedReach: '100K-200K',
+      campaignGoal: 'Product Launch',
+      deliverables: ['1 Reel', '5 Stories', '2 Posts']
     },
     {
       id: 3,
@@ -98,15 +126,16 @@ function CreatorCampaignsContent() {
       requirements: '3 Instagram posts with product',
       location: 'Mumbai, India',
       deadline: '2024-01-18',
-      cpvRate: null,
-      productCost: 5000,
       brandRating: 4.7,
       applicants: 67,
       maxApplicants: 80,
       posted: '1 day ago',
       matchScore: 82,
       recommended: false,
-      urgency: 'urgent'
+      urgency: 'urgent',
+      estimatedReach: '75K-150K',
+      campaignGoal: 'Sales & Conversions',
+      deliverables: ['3 Posts', '10 Stories']
     },
     {
       id: 4,
@@ -119,15 +148,16 @@ function CreatorCampaignsContent() {
       requirements: '1 recipe video with ingredients list',
       location: 'Anywhere, India',
       deadline: '2024-01-12',
-      cpvRate: null,
-      productCost: null,
       brandRating: 4.6,
       applicants: 34,
       maxApplicants: 60,
       posted: '3 hours ago',
       matchScore: 75,
       recommended: false,
-      urgency: 'normal'
+      urgency: 'normal',
+      estimatedReach: '30K-60K',
+      campaignGoal: 'Engagement',
+      deliverables: ['1 Video', '5 Stories']
     },
     {
       id: 5,
@@ -140,15 +170,16 @@ function CreatorCampaignsContent() {
       requirements: '1 workout demonstration video',
       location: 'Anywhere, India',
       deadline: '2024-01-25',
-      cpvRate: null,
-      productCost: null,
       brandRating: 4.9,
       applicants: 12,
       maxApplicants: 40,
       posted: '1 hour ago',
       matchScore: 92,
       recommended: true,
-      urgency: 'normal'
+      urgency: 'normal',
+      estimatedReach: '40K-80K',
+      campaignGoal: 'Product Review',
+      deliverables: ['1 Video', '3 Posts']
     },
     {
       id: 6,
@@ -161,32 +192,22 @@ function CreatorCampaignsContent() {
       requirements: '1 travel vlog showcasing destination',
       location: 'Goa, India',
       deadline: '2024-02-01',
-      cpvRate: 0.30,
-      productCost: null,
       brandRating: 4.8,
       applicants: 28,
       maxApplicants: 50,
       posted: '4 hours ago',
       matchScore: 85,
       recommended: true,
-      urgency: 'normal'
+      urgency: 'normal',
+      estimatedReach: '80K-150K',
+      campaignGoal: 'Brand Awareness',
+      deliverables: ['1 Vlog', '7 Stories', '2 Posts']
     }
   ];
 
-  const categories = ['All', 'Beauty & Skincare', 'Technology', 'Fashion', 'Food & Cooking', 'Fitness & Wellness', 'Travel & Lifestyle'];
-
   const fadeInUp = {
-    initial: { opacity: 0, y: 30 },
+    initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'gigs': return 'bg-blue-500/20 text-blue-700 border-blue-500/30';
-      case 'cpv': return 'bg-purple-500/20 text-purple-700 border-purple-500/30';
-      case 'onetime': return 'bg-green-500/20 text-green-700 border-green-500/30';
-      default: return 'bg-gray-500/20 text-gray-700 border-gray-500/30';
-    }
   };
 
   const getTypeIcon = (type: string) => {
@@ -203,30 +224,57 @@ function CreatorCampaignsContent() {
       setSavedCampaigns(savedCampaigns.filter(id => id !== campaignId));
     } else {
       setSavedCampaigns([...savedCampaigns, campaignId]);
-      openSuccess({
-        message: 'Campaign saved to favorites',
-        autoClose: true,
-        autoCloseDelay: 2000,
-      });
+      setSuccessMessage('✓ Campaign saved to favorites');
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
     }
   };
 
-  const handleApply = async (campaignId: number) => {
-    const confirmed = await openConfirm({
-      title: 'Apply to Campaign',
-      message: 'Are you sure you want to apply to this campaign?',
-      confirmText: 'Yes, Apply',
-      cancelText: 'Cancel',
-    });
+  const toggleBookmark = (campaignId: number) => {
+    if (bookmarkedCampaigns.includes(campaignId)) {
+      setBookmarkedCampaigns(bookmarkedCampaigns.filter(id => id !== campaignId));
+    } else {
+      setBookmarkedCampaigns([...bookmarkedCampaigns, campaignId]);
+      setSuccessMessage('✓ Campaign bookmarked');
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
+    }
+  };
 
-    if (confirmed) {
-      // Simulate application
-      setTimeout(() => {
-        openSuccess({
-          message: 'Application submitted successfully! The brand will review your profile.',
-          title: 'Application Sent',
-        });
-      }, 500);
+  const handleApply = async (campaign: any) => {
+    setModalContent({
+      title: 'Apply to Campaign',
+      message: 'Are you sure you want to apply to this campaign? The brand will review your profile.',
+      campaign: campaign
+    });
+    setShowModal(true);
+  };
+
+  const confirmApply = () => {
+    setShowModal(false);
+    setSuccessMessage('✓ Application submitted successfully!');
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  const handleStackAction = (action: 'apply' | 'reject') => {
+    if (action === 'apply' && filteredCampaigns[currentStackIndex]) {
+      handleApply(filteredCampaigns[currentStackIndex]);
+    }
+    
+    // Move to next card
+    if (currentStackIndex < filteredCampaigns.length - 1) {
+      setCurrentStackIndex(currentStackIndex + 1);
+    } else {
+      setCurrentStackIndex(0); // Loop back
+    }
+  };
+
+  const scrollToCard = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const cardWidth = 450; // Approximate card width
+      const scrollAmount = direction === 'left' ? -cardWidth : cardWidth;
+      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
 
@@ -236,11 +284,7 @@ function CreatorCampaignsContent() {
                          campaign.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || campaign.type === filterType;
     const matchesCategory = filterCategory === 'all' || campaign.category === filterCategory;
-    const matchesStatus = filterStatus === 'all' || 
-      (filterStatus === 'urgent' && campaign.urgency === 'urgent') ||
-      (filterStatus === 'recommended' && campaign.recommended) ||
-      (filterStatus === 'closing' && (campaign.applicants / campaign.maxApplicants) > 0.8);
-    return matchesSearch && matchesType && matchesCategory && matchesStatus;
+    return matchesSearch && matchesType && matchesCategory;
   });
 
   // Sort campaigns
@@ -250,340 +294,574 @@ function CreatorCampaignsContent() {
     filteredCampaigns = [...filteredCampaigns].sort((a, b) => a.budget - b.budget);
   } else if (sortBy === 'match_score') {
     filteredCampaigns = [...filteredCampaigns].sort((a, b) => b.matchScore - a.matchScore);
-  } else if (sortBy === 'deadline') {
-    filteredCampaigns = [...filteredCampaigns].sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
   }
 
-  const recommendedCampaigns = filteredCampaigns.filter(c => c.recommended);
-  const regularCampaigns = filteredCampaigns.filter(c => !c.recommended);
+  // Stack View Component
+  const StackView = ({ campaigns }: { campaigns: any[] }) => {
+    const [exitX, setExitX] = useState(0);
+    const x = useMotionValue(0);
+    const rotate = useTransform(x, [-200, 200], [-25, 25]);
+    const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+
+    if (campaigns.length === 0) return null;
+    const campaign = campaigns[currentStackIndex];
+    if (!campaign) return null;
+
+    const TypeIcon = getTypeIcon(campaign.type);
+    const applicantPercentage = (campaign.applicants / campaign.maxApplicants) * 100;
+
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[700px]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStackIndex}
+            className="relative w-full max-w-md"
+            style={{ x, rotate, opacity }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ 
+              x: exitX, 
+              opacity: 0,
+              scale: 0.5,
+              transition: { duration: 0.2 }
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            {/* Card */}
+            <div className="bg-white border-2 border-black rounded-2xl overflow-hidden shadow-2xl">
+              {/* Gray Header */}
+              <div className="bg-gray-100 border-b-2 border-black p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-14 h-14 bg-black rounded-xl flex items-center justify-center">
+                      <BuildingOfficeIcon className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-[24px] font-black text-black leading-tight mb-1">{campaign.title}</h3>
+                      <p className="text-[14px] text-gray-700 font-medium">by {campaign.brand}</p>
+                    </div>
+                  </div>
+                  {campaign.recommended && (
+                    <motion.div
+                      className="px-3 py-1 bg-black text-white rounded-full"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, type: "spring" }}
+                    >
+                      <SparklesIcon className="w-4 h-4 inline mr-1" />
+                      <span className="text-[10px] font-bold uppercase">Top Match</span>
+                    </motion.div>
+                  )}
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[40px] font-black text-black leading-none">₹{(campaign.budget / 1000).toFixed(0)}K</p>
+                    <p className="text-[11px] text-gray-600 uppercase tracking-wider mt-1">Total Budget</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-center justify-end gap-2 mb-1">
+                      <StarIcon className="w-5 h-5 text-black" />
+                      <span className="text-[24px] font-black text-black">{campaign.matchScore}%</span>
+                    </div>
+                    <p className="text-[11px] text-gray-600 uppercase tracking-wider">Match Score</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* White Body */}
+              <div className="p-6 space-y-6">
+                {/* Info Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="border border-gray-200 rounded-lg p-3 hover:border-black transition-all duration-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ClockIcon className="w-5 h-5 text-black" />
+                      <p className="text-[11px] text-gray-500 uppercase font-bold">Duration</p>
+                    </div>
+                    <p className="text-[16px] font-black text-black">{campaign.duration}</p>
+                  </div>
+
+                  <div className="border border-gray-200 rounded-lg p-3 hover:border-black transition-all duration-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <EyeIcon className="w-5 h-5 text-black" />
+                      <p className="text-[11px] text-gray-500 uppercase font-bold">Est. Reach</p>
+                    </div>
+                    <p className="text-[16px] font-black text-black">{campaign.estimatedReach}</p>
+                  </div>
+
+                  <div className="border border-gray-200 rounded-lg p-3 hover:border-black transition-all duration-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MapPinIcon className="w-5 h-5 text-black" />
+                      <p className="text-[11px] text-gray-500 uppercase font-bold">Location</p>
+                    </div>
+                    <p className="text-[16px] font-black text-black truncate">{campaign.location}</p>
+                  </div>
+
+                  <div className="border border-gray-200 rounded-lg p-3 hover:border-black transition-all duration-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <RocketLaunchIcon className="w-5 h-5 text-black" />
+                      <p className="text-[11px] text-gray-500 uppercase font-bold">Goal</p>
+                    </div>
+                    <p className="text-[16px] font-black text-black truncate">{campaign.campaignGoal}</p>
+                  </div>
+                </div>
+
+                {/* Deliverables */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircleIcon className="w-5 h-5 text-black" />
+                    <p className="text-[12px] font-bold text-black uppercase">Deliverables</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {campaign.deliverables.map((item: string, idx: number) => (
+                      <motion.span
+                        key={idx}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.1 * idx }}
+                        className="px-3 py-1.5 bg-white border-2 border-black rounded-lg text-[12px] font-bold text-black"
+                      >
+                        {item}
+                      </motion.span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Progress */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <UserGroupIcon className="w-4 h-4 text-black" />
+                      <span className="text-[12px] font-bold text-black">
+                        {campaign.applicants}/{campaign.maxApplicants} Applied
+                      </span>
+                    </div>
+                    <span className="text-[12px] font-black text-black">{applicantPercentage.toFixed(0)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <motion.div 
+                      className="bg-black h-3 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${applicantPercentage}%` }}
+                      transition={{ duration: 1, delay: 0.3 }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-center gap-6 mt-8">
+          <motion.button
+            onClick={() => {
+              setExitX(-300);
+              handleStackAction('reject');
+            }}
+            className="w-20 h-20 bg-white border-4 border-black rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200 group"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <XMarkIcon className="w-10 h-10 text-black group-hover:scale-110 transition-transform" />
+          </motion.button>
+
+          <motion.div
+            className="text-center px-6 py-2 bg-gray-50 border border-gray-200 rounded-full"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <p className="text-[20px] font-black text-black">{currentStackIndex + 1}</p>
+            <p className="text-[10px] text-gray-500 uppercase font-bold">of {campaigns.length}</p>
+          </motion.div>
+
+          <motion.button
+            onClick={() => {
+              setExitX(300);
+              handleStackAction('apply');
+            }}
+            className="w-20 h-20 bg-black border-4 border-black rounded-full flex items-center justify-center hover:bg-gray-900 transition-all duration-200 group premium-glow-button"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <CheckIcon className="w-10 h-10 text-white group-hover:scale-110 transition-transform" />
+          </motion.button>
+        </div>
+
+        {/* Instructions */}
+        <motion.div
+          className="mt-6 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+        >
+          <p className="text-[13px] text-gray-600 font-medium">
+            <span className="font-bold">✗</span> to skip or <span className="font-bold">✓</span> to quick apply
+          </p>
+        </motion.div>
+      </div>
+    );
+  };
+
+  // Skeleton Loading
+  const SkeletonLoader = () => (
+    <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8 animate-pulse">
+      <div className="bg-white border-b border-gray-200 -mx-8 md:-mx-16 lg:-mx-24 px-8 md:px-16 lg:px-24 mb-8">
+        <div className="py-8">
+          <div className="h-12 bg-gray-200 rounded w-96 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-64"></div>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-6">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="h-40 bg-gray-200 rounded mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  if (isLoading) {
+    return <SkeletonLoader />;
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/50 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowModal(false)}
+            />
+            <motion.div
+              className="fixed inset-0 flex items-center justify-center z-50 p-4"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+            >
+              <div className="bg-white border-2 border-black rounded-lg p-8 max-w-md w-full shadow-2xl">
+                <h3 className="text-[24px] font-black text-black mb-4">{modalContent.title}</h3>
+                <p className="text-[14px] text-gray-700 mb-6">{modalContent.message}</p>
+                {modalContent.campaign && (
+                  <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
+                    <div className="flex items-center gap-3 mb-2">
+                      <BuildingOfficeIcon className="w-6 h-6 text-black" />
+                      <div>
+                        <p className="font-black text-black">{modalContent.campaign.title}</p>
+                        <p className="text-[12px] text-gray-600">by {modalContent.campaign.brand}</p>
+                      </div>
+                    </div>
+                    <p className="text-[20px] font-black text-black">₹{modalContent.campaign.budget.toLocaleString()}</p>
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <motion.button
+                    className="flex-1 px-4 py-3 bg-white border-2 border-gray-300 text-black rounded-lg font-semibold text-[14px] hover:border-black transition-all duration-200"
+                    onClick={() => setShowModal(false)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    className="flex-1 px-4 py-3 bg-black text-white rounded-lg font-semibold text-[14px] hover:bg-gray-900 transition-all duration-200 premium-glow-button"
+                    onClick={confirmApply}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Yes, Apply
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Success Message */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            className="fixed top-8 right-8 z-50"
+            initial={{ opacity: 0, y: -20, x: 100 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, y: -20, x: 100 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            <div className="bg-black text-white border-2 border-black rounded-lg p-4 shadow-2xl min-w-[300px]">
+              <p className="text-[14px] font-bold">{successMessage}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <motion.div
-        className="bg-gradient-to-br from-white/80 via-white/60 to-white/40 backdrop-blur-2xl border-b border-white/30"
+        className="bg-white border-b border-gray-200"
         {...fadeInUp}
-        transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
+        transition={{ duration: 0.5 }}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-          <div className="flex justify-between items-center flex-wrap gap-4">
-            <div>
-              <h1 className="text-6xl font-black text-gray-900 tracking-tight leading-none mb-4">
-                Available Campaigns
+        <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto">
+          <div className="flex justify-between items-start py-8">
+            <div className="flex-1">
+              <div className="flex items-center space-x-3 mb-3">
+                <FireIcon className="w-5 h-5 text-black" />
+                <span className="text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
+                  {filteredCampaigns.length} Active Campaigns
+                </span>
+              </div>
+              <h1 className="text-[48px] md:text-[56px] font-black text-black tracking-tighter leading-none mb-3">
+                Discover Campaigns
               </h1>
-              <p className="text-xl text-gray-600 font-light">
-                Discover and apply to campaigns that match your niche
+              <p className="text-[14px] text-gray-600 font-normal max-w-lg">
+                Find perfect brand collaborations matching your niche and expertise
               </p>
             </div>
-            
-            <GlassButton variant="secondary" size="md" onClick={() => {}}>
-              <EyeIcon className="w-5 h-5 mr-2" />
-              My Applications
-            </GlassButton>
+            <div className="flex items-center space-x-3">
+              {bookmarkedCampaigns.length > 0 && (
+                <motion.button
+                  className="bg-white border-2 border-gray-300 text-black px-4 py-3 rounded-full text-[13px] font-bold hover:border-black transition-all duration-200"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <BookmarkIcon className="w-4 h-4 inline mr-2" />
+                  Saved ({bookmarkedCampaigns.length})
+                </motion.button>
+              )}
+              <motion.button
+                className="bg-white border-2 border-gray-300 text-black px-4 py-3 rounded-full text-[13px] font-bold hover:border-black transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <EyeIcon className="w-4 h-4 inline mr-2" />
+                My Applications
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-        {/* Search and Filters */}
-        <GlassCard variant="elevated" className="p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
+      <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8">
+        {/* Filters */}
+        <motion.div
+          className="bg-white border border-gray-200 rounded-lg p-6 mb-6"
+          {...fadeInUp}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <div className="flex flex-col lg:flex-row gap-4 mb-4">
             <div className="flex-1 relative">
               <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-              <GlassInput
-                placeholder="Search campaigns by brand, title, or category..."
+              <input
+                type="text"
+                placeholder="Search campaigns, brands, or categories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12"
-                size="md"
+                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:border-black focus:ring-1 focus:ring-black text-[14px] font-medium text-black transition-all duration-200"
               />
             </div>
 
-            {/* Quick Filters */}
-            <div className="flex gap-3">
-              <GlassCard variant="floating" className="p-0">
-                <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="px-4 py-3 bg-transparent border-none focus:ring-0 focus:outline-none font-medium text-gray-700"
+            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200">
+              {[
+                { mode: 'list', icon: ListBulletIcon, label: 'List' },
+                { mode: 'grid', icon: Squares2X2Icon, label: 'Grid' },
+                { mode: 'cards', icon: SparklesIcon, label: 'Cards' },
+                { mode: 'stack', icon: RocketLaunchIcon, label: 'Stack' }
+              ].map(({ mode, icon: Icon, label }) => (
+                <motion.button
+                  key={mode}
+                  onClick={() => setViewMode(mode as any)}
+                  className={`px-4 py-2 rounded-lg text-[12px] font-bold transition-all duration-200 ${
+                    viewMode === mode ? 'bg-black text-white' : 'text-gray-600 hover:bg-white'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <option value="all">All Types</option>
-                  <option value="gigs">Gigs</option>
-                  <option value="cpv">CPV</option>
-                  <option value="onetime">One-Time</option>
-                </select>
-              </GlassCard>
-
-              <GlassCard variant="floating" className="p-0">
-                <select
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  className="px-4 py-3 bg-transparent border-none focus:ring-0 focus:outline-none font-medium text-gray-700"
-                >
-                  <option value="all">All Categories</option>
-                  {categories.filter(c => c !== 'All').map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </GlassCard>
-
-              <GlassButton
-                variant="tertiary"
-                size="md"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <AdjustmentsHorizontalIcon className="w-5 h-5 mr-2" />
-                Filters
-              </GlassButton>
+                  <Icon className="w-4 h-4 inline mr-1" />
+                  {label}
+                </motion.button>
+              ))}
             </div>
           </div>
+        </motion.div>
 
-          {/* Advanced Filters */}
-          <AnimatePresence>
-            {showFilters && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-4 pt-4 border-t border-white/20"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                    <GlassCard variant="floating" className="p-0">
-                      <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="w-full px-4 py-3 bg-transparent border-none focus:ring-0 focus:outline-none font-medium text-gray-700"
-                      >
-                        <option value="all">All Status</option>
-                        <option value="recommended">Recommended</option>
-                        <option value="urgent">Urgent</option>
-                        <option value="closing">Closing Soon</option>
-                      </select>
-                    </GlassCard>
-                  </div>
+        {/* Stack View */}
+        {viewMode === 'stack' && (
+          <StackView campaigns={filteredCampaigns} />
+        )}
 
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Sort By</label>
-                    <GlassCard variant="floating" className="p-0">
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="w-full px-4 py-3 bg-transparent border-none focus:ring-0 focus:outline-none font-medium text-gray-700"
-                      >
-                        <option value="newest">Newest First</option>
-                        <option value="budget_high">Budget: High to Low</option>
-                        <option value="budget_low">Budget: Low to High</option>
-                        <option value="match_score">Best Match</option>
-                        <option value="deadline">Deadline</option>
-                      </select>
-                    </GlassCard>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">View Mode</label>
-                    <div className="flex gap-2">
-                      <GlassButton
-                        variant={viewMode === 'list' ? 'primary' : 'tertiary'}
-                        size="sm"
-                        onClick={() => setViewMode('list')}
-                        className="flex-1"
-                      >
-                        <ListBulletIcon className="w-4 h-4 mr-1" />
-                        List
-                      </GlassButton>
-                      <GlassButton
-                        variant={viewMode === 'grid' ? 'primary' : 'tertiary'}
-                        size="sm"
-                        onClick={() => setViewMode('grid')}
-                        className="flex-1"
-                      >
-                        <Squares2X2Icon className="w-4 h-4 mr-1" />
-                        Grid
-                      </GlassButton>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </GlassCard>
-
-        {/* Campaign Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          {[
-            { label: 'Available Campaigns', value: filteredCampaigns.length, icon: GiftIcon, color: 'blue' },
-            { label: 'Gigs Available', value: filteredCampaigns.filter(c => c.type === 'gigs').length, icon: GiftIcon, color: 'green' },
-            { label: 'CPV Campaigns', value: filteredCampaigns.filter(c => c.type === 'cpv').length, icon: ArrowTrendingUpIcon, color: 'purple' },
-            { label: 'Total Budget', value: `₹${filteredCampaigns.reduce((sum, c) => sum + c.budget, 0).toLocaleString()}`, icon: CurrencyDollarIcon, color: 'orange' }
-          ].map((stat, index) => {
-            const Icon = stat.icon;
-            const colorClasses = {
-              blue: 'bg-blue-500/20 border-blue-500/30 text-blue-600',
-              green: 'bg-green-500/20 border-green-500/30 text-green-600',
-              purple: 'bg-purple-500/20 border-purple-500/30 text-purple-600',
-              orange: 'bg-orange-500/20 border-orange-500/30 text-orange-600',
-            };
-
-            return (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <GlassCard variant="elevated" className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 backdrop-blur-sm ${colorClasses[stat.color as keyof typeof colorClasses]}`}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                  </div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">{stat.label}</p>
-                  <p className="text-2xl font-black text-gray-900">{stat.value}</p>
-                </GlassCard>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Recommended Campaigns */}
-        {recommendedCampaigns.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <SparklesIcon className="w-6 h-6 text-yellow-500" />
-              <h2 className="text-3xl font-black text-gray-900">Recommended for You</h2>
+        {/* Cards View - Horizontal Scroll */}
+        {viewMode === 'cards' && (
+          <div className="relative">
+            {/* Navigation Arrows */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-[24px] font-black text-black">Swipe Through Campaigns</h2>
+              <div className="flex gap-2">
+                <motion.button
+                  onClick={() => scrollToCard('left')}
+                  className="w-12 h-12 bg-white border-2 border-black rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <ArrowLeftIcon className="w-6 h-6 text-black" />
+                </motion.button>
+                <motion.button
+                  onClick={() => scrollToCard('right')}
+                  className="w-12 h-12 bg-black border-2 border-black rounded-full flex items-center justify-center hover:bg-gray-900 transition-all duration-200"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <ArrowRightIcon className="w-6 h-6 text-white" />
+                </motion.button>
+              </div>
             </div>
-            <div className="space-y-6">
-              {recommendedCampaigns.map((campaign, index) => {
+
+            {/* Scrollable Container */}
+            <div 
+              ref={scrollContainerRef}
+              className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {filteredCampaigns.map((campaign, index) => {
                 const TypeIcon = getTypeIcon(campaign.type);
-                const isClosingSoon = campaign.applicants / campaign.maxApplicants > 0.8;
                 const applicantPercentage = (campaign.applicants / campaign.maxApplicants) * 100;
-                
+
                 return (
                   <motion.div
                     key={campaign.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    className="flex-shrink-0 w-[420px] snap-start"
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <GlassCard variant="elevated" className="p-8 border-2 border-yellow-500/30 hover:scale-[1.01] transition-transform duration-200">
-                      <div className="flex items-start justify-between mb-6">
-                        <div className="flex items-start space-x-4 flex-1">
-                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/30 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                            <TypeIcon className="w-8 h-8 text-blue-600" />
+                    <div className="bg-white border-2 border-black rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 h-full">
+                      {/* Gray Header */}
+                      <div className="bg-gray-100 border-b-2 border-black p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3 flex-1">
+                            <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center">
+                              <BuildingOfficeIcon className="w-7 h-7 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-[20px] font-black text-black leading-tight mb-1 truncate">{campaign.title}</h3>
+                              <p className="text-[13px] text-gray-700 font-medium">by {campaign.brand}</p>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-3xl font-black text-gray-900">{campaign.title}</h3>
-                              <span className="px-3 py-1 rounded-full bg-yellow-500/20 border-2 border-yellow-500/30 text-xs font-bold text-yellow-700 backdrop-blur-sm flex items-center gap-1">
-                                <SparklesIcon className="w-3 h-3" />
-                                RECOMMENDED
-                              </span>
-                              {campaign.urgency === 'urgent' && (
-                                <span className="px-3 py-1 rounded-full bg-red-500/20 border-2 border-red-500/30 text-xs font-bold text-red-700 backdrop-blur-sm flex items-center gap-1">
-                                  <BoltIcon className="w-3 h-3" />
-                                  URGENT
-                                </span>
-                              )}
-                              {isClosingSoon && (
-                                <span className="px-3 py-1 rounded-full bg-red-500/20 border-2 border-red-500/30 text-xs font-bold text-red-700 backdrop-blur-sm">
-                                  CLOSING SOON
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-gray-600 font-medium mb-3">by {campaign.brand}</p>
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-sm font-bold text-gray-700">
-                                {campaign.category}
-                              </span>
-                              <span className={`px-3 py-1 rounded-full text-sm font-bold border-2 backdrop-blur-sm ${getTypeColor(campaign.type)}`}>
-                                {campaign.type.toUpperCase()}
-                              </span>
-                              <span className="px-3 py-1 rounded-full bg-green-500/20 border-2 border-green-500/30 text-sm font-bold text-green-700 backdrop-blur-sm">
-                                {campaign.matchScore}% Match
-                              </span>
-                            </div>
+                          <motion.button
+                            onClick={() => toggleBookmark(campaign.id)}
+                            className="ml-2"
+                            whileHover={{ scale: 1.2 }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            {bookmarkedCampaigns.includes(campaign.id) ? (
+                              <BookmarkIconSolid className="w-6 h-6 text-black" />
+                            ) : (
+                              <BookmarkIcon className="w-6 h-6 text-black" />
+                            )}
+                          </motion.button>
+                        </div>
+                        
+                        <div className="flex items-end justify-between">
+                          <div>
+                            <p className="text-[36px] font-black text-black leading-none">₹{(campaign.budget / 1000).toFixed(0)}K</p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <StarIcon className="w-5 h-5 text-black" />
+                            <span className="text-[20px] font-black text-black">{campaign.matchScore}%</span>
                           </div>
                         </div>
-                        <div className="text-right ml-4">
-                          <p className="text-4xl font-black text-green-600 mb-1">₹{campaign.budget.toLocaleString()}</p>
-                          <p className="text-sm text-gray-500 font-medium">Total Budget</p>
-                          {campaign.cpvRate && (
-                            <p className="text-lg font-bold text-purple-600 mt-1">₹{campaign.cpvRate} per view</p>
+                      </div>
+
+                      {/* White Body */}
+                      <div className="p-6 space-y-4">
+                        <div className="flex flex-wrap gap-2">
+                          {campaign.recommended && (
+                            <span className="px-2 py-1 bg-black text-white rounded text-[10px] font-bold uppercase">
+                              Recommended
+                            </span>
                           )}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-                        <div>
-                          <p className="text-sm text-gray-500 font-medium mb-1">Duration</p>
-                          <p className="text-lg font-bold text-gray-900">{campaign.duration}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 font-medium mb-1">Location</p>
-                          <div className="flex items-center gap-1">
-                            <MapPinIcon className="w-4 h-4 text-gray-500" />
-                            <p className="text-lg font-bold text-gray-900">{campaign.location}</p>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 font-medium mb-1">Deadline</p>
-                          <p className="text-lg font-bold text-gray-900">{campaign.deadline}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 font-medium mb-1">Brand Rating</p>
-                          <div className="flex items-center gap-1">
-                            <StarIcon className="w-4 h-4 text-yellow-500" />
-                            <p className="text-lg font-bold text-gray-900">{campaign.brandRating}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mb-6">
-                        <p className="text-gray-500 font-medium mb-2">Requirements:</p>
-                        <p className="text-gray-900 text-lg">{campaign.requirements}</p>
-                      </div>
-
-                      {/* Application Stats */}
-                      <div className="mb-6">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-600">
-                            {campaign.applicants} / {campaign.maxApplicants} applicants
+                          {campaign.urgency === 'urgent' && (
+                            <span className="px-2 py-1 bg-black text-white rounded text-[10px] font-bold uppercase">
+                              Urgent
+                            </span>
+                          )}
+                          <span className="px-2 py-1 bg-gray-100 border border-gray-200 text-black rounded text-[10px] font-bold uppercase">
+                            {campaign.type}
                           </span>
-                          <span className="text-sm font-bold text-gray-700">{applicantPercentage.toFixed(0)}% filled</span>
                         </div>
-                        <ProgressBar progress={applicantPercentage} variant="linear" color="primary" size="sm" showLabel={false} />
-                      </div>
 
-                      <div className="flex gap-4">
-                        <GlassButton
-                          variant="primary"
-                          size="md"
-                          onClick={() => handleApply(campaign.id)}
-                          className="flex-1"
-                        >
-                          <BoltIcon className="w-5 h-5 mr-2" />
-                          Quick Apply
-                        </GlassButton>
-                        <GlassButton variant="tertiary" size="md" onClick={() => {}}>
-                          View Details
-                        </GlassButton>
-                        <motion.button
-                          onClick={() => toggleSave(campaign.id)}
-                          className="p-4 rounded-xl bg-white/20 backdrop-blur-xl border-2 border-white/30 hover:bg-white/30 transition-all duration-200"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          {savedCampaigns.includes(campaign.id) ? (
-                            <HeartIconSolid className="w-5 h-5 text-red-500" />
-                          ) : (
-                            <HeartIcon className="w-5 h-5 text-gray-600" />
-                          )}
-                        </motion.button>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="border border-gray-200 rounded p-2">
+                            <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Duration</p>
+                            <p className="text-[14px] font-black text-black">{campaign.duration}</p>
+                          </div>
+                          <div className="border border-gray-200 rounded p-2">
+                            <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Reach</p>
+                            <p className="text-[14px] font-black text-black">{campaign.estimatedReach}</p>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 border border-gray-200 rounded p-3">
+                          <p className="text-[10px] font-bold text-black uppercase mb-2">Deliverables</p>
+                          <div className="flex flex-wrap gap-1">
+                            {campaign.deliverables.map((item: string, idx: number) => (
+                              <span key={idx} className="px-2 py-1 bg-white border border-gray-200 rounded text-[10px] font-semibold text-black">
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[11px] font-bold text-black">
+                              {campaign.applicants}/{campaign.maxApplicants} Applied
+                            </span>
+                            <span className="text-[11px] font-black text-black">{applicantPercentage.toFixed(0)}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-black h-2 rounded-full transition-all duration-500"
+                              style={{ width: `${applicantPercentage}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 pt-2">
+                          <motion.button
+                            className="flex-1 bg-black text-white px-4 py-3 rounded-lg font-semibold text-[13px] hover:bg-gray-900 transition-all duration-200"
+                            onClick={() => handleApply(campaign)}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            Apply Now
+                          </motion.button>
+                          <motion.button
+                            onClick={() => toggleSave(campaign.id)}
+                            className="p-3 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition-all duration-200"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            {savedCampaigns.includes(campaign.id) ? (
+                              <HeartIconSolid className="w-5 h-5 text-black" />
+                            ) : (
+                              <HeartIcon className="w-5 h-5 text-black" />
+                            )}
+                          </motion.button>
+                        </div>
                       </div>
-                    </GlassCard>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -591,173 +869,261 @@ function CreatorCampaignsContent() {
           </div>
         )}
 
-        {/* Other Campaigns */}
-        {regularCampaigns.length > 0 && (
-          <div className={recommendedCampaigns.length > 0 ? 'mt-12' : ''}>
-            {recommendedCampaigns.length > 0 && (
-              <h2 className="text-3xl font-black text-gray-900 mb-6">All Campaigns</h2>
-            )}
-            <div className="space-y-6">
-              {regularCampaigns.map((campaign, index) => {
-                const TypeIcon = getTypeIcon(campaign.type);
-                const isClosingSoon = campaign.applicants / campaign.maxApplicants > 0.8;
-                const applicantPercentage = (campaign.applicants / campaign.maxApplicants) * 100;
-                
-                return (
-                  <motion.div
-                    key={campaign.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <GlassCard variant="elevated" className="p-8 hover:scale-[1.01] transition-transform duration-200">
-                      <div className="flex items-start justify-between mb-6">
-                        <div className="flex items-start space-x-4 flex-1">
-                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/30 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                            <TypeIcon className="w-8 h-8 text-blue-600" />
+        {/* Grid View - 3 Columns */}
+        {viewMode === 'grid' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCampaigns.map((campaign, index) => {
+              const TypeIcon = getTypeIcon(campaign.type);
+              const applicantPercentage = (campaign.applicants / campaign.maxApplicants) * 100;
+
+              return (
+                <motion.div
+                  key={campaign.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="group"
+                >
+                  <div className="bg-white border-2 border-black rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+                    {/* Gray Header */}
+                    <div className="bg-gray-100 border-b-2 border-black p-5">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2 flex-1">
+                          <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+                            <BuildingOfficeIcon className="w-6 h-6 text-white" />
                           </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-3xl font-black text-gray-900">{campaign.title}</h3>
-                              {campaign.urgency === 'urgent' && (
-                                <span className="px-3 py-1 rounded-full bg-red-500/20 border-2 border-red-500/30 text-xs font-bold text-red-700 backdrop-blur-sm flex items-center gap-1">
-                                  <BoltIcon className="w-3 h-3" />
-                                  URGENT
-                                </span>
-                              )}
-                              {isClosingSoon && (
-                                <span className="px-3 py-1 rounded-full bg-red-500/20 border-2 border-red-500/30 text-xs font-bold text-red-700 backdrop-blur-sm">
-                                  CLOSING SOON
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-gray-600 font-medium mb-3">by {campaign.brand}</p>
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-sm font-bold text-gray-700">
-                                {campaign.category}
-                              </span>
-                              <span className={`px-3 py-1 rounded-full text-sm font-bold border-2 backdrop-blur-sm ${getTypeColor(campaign.type)}`}>
-                                {campaign.type.toUpperCase()}
-                              </span>
-                              <span className="px-3 py-1 rounded-full bg-blue-500/20 border-2 border-blue-500/30 text-sm font-bold text-blue-700 backdrop-blur-sm">
-                                {campaign.matchScore}% Match
-                              </span>
-                            </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-[18px] font-black text-black leading-tight truncate">{campaign.title}</h3>
+                            <p className="text-[12px] text-gray-700 font-medium truncate">{campaign.brand}</p>
                           </div>
                         </div>
-                        <div className="text-right ml-4">
-                          <p className="text-4xl font-black text-green-600 mb-1">₹{campaign.budget.toLocaleString()}</p>
-                          <p className="text-sm text-gray-500 font-medium">Total Budget</p>
-                          {campaign.cpvRate && (
-                            <p className="text-lg font-bold text-purple-600 mt-1">₹{campaign.cpvRate} per view</p>
+                      </div>
+                      
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <p className="text-[32px] font-black text-black leading-none">₹{(campaign.budget / 1000).toFixed(0)}K</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <StarIcon className="w-4 h-4 text-black" />
+                          <span className="text-[18px] font-black text-black">{campaign.matchScore}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* White Body */}
+                    <div className="p-5 space-y-4">
+                      <div className="flex flex-wrap gap-2">
+                        {campaign.recommended && (
+                          <span className="px-2 py-1 bg-black text-white rounded text-[10px] font-bold uppercase">
+                            Top Pick
+                          </span>
+                        )}
+                        <span className="px-2 py-1 bg-gray-100 border border-gray-200 text-black rounded text-[10px] font-bold">
+                          {campaign.type}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-[12px]">
+                          <span className="text-gray-600 flex items-center gap-1">
+                            <ClockIcon className="w-4 h-4" />
+                            Duration
+                          </span>
+                          <span className="font-bold text-black">{campaign.duration}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[12px]">
+                          <span className="text-gray-600 flex items-center gap-1">
+                            <EyeIcon className="w-4 h-4" />
+                            Reach
+                          </span>
+                          <span className="font-bold text-black">{campaign.estimatedReach}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[11px] font-bold text-black">{campaign.applicants}/{campaign.maxApplicants}</span>
+                          <span className="text-[11px] font-black text-black">{applicantPercentage.toFixed(0)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-black h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${applicantPercentage}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <motion.button
+                          className="flex-1 bg-black text-white px-4 py-2.5 rounded-lg font-semibold text-[12px] hover:bg-gray-900 transition-all duration-200"
+                          onClick={() => handleApply(campaign)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          Apply
+                        </motion.button>
+                        <motion.button
+                          onClick={() => toggleBookmark(campaign.id)}
+                          className="p-2.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition-all duration-200"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          {bookmarkedCampaigns.includes(campaign.id) ? (
+                            <BookmarkIconSolid className="w-5 h-5 text-black" />
+                          ) : (
+                            <BookmarkIcon className="w-5 h-5 text-black" />
+                          )}
+                        </motion.button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* List View */}
+        {viewMode === 'list' && (
+          <div className="space-y-4">
+            {filteredCampaigns.map((campaign, index) => {
+              const TypeIcon = getTypeIcon(campaign.type);
+              const applicantPercentage = (campaign.applicants / campaign.maxApplicants) * 100;
+
+              return (
+                <motion.div
+                  key={campaign.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white border-2 border-black rounded-lg p-6 hover:shadow-lg transition-all duration-200"
+                >
+                  <div className="flex items-center justify-between gap-6">
+                    {/* Left Section - Campaign Info */}
+                    <div className="flex items-center gap-6 flex-1">
+                      <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
+                        <BuildingOfficeIcon className="w-9 h-9 text-white" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-[24px] font-black text-black truncate">{campaign.title}</h3>
+                          {campaign.recommended && (
+                            <span className="px-3 py-1 bg-black text-white rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
+                              Top Match
+                            </span>
+                          )}
+                          {campaign.urgency === 'urgent' && (
+                            <span className="px-3 py-1 bg-black text-white rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
+                              Urgent
+                            </span>
                           )}
                         </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-                        <div>
-                          <p className="text-sm text-gray-500 font-medium mb-1">Duration</p>
-                          <p className="text-lg font-bold text-gray-900">{campaign.duration}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 font-medium mb-1">Location</p>
-                          <div className="flex items-center gap-1">
-                            <MapPinIcon className="w-4 h-4 text-gray-500" />
-                            <p className="text-lg font-bold text-gray-900">{campaign.location}</p>
+                        <p className="text-[14px] text-gray-600 mb-3 font-medium">by {campaign.brand} • {campaign.category}</p>
+                        
+                        <div className="flex items-center gap-6 text-[13px]">
+                          <div className="flex items-center gap-2">
+                            <ClockIcon className="w-4 h-4 text-black" />
+                            <span className="font-bold text-black">{campaign.duration}</span>
                           </div>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 font-medium mb-1">Deadline</p>
-                          <p className="text-lg font-bold text-gray-900">{campaign.deadline}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 font-medium mb-1">Brand Rating</p>
-                          <div className="flex items-center gap-1">
-                            <StarIcon className="w-4 h-4 text-yellow-500" />
-                            <p className="text-lg font-bold text-gray-900">{campaign.brandRating}</p>
+                          <div className="flex items-center gap-2">
+                            <EyeIcon className="w-4 h-4 text-black" />
+                            <span className="font-bold text-black">{campaign.estimatedReach}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPinIcon className="w-4 h-4 text-black" />
+                            <span className="font-bold text-black">{campaign.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <StarIcon className="w-4 h-4 text-black" />
+                            <span className="font-bold text-black">{campaign.matchScore}% Match</span>
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="mb-6">
-                        <p className="text-gray-500 font-medium mb-2">Requirements:</p>
-                        <p className="text-gray-900 text-lg">{campaign.requirements}</p>
-                      </div>
-
-                      {/* Application Stats */}
-                      <div className="mb-6">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-600">
-                            {campaign.applicants} / {campaign.maxApplicants} applicants
+                    {/* Middle Section - Deliverables */}
+                    <div className="flex-shrink-0">
+                      <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">Deliverables</p>
+                      <div className="flex flex-wrap gap-2 max-w-xs">
+                        {campaign.deliverables.slice(0, 3).map((item: string, idx: number) => (
+                          <span key={idx} className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-[11px] font-semibold text-black">
+                            {item}
                           </span>
-                          <span className="text-sm font-bold text-gray-700">{applicantPercentage.toFixed(0)}% filled</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Right Section - Budget & Actions */}
+                    <div className="flex items-center gap-6 flex-shrink-0">
+                      <div className="text-right">
+                        <p className="text-[40px] font-black text-black leading-none mb-1">₹{(campaign.budget / 1000).toFixed(0)}K</p>
+                        <p className="text-[11px] text-gray-500 font-medium uppercase">Total Budget</p>
+                        
+                        {/* Progress */}
+                        <div className="mt-3">
+                          <div className="flex items-center justify-end gap-2 mb-1">
+                            <UserGroupIcon className="w-3 h-3 text-black" />
+                            <span className="text-[10px] font-bold text-black">
+                              {campaign.applicants}/{campaign.maxApplicants}
+                            </span>
+                          </div>
+                          <div className="w-32 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-black h-2 rounded-full transition-all duration-500"
+                              style={{ width: `${applicantPercentage}%` }}
+                            />
+                          </div>
                         </div>
-                        <ProgressBar progress={applicantPercentage} variant="linear" color="primary" size="sm" showLabel={false} />
                       </div>
 
-                      <div className="flex gap-4">
-                        <GlassButton
-                          variant="primary"
-                          size="md"
-                          onClick={() => handleApply(campaign.id)}
-                          className="flex-1"
+                      <div className="flex flex-col gap-2">
+                        <motion.button
+                          className="bg-black text-white px-6 py-3 rounded-lg font-semibold text-[13px] hover:bg-gray-900 transition-all duration-200 whitespace-nowrap"
+                          onClick={() => handleApply(campaign)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                         >
                           Apply Now
-                        </GlassButton>
-                        <GlassButton variant="tertiary" size="md" onClick={() => {}}>
-                          View Details
-                        </GlassButton>
-                        <motion.button
-                          onClick={() => toggleSave(campaign.id)}
-                          className="p-4 rounded-xl bg-white/20 backdrop-blur-xl border-2 border-white/30 hover:bg-white/30 transition-all duration-200"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          {savedCampaigns.includes(campaign.id) ? (
-                            <HeartIconSolid className="w-5 h-5 text-red-500" />
-                          ) : (
-                            <HeartIcon className="w-5 h-5 text-gray-600" />
-                          )}
                         </motion.button>
+                        <div className="flex gap-2">
+                          <motion.button
+                            onClick={() => toggleBookmark(campaign.id)}
+                            className="flex-1 p-2 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition-all duration-200"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            {bookmarkedCampaigns.includes(campaign.id) ? (
+                              <BookmarkIconSolid className="w-5 h-5 text-black" />
+                            ) : (
+                              <BookmarkIcon className="w-5 h-5 text-black" />
+                            )}
+                          </motion.button>
+                          <motion.button
+                            onClick={() => toggleSave(campaign.id)}
+                            className="flex-1 p-2 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition-all duration-200"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            {savedCampaigns.includes(campaign.id) ? (
+                              <HeartIconSolid className="w-5 h-5 text-black" />
+                            ) : (
+                              <HeartIcon className="w-5 h-5 text-black" />
+                            )}
+                          </motion.button>
+                        </div>
                       </div>
-                    </GlassCard>
-                  </motion.div>
-                );
-              })}
-            </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
-        )}
-
-        {/* Empty State */}
-        {filteredCampaigns.length === 0 && (
-          <motion.div
-            className="text-center py-16"
-            {...fadeInUp}
-            transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
-          >
-            <GlassCard variant="floating" className="p-12 inline-block">
-              <div className="w-24 h-24 bg-gray-500/20 border-2 border-gray-500/30 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm">
-                <ArrowTrendingUpIcon className="w-12 h-12 text-gray-400" />
-              </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-4">No campaigns found</h3>
-              <p className="text-gray-600 mb-8">Try adjusting your search or filter criteria</p>
-              <GlassButton variant="primary" size="md" onClick={() => {
-                setSearchTerm('');
-                setFilterType('all');
-                setFilterCategory('all');
-                setFilterStatus('all');
-              }}>
-                <ArrowPathIcon className="w-5 h-5 mr-2" />
-                Reset Filters
-              </GlassButton>
-            </GlassCard>
-          </motion.div>
         )}
       </div>
 
-      {/* Floating Navigation */}
       <FloatingNav userType="creator" />
-    </div>
+    </motion.div>
   );
 }
 
