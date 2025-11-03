@@ -174,3 +174,4 @@ export default function SkeletonLoader({
 
   return <div className="w-full">{renderSkeleton()}</div>;
 }
+
