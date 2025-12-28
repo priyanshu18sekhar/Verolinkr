@@ -307,7 +307,7 @@ export default function CreatorRegistrationStep4() {
               <h4 className="text-sm font-medium text-purple-900">Selection Tips</h4>
               <ul className="text-sm text-purple-700 mt-1 space-y-1">
                 <li>• Choose categories that best represent your content and expertise</li>
-                <li>• Select languages you're comfortable creating content in</li>
+                <li>• Select languages you&apos;re comfortable creating content in</li>
                 <li>• Your location helps brands find creators in specific regions</li>
                 <li>• Be specific to attract the right brand partnerships</li>
               </ul>
@@ -318,6 +318,8 @@ export default function CreatorRegistrationStep4() {
     </div>
   );
 }
+
+
 
 
 

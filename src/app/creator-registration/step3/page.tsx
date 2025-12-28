@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowRightIcon, ArrowLeftIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function CreatorRegistrationStep3() {
   const router = useRouter();
@@ -154,9 +155,12 @@ export default function CreatorRegistrationStep3() {
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
                   {profilePreview ? (
-                    <img
+                    <Image
                       src={profilePreview}
                       alt="Profile preview"
+                      width={80}
+                      height={80}
+                      unoptimized
                       className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                     />
                   ) : (
@@ -307,7 +311,7 @@ export default function CreatorRegistrationStep3() {
               <h4 className="text-sm font-medium text-purple-900">Profile Tips</h4>
               <ul className="text-sm text-purple-700 mt-1 space-y-1">
                 <li>• Use a clear, professional profile photo that represents your brand</li>
-                <li>• Choose a memorable handle that's easy to find and remember</li>
+                <li>• Choose a memorable handle that&apos;s easy to find and remember</li>
                 <li>• Write a compelling bio that highlights your unique value proposition</li>
                 <li>• Be authentic and let your personality shine through</li>
               </ul>
@@ -318,6 +322,8 @@ export default function CreatorRegistrationStep3() {
     </div>
   );
 }
+
+
 
 
 

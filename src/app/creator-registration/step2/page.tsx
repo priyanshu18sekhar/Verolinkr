@@ -92,7 +92,7 @@ export default function CreatorRegistrationStep2() {
       } else {
         setError('Invalid OTP. Please try again.');
       }
-    } catch (err) {
+    } catch {
       setError('Verification failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -110,7 +110,7 @@ export default function CreatorRegistrationStep2() {
       // Simulate resending OTP
       await new Promise(resolve => setTimeout(resolve, 1000));
       // In real implementation, this would trigger OTP resend
-    } catch (err) {
+    } catch {
       setError('Failed to resend OTP. Please try again.');
     } finally {
       setIsLoading(false);
@@ -159,7 +159,7 @@ export default function CreatorRegistrationStep2() {
             Verify Your Mobile Number
           </h1>
           <p className="text-gray-600">
-            We've sent a 6-digit verification code to your mobile number. 
+            We&apos;ve sent a 6-digit verification code to your mobile number. 
             Please enter it below to continue.
           </p>
         </motion.div>
@@ -275,7 +275,7 @@ export default function CreatorRegistrationStep2() {
             <div>
               <h4 className="text-sm font-medium text-purple-900">Need Help?</h4>
               <p className="text-sm text-purple-700 mt-1">
-                Didn't receive the SMS? Check your spam folder or try resending. 
+                Didn&apos;t receive the SMS? Check your spam folder or try resending. 
                 Make sure you entered the correct mobile number.
               </p>
             </div>
@@ -285,6 +285,8 @@ export default function CreatorRegistrationStep2() {
     </div>
   );
 }
+
+
 
 
 

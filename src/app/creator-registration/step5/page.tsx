@@ -301,7 +301,7 @@ export default function CreatorRegistrationStep5() {
             <div>
               <h4 className="text-sm font-medium text-purple-900">Social Media Tips</h4>
               <ul className="text-sm text-purple-700 mt-1 space-y-1">
-                <li>• Connect platforms where you're most active and have the best engagement</li>
+                <li>• Connect platforms where you&apos;re most active and have the best engagement</li>
                 <li>• Ensure your profiles are public so brands can review your content</li>
                 <li>• You can always add or remove platforms later in your dashboard</li>
                 <li>• This helps brands understand your reach and content style</li>
@@ -313,6 +313,8 @@ export default function CreatorRegistrationStep5() {
     </div>
   );
 }
+
+
 
 
 
