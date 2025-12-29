@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { fadeInUp } from '@/utils/animations';
 import { ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -92,12 +93,6 @@ export default function CreatorRegistrationStep6() {
         setIsSubmitting(false);
       }
     }
-  };
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 30 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: "easeOut" }
   };
 
   const popularBanks = [

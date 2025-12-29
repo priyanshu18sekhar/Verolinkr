@@ -6,6 +6,7 @@ import { ArrowRightIcon, ArrowLeftIcon, PhotoIcon } from '@heroicons/react/24/ou
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { fadeInUp } from '@/utils/animations';
 
 export default function CreatorRegistrationStep3() {
   const router = useRouter();
@@ -93,12 +94,6 @@ export default function CreatorRegistrationStep3() {
       localStorage.setItem('creatorRegistrationData', JSON.stringify(updatedData));
       router.push('/creator-registration/step4');
     }
-  };
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 30 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: "easeOut" }
   };
 
   return (

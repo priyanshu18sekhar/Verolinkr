@@ -548,7 +548,7 @@ function CreatorAnalyticsContent() {
                       />
                     );
                     return acc;
-                  }, [] as JSX.Element[])}
+                  }, [] as React.ReactElement[])}
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center flex-col">
                   <p className="text-[32px] font-black text-black">₹185K</p>

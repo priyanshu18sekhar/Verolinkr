@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { fadeInUp, staggerContainer } from '@/utils/animations';
 import { CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -25,20 +26,6 @@ export default function CreatorRegistrationStep7() {
     localStorage.removeItem('creatorRegistrationData');
     // Redirect to login or dashboard
     router.push('/auth');
-  };
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 30 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: "easeOut" }
-  };
-
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
   };
 
   if (isLoading) {
@@ -178,22 +165,22 @@ export default function CreatorRegistrationStep7() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Name:</span>
-                  <span className="font-medium text-gray-900">{creatorData.fullName}</span>
+                  <span className="font-medium text-gray-900">{creatorData.fullName as string}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Handle:</span>
-                  <span className="font-medium text-gray-900">@{creatorData.professionalHandle}</span>
+                  <span className="font-medium text-gray-900">@{creatorData.professionalHandle as string}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Categories:</span>
                   <span className="font-medium text-gray-900">
-                    {creatorData.primaryCategories?.slice(0, 2).join(', ')}
-                    {creatorData.primaryCategories?.length > 2 && '...'}
+                    {(creatorData.primaryCategories as string[])?.slice(0, 2).join(', ')}
+                    {(creatorData.primaryCategories as string[])?.length > 2 && '...'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Location:</span>
-                  <span className="font-medium text-gray-900">{creatorData.primaryCity}, {creatorData.primaryState}</span>
+                  <span className="font-medium text-gray-900">{creatorData.primaryCity as string}, {creatorData.primaryState as string}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Status:</span>

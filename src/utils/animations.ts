@@ -2,14 +2,12 @@ import { Variants } from 'framer-motion';
 
 export const fadeInUp: Variants = {
   initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }
+  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] } }
 };
 
 export const fadeIn: Variants = {
   initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }
+  animate: { opacity: 1, transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] } }
 };
 
 export const staggerContainer: Variants = {
@@ -22,20 +20,17 @@ export const staggerContainer: Variants = {
 
 export const scaleIn: Variants = {
   initial: { opacity: 0, scale: 0.95 },
-  animate: { opacity: 1, scale: 1 },
-  transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }
+  animate: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] } }
 };
 
 export const slideInLeft: Variants = {
   initial: { opacity: 0, x: -50 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }
+  animate: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] } }
 };
 
 export const slideInRight: Variants = {
   initial: { opacity: 0, x: 50 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }
+  animate: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] } }
 };
 
 export const floatingVariants: Variants = {

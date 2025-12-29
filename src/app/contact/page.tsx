@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { fadeInUp, staggerContainer } from '@/utils/animations';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -25,20 +26,6 @@ export default function ContactPage() {
     console.log('Contact form submitted:', formData);
     // Reset form
     setFormData({ name: '', email: '', subject: '', message: '' });
-  };
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 30 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: "easeOut" }
-  };
-
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
   };
 
   const contactInfo = [

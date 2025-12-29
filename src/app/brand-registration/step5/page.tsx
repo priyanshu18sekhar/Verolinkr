@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fadeInUp, staggerContainer } from '@/utils/animations';
 
 export default function BrandRegistrationStep5() {
   const router = useRouter();
@@ -25,20 +26,6 @@ export default function BrandRegistrationStep5() {
     localStorage.removeItem('brandRegistrationData');
     // Redirect to login or dashboard
     router.push('/auth');
-  };
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 30 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: "easeOut" }
-  };
-
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
   };
 
   if (isLoading) {
@@ -177,15 +164,15 @@ export default function BrandRegistrationStep5() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Company Name:</span>
-                  <span className="font-medium text-gray-900">{brandData.companyName}</span>
+                  <span className="font-medium text-gray-900">{String(brandData.companyName || '')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Email:</span>
-                  <span className="font-medium text-gray-900">{brandData.businessEmail}</span>
+                  <span className="font-medium text-gray-900">{String(brandData.businessEmail || '')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Location:</span>
-                  <span className="font-medium text-gray-900">{brandData.primaryCity}, {brandData.primaryState}</span>
+                  <span className="font-medium text-gray-900">{String(brandData.primaryCity || '')}, {String(brandData.primaryState || '')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Status:</span>

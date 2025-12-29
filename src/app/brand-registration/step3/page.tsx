@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowRightIcon, ArrowLeftIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fadeInUp } from '@/utils/animations';
 
 export default function BrandRegistrationStep3() {
   const router = useRouter();
@@ -93,12 +94,6 @@ export default function BrandRegistrationStep3() {
       localStorage.setItem('brandRegistrationData', JSON.stringify(updatedData));
       router.push('/brand-registration/step4');
     }
-  };
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 30 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: "easeOut" }
   };
 
   const indianStates = [

@@ -1,10 +1,10 @@
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 
 interface TypographyProps {
   children: ReactNode;
   variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body' | 'caption' | 'lead';
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof React.JSX.IntrinsicElements;
   gradient?: boolean;
 }
 

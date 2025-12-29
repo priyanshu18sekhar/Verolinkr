@@ -318,7 +318,7 @@ function CreatorCampaignsContent() {
     if (!campaign) return null;
 
     const TypeIcon = getTypeIcon(campaign.type);
-    const applicantPercentage = (campaign.applicants / campaign.maxApplicants) * 100;
+    const applicantPercentage = ((campaign.applicants as number) / (campaign.maxApplicants as number)) * 100;
 
     return (
       <div className="flex flex-col items-center justify-center min-h-[700px]">
@@ -347,11 +347,11 @@ function CreatorCampaignsContent() {
                       <BuildingOfficeIcon className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-[24px] font-black text-black leading-tight mb-1">{campaign.title}</h3>
-                      <p className="text-[14px] text-gray-700 font-medium">by {campaign.brand}</p>
+                      <h3 className="text-[24px] font-black text-black leading-tight mb-1">{campaign.title as string}</h3>
+                      <p className="text-[14px] text-gray-700 font-medium">by {campaign.brand as string}</p>
                     </div>
                   </div>
-                  {campaign.recommended && (
+                  {(campaign.recommended as boolean) && (
                     <motion.div
                       className="px-3 py-1 bg-black text-white rounded-full"
                       initial={{ scale: 0 }}
@@ -372,7 +372,7 @@ function CreatorCampaignsContent() {
                   <div className="text-right">
                     <div className="flex items-center justify-end gap-2 mb-1">
                       <StarIcon className="w-5 h-5 text-black" />
-                      <span className="text-[24px] font-black text-black">{campaign.matchScore}%</span>
+                      <span className="text-[24px] font-black text-black">{campaign.matchScore as number}%</span>
                     </div>
                     <p className="text-[11px] text-gray-600 uppercase tracking-wider">Match Score</p>
                   </div>
@@ -388,7 +388,7 @@ function CreatorCampaignsContent() {
                       <ClockIcon className="w-5 h-5 text-black" />
                       <p className="text-[11px] text-gray-500 uppercase font-bold">Duration</p>
                     </div>
-                    <p className="text-[16px] font-black text-black">{campaign.duration}</p>
+                    <p className="text-[16px] font-black text-black">{campaign.duration as string}</p>
                   </div>
 
                   <div className="border border-gray-200 rounded-lg p-3 hover:border-black transition-all duration-200">
@@ -396,7 +396,7 @@ function CreatorCampaignsContent() {
                       <EyeIcon className="w-5 h-5 text-black" />
                       <p className="text-[11px] text-gray-500 uppercase font-bold">Est. Reach</p>
                     </div>
-                    <p className="text-[16px] font-black text-black">{campaign.estimatedReach}</p>
+                    <p className="text-[16px] font-black text-black">{campaign.estimatedReach as string}</p>
                   </div>
 
                   <div className="border border-gray-200 rounded-lg p-3 hover:border-black transition-all duration-200">
@@ -404,7 +404,7 @@ function CreatorCampaignsContent() {
                       <MapPinIcon className="w-5 h-5 text-black" />
                       <p className="text-[11px] text-gray-500 uppercase font-bold">Location</p>
                     </div>
-                    <p className="text-[16px] font-black text-black truncate">{campaign.location}</p>
+                    <p className="text-[16px] font-black text-black truncate">{campaign.location as string}</p>
                   </div>
 
                   <div className="border border-gray-200 rounded-lg p-3 hover:border-black transition-all duration-200">
@@ -412,7 +412,7 @@ function CreatorCampaignsContent() {
                       <RocketLaunchIcon className="w-5 h-5 text-black" />
                       <p className="text-[11px] text-gray-500 uppercase font-bold">Goal</p>
                     </div>
-                    <p className="text-[16px] font-black text-black truncate">{campaign.campaignGoal}</p>
+                    <p className="text-[16px] font-black text-black truncate">{campaign.campaignGoal as string}</p>
                   </div>
                 </div>
 
@@ -423,7 +423,7 @@ function CreatorCampaignsContent() {
                     <p className="text-[12px] font-bold text-black uppercase">Deliverables</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {campaign.deliverables.map((item: string, idx: number) => (
+                    {(campaign.deliverables as string[]).map((item: string, idx: number) => (
                       <motion.span
                         key={idx}
                         initial={{ opacity: 0, scale: 0.8 }}
@@ -443,7 +443,7 @@ function CreatorCampaignsContent() {
                     <div className="flex items-center gap-2">
                       <UserGroupIcon className="w-4 h-4 text-black" />
                       <span className="text-[12px] font-bold text-black">
-                        {campaign.applicants}/{campaign.maxApplicants} Applied
+                        {campaign.applicants as number}/{campaign.maxApplicants as number} Applied
                       </span>
                     </div>
                     <span className="text-[12px] font-black text-black">{applicantPercentage.toFixed(0)}%</span>
@@ -796,7 +796,7 @@ function CreatorCampaignsContent() {
                       {/* White Body */}
                       <div className="p-6 space-y-4">
                         <div className="flex flex-wrap gap-2">
-                          {campaign.recommended && (
+                          {(campaign.recommended as boolean) && (
                             <span className="px-2 py-1 bg-black text-white rounded text-[10px] font-bold uppercase">
                               Recommended
                             </span>
@@ -818,14 +818,14 @@ function CreatorCampaignsContent() {
                           </div>
                           <div className="border border-gray-200 rounded p-2">
                             <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Reach</p>
-                            <p className="text-[14px] font-black text-black">{campaign.estimatedReach}</p>
+                            <p className="text-[14px] font-black text-black">{campaign.estimatedReach as string}</p>
                           </div>
                         </div>
 
                         <div className="bg-gray-50 border border-gray-200 rounded p-3">
                           <p className="text-[10px] font-bold text-black uppercase mb-2">Deliverables</p>
                           <div className="flex flex-wrap gap-1">
-                            {campaign.deliverables.map((item: string, idx: number) => (
+                            {(campaign.deliverables as string[]).map((item: string, idx: number) => (
                               <span key={idx} className="px-2 py-1 bg-white border border-gray-200 rounded text-[10px] font-semibold text-black">
                                 {item}
                               </span>
@@ -836,7 +836,7 @@ function CreatorCampaignsContent() {
                         <div>
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-[11px] font-bold text-black">
-                              {campaign.applicants}/{campaign.maxApplicants} Applied
+                              {campaign.applicants as number}/{campaign.maxApplicants as number} Applied
                             </span>
                             <span className="text-[11px] font-black text-black">{applicantPercentage.toFixed(0)}%</span>
                           </div>
@@ -923,7 +923,7 @@ function CreatorCampaignsContent() {
                     {/* White Body */}
                     <div className="p-5 space-y-4">
                       <div className="flex flex-wrap gap-2">
-                        {campaign.recommended && (
+                        {(campaign.recommended as boolean) && (
                           <span className="px-2 py-1 bg-black text-white rounded text-[10px] font-bold uppercase">
                             Top Pick
                           </span>
@@ -946,13 +946,13 @@ function CreatorCampaignsContent() {
                             <EyeIcon className="w-4 h-4" />
                             Reach
                           </span>
-                          <span className="font-bold text-black">{campaign.estimatedReach}</span>
+                          <span className="font-bold text-black">{campaign.estimatedReach as string}</span>
                         </div>
                       </div>
 
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-[11px] font-bold text-black">{campaign.applicants}/{campaign.maxApplicants}</span>
+                          <span className="text-[11px] font-bold text-black">{campaign.applicants as number}/{campaign.maxApplicants as number}</span>
                           <span className="text-[11px] font-black text-black">{applicantPercentage.toFixed(0)}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -1018,7 +1018,7 @@ function CreatorCampaignsContent() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2">
                           <h3 className="text-[24px] font-black text-black truncate">{campaign.title}</h3>
-                          {campaign.recommended && (
+                          {(campaign.recommended as boolean) && (
                             <span className="px-3 py-1 bg-black text-white rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
                               Top Match
                             </span>
@@ -1038,11 +1038,11 @@ function CreatorCampaignsContent() {
                           </div>
                           <div className="flex items-center gap-2">
                             <EyeIcon className="w-4 h-4 text-black" />
-                            <span className="font-bold text-black">{campaign.estimatedReach}</span>
+                            <span className="font-bold text-black">{campaign.estimatedReach as string}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <MapPinIcon className="w-4 h-4 text-black" />
-                            <span className="font-bold text-black">{campaign.location}</span>
+                            <span className="font-bold text-black">{campaign.location as string}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <StarIcon className="w-4 h-4 text-black" />
@@ -1056,7 +1056,7 @@ function CreatorCampaignsContent() {
                     <div className="flex-shrink-0">
                       <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">Deliverables</p>
                       <div className="flex flex-wrap gap-2 max-w-xs">
-                        {campaign.deliverables.slice(0, 3).map((item: string, idx: number) => (
+                        {(campaign.deliverables as string[]).slice(0, 3).map((item: string, idx: number) => (
                           <span key={idx} className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-[11px] font-semibold text-black">
                             {item}
                           </span>
@@ -1075,7 +1075,7 @@ function CreatorCampaignsContent() {
                           <div className="flex items-center justify-end gap-2 mb-1">
                             <UserGroupIcon className="w-3 h-3 text-black" />
                             <span className="text-[10px] font-bold text-black">
-                              {campaign.applicants}/{campaign.maxApplicants}
+                              {campaign.applicants as number}/{campaign.maxApplicants as number}
                             </span>
                           </div>
                           <div className="w-32 bg-gray-200 rounded-full h-2">
