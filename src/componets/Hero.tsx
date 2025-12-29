@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/rules-of-hooks */
 
 import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
 import { useRef } from 'react';

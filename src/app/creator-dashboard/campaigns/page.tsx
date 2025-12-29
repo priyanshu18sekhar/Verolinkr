@@ -43,6 +43,16 @@ import { HeartIcon as HeartIconSolid, BookmarkIcon as BookmarkIconSolid } from '
 import FloatingNav from '../../../componets/ui/FloatingNav';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
 
+interface Campaign {
+  id: number;
+  brand: string;
+  title: string;
+  category: string;
+  type: string;
+  budget: number;
+  [key: string]: unknown;
+}
+
 function CreatorCampaignsContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -56,15 +66,6 @@ function CreatorCampaignsContent() {
   const [selectedForCompare, setSelectedForCompare] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  interface Campaign {
-    id: number;
-    brand: string;
-    title: string;
-    category: string;
-    type: string;
-    budget: number;
-    [key: string]: unknown;
-  }
   const [modalContent, setModalContent] = useState<{ title: string; message: string; campaign: Campaign | null }>({ title: '', message: '', campaign: null });
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -306,7 +307,7 @@ function CreatorCampaignsContent() {
   }
 
   // Stack View Component
-  const StackView = ({ campaigns }: { campaigns: any[] }) => {
+  const StackView = ({ campaigns }: { campaigns: Campaign[] }) => {
     const [exitX, setExitX] = useState(0);
     const x = useMotionValue(0);
     const rotate = useTransform(x, [-200, 200], [-25, 25]);

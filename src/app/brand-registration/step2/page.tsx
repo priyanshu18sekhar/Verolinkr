@@ -159,7 +159,7 @@ export default function BrandRegistrationStep2() {
             Verify Your Mobile Number
           </h1>
           <p className="text-gray-600">
-            We've sent a 6-digit verification code to your mobile number. 
+            We&apos;ve sent a 6-digit verification code to your mobile number. 
             Please enter it below to continue.
           </p>
         </motion.div>

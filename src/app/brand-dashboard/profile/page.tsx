@@ -40,7 +40,6 @@ import {
   BuildingOfficeIcon,
   UsersIcon,
   IdentificationIcon,
-  FileTextIcon,
   BriefcaseIcon
 } from '@heroicons/react/24/outline';
 import FloatingNav from '../../../componets/ui/FloatingNav';

@@ -480,7 +480,7 @@ function BrandDashboardContent() {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as string)}
+                  onClick={() => setActiveTab(tab.id as 'overview' | 'campaigns' | 'create')}
                   className={`py-4 px-1 border-b-2 font-semibold text-[13px] flex items-center space-x-2 transition-all duration-200 ${
                     activeTab === tab.id
                       ? 'border-black text-black'
