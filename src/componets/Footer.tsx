@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Container, Typography } from '../components/design-system';
 
 interface FooterProps {
-  staggerContainer?: any;
+  staggerContainer?: unknown;
 }
 
 const Footer = ({ staggerContainer }: FooterProps) => {

@@ -147,11 +147,12 @@ export function ModalProvider({ children }: { children: ReactNode }) {
             onButtonClick={props.onButtonClick}
             title={props.title}
             message={props.message}
-            children={props.children}
             buttonText={props.buttonText}
             icon={undefined}
             size={props.size}
-          />
+          >
+            {props.children}
+          </InfoModal>
         );
       default:
         return null;

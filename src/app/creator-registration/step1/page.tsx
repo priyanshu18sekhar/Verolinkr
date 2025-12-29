@@ -114,7 +114,7 @@ export default function CreatorRegistrationStep1() {
             Welcome, Creator!
           </Typography>
           <Typography variant="lead" className="text-gray-600 max-w-2xl mx-auto">
-            Let's get you started on VeroLinkr. This process will help you connect with amazing brands and monetize your content.
+            Let&apos;s get you started on VeroLinkr. This process will help you connect with amazing brands and monetize your content.
           </Typography>
         </motion.div>
 

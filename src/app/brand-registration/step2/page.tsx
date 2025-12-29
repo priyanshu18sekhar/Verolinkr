@@ -275,7 +275,7 @@ export default function BrandRegistrationStep2() {
             <div>
               <h4 className="text-sm font-medium text-blue-900">Need Help?</h4>
               <p className="text-sm text-blue-700 mt-1">
-                Didn't receive the SMS? Check your spam folder or try resending. 
+                Didn&apos;t receive the SMS? Check your spam folder or try resending. 
                 Make sure you entered the correct mobile number.
               </p>
             </div>

@@ -141,7 +141,7 @@ export default function CreatorOnboardingStep7() {
             transition={{ delay: 0.2 }}
             className="text-xl text-gray-600 mb-8 font-light"
           >
-            Your creator profile has been submitted for review. You're one step closer to connecting with amazing brands and monetizing your content.
+            Your creator profile has been submitted for review. You&apos;re one step closer to connecting with amazing brands and monetizing your content.
           </motion.p>
 
           <motion.div

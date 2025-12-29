@@ -70,7 +70,6 @@ export default function GlassButton({
       <motion.div
         className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 opacity-0"
         whileHover={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
         style={{
           background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2), rgba(236, 72, 153, 0.2))',
           backgroundSize: '200% 100%',
@@ -82,6 +81,7 @@ export default function GlassButton({
           duration: 3,
           repeat: Infinity,
           ease: 'linear',
+          opacity: { duration: 0.3 },
         }}
       />
       

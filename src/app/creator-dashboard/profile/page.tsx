@@ -290,7 +290,7 @@ function CreatorProfileContent() {
               <div className="bg-white border-2 border-black rounded-lg p-8 max-w-md w-full">
                 <h3 className="text-[24px] font-black text-black mb-4">Connect Platform</h3>
                 <p className="text-[14px] text-gray-700 mb-6">
-                  You\'ll be redirected to authorize {platforms.find(p => p.id === selectedPlatform)?.name}. Make sure you\'re logged in.
+                  You&apos;ll be redirected to authorize {platforms.find(p => p.id === selectedPlatform)?.name}. Make sure you&apos;re logged in.
                 </p>
                 <div className="flex gap-3">
                   <motion.button

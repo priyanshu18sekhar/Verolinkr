@@ -159,7 +159,7 @@ export default function CreatorRegistrationStep6() {
               </h3>
               <div className="bg-blue-50 rounded-lg p-4 mb-4">
                 <p className="text-sm text-blue-800">
-                  By acknowledging these guidelines, you agree to comply with ASCI's Code for Self-Regulation 
+                  By acknowledging these guidelines, you agree to comply with ASCI&apos;s Code for Self-Regulation 
                   in Advertising, ensuring that all sponsored content is honest, truthful, and not misleading.
                 </p>
               </div>

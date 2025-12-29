@@ -75,7 +75,7 @@ export default function ContactPage() {
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Have questions about our platform? Need support with your account? 
-            We're here to help you succeed in your creator-brand partnerships.
+            We&apos;re here to help you succeed in your creator-brand partnerships.
           </p>
         </motion.div>
 
@@ -157,7 +157,7 @@ export default function ContactPage() {
               Send us a Message
             </h2>
             <p className="text-gray-600 mb-8">
-              Fill out the form below and we'll get back to you as soon as possible.
+              Fill out the form below and we&apos;ll get back to you as soon as possible.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -205,7 +205,7 @@ export default function ContactPage() {
                   value={formData.subject}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="What's this about?"
+                  placeholder="What&apos;s this about?"
                   required
                 />
               </div>

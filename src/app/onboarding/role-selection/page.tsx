@@ -56,7 +56,7 @@ export default function RoleSelectionPage() {
                 Choose Your Path
               </Typography>
               <Typography variant="lead" className="text-gray-600 font-light max-w-2xl mx-auto">
-                Select how you'd like to use VeroLinkr. You can always update this later.
+                Select how you&apos;d like to use VeroLinkr. You can always update this later.
               </Typography>
             </motion.div>
           </div>
@@ -83,7 +83,7 @@ export default function RoleSelectionPage() {
                 </svg>
               </div>
               <Typography variant="h4" className="font-black mb-4 text-center">
-                I'm a Creator
+                I&apos;m a Creator
               </Typography>
               <p className="text-gray-600 text-center mb-6 leading-relaxed">
                 Find brand partnerships, monetize your content, and grow your audience with authentic campaigns.
@@ -130,7 +130,7 @@ export default function RoleSelectionPage() {
                 </svg>
               </div>
               <Typography variant="h4" className="font-black mb-4 text-center">
-                I'm a Brand
+                I&apos;m a Brand
               </Typography>
               <p className="text-gray-600 text-center mb-6 leading-relaxed">
                 Connect with authentic creators, launch campaigns, and track performance with detailed analytics.

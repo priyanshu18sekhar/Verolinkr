@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 
 export default function CreatorRegistrationStep7() {
   const router = useRouter();
-  const [creatorData, setCreatorData] = useState<any>(null);
+  const [creatorData, setCreatorData] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function CreatorRegistrationStep7() {
           </h1>
           
           <p className="text-lg text-gray-600 mb-6">
-            Your creator profile has been submitted for review. You're one step closer to 
+            Your creator profile has been submitted for review. You&apos;re one step closer to 
             connecting with amazing brands and monetizing your content.
           </p>
 
@@ -129,7 +129,7 @@ export default function CreatorRegistrationStep7() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-purple-900">Start Earning</p>
-                  <p className="text-sm text-purple-700">You'll receive notifications when brands want to collaborate with you.</p>
+                  <p className="text-sm text-purple-700">You&apos;ll receive notifications when brands want to collaborate with you.</p>
                 </div>
               </div>
             </motion.div>
@@ -273,7 +273,7 @@ export default function CreatorRegistrationStep7() {
               <h4 className="text-sm font-medium text-blue-900">Need Help?</h4>
               <p className="text-sm text-blue-700 mt-1">
                 If you have any questions about your registration or need to make changes, 
-                please contact our support team. We're here to help you succeed!
+                please contact our support team. We&apos;re here to help you succeed!
               </p>
               <div className="mt-3 flex space-x-4 text-sm">
                 <a href="mailto:support@verolinkr.com" className="text-blue-600 hover:text-blue-500 font-medium">

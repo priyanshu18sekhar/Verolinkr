@@ -136,7 +136,7 @@ export default function PaymentHistory({ transactions = mockTransactions }: Paym
           {/* Type Filter */}
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
+            onChange={(e) => setFilterType(e.target.value as 'all' | 'credit' | 'debit')}
             className="px-4 py-3 rounded-xl bg-white/20 backdrop-blur-xl border border-white/30 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-gray-700"
           >
             <option value="all">All Types</option>
@@ -147,7 +147,7 @@ export default function PaymentHistory({ transactions = mockTransactions }: Paym
           {/* Status Filter */}
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as any)}
+            onChange={(e) => setFilterStatus(e.target.value as 'all' | 'completed' | 'pending' | 'failed')}
             className="px-4 py-3 rounded-xl bg-white/20 backdrop-blur-xl border border-white/30 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-gray-700"
           >
             <option value="all">All Status</option>

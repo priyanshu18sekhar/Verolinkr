@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 
 export default function BrandRegistrationStep5() {
   const router = useRouter();
-  const [brandData, setBrandData] = useState<any>(null);
+  const [brandData, setBrandData] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -128,7 +128,7 @@ export default function BrandRegistrationStep5() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-blue-900">Start Creating Campaigns</p>
-                  <p className="text-sm text-blue-700">You'll receive an email notification when your account is ready to use.</p>
+                  <p className="text-sm text-blue-700">You&apos;ll receive an email notification when your account is ready to use.</p>
                 </div>
               </div>
             </motion.div>
@@ -242,7 +242,7 @@ export default function BrandRegistrationStep5() {
               <h4 className="text-sm font-medium text-blue-900">Need Help?</h4>
               <p className="text-sm text-blue-700 mt-1">
                 If you have any questions about your registration or need to make changes, 
-                please contact our support team. We're here to help you get started!
+                please contact our support team. We&apos;re here to help you get started!
               </p>
               <div className="mt-3 flex space-x-4 text-sm">
                 <a href="mailto:support@verolinkr.com" className="text-blue-600 hover:text-blue-500 font-medium">

@@ -108,7 +108,7 @@ export default function BrandRegistrationStep1() {
             Welcome to VeroLinkr
           </h1>
           <p className="text-gray-600">
-            Let's start by setting up your brand account. This will only take a few minutes.
+            Let&apos;s start by setting up your brand account. This will only take a few minutes.
           </p>
         </motion.div>
 
@@ -278,7 +278,7 @@ export default function BrandRegistrationStep1() {
             <div>
               <h4 className="text-sm font-medium text-blue-900">Secure Registration</h4>
               <p className="text-sm text-blue-700 mt-1">
-                Your information is encrypted and secure. We'll verify your mobile number 
+                Your information is encrypted and secure. We&apos;ll verify your mobile number 
                 in the next step to ensure account security.
               </p>
             </div>

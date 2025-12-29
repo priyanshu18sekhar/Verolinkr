@@ -138,7 +138,7 @@ export default function BrandOnboardingStep5() {
             transition={{ delay: 0.2 }}
             className="text-xl text-gray-600 mb-8 font-light"
           >
-            Your brand profile has been submitted for review. You're one step closer to connecting with authentic creators and launching successful campaigns.
+            Your brand profile has been submitted for review. You&apos;re one step closer to connecting with authentic creators and launching successful campaigns.
           </motion.p>
 
           <motion.div

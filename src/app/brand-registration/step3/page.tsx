@@ -335,7 +335,7 @@ export default function BrandRegistrationStep3() {
               <ul className="text-sm text-purple-700 mt-1 space-y-1">
                 <li>• Use a clear, high-quality logo that represents your brand</li>
                 <li>• Write a compelling tagline that creators will remember</li>
-                <li>• Be authentic in your "About Us" section to attract the right creators</li>
+                <li>• Be authentic in your &quot;About Us&quot; section to attract the right creators</li>
               </ul>
             </div>
           </div>

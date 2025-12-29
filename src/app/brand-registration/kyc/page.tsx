@@ -109,7 +109,7 @@ export default function KYCVerification() {
             Your brand has been successfully verified. You can now create campaigns and start working with creators.
           </p>
           <div className="bg-green-50 border border-green-200 rounded-2xl p-8 mb-8">
-            <h3 className="text-2xl font-bold text-green-800 mb-4">What's Next?</h3>
+            <h3 className="text-2xl font-bold text-green-800 mb-4">What&apos;s Next?</h3>
             <div className="space-y-4 text-left">
               <div className="flex items-center space-x-3">
                 <CheckCircleIcon className="w-5 h-5 text-green-600" />

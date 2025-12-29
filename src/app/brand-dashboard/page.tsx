@@ -480,7 +480,7 @@ function BrandDashboardContent() {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as string)}
                   className={`py-4 px-1 border-b-2 font-semibold text-[13px] flex items-center space-x-2 transition-all duration-200 ${
                     activeTab === tab.id
                       ? 'border-black text-black'
@@ -530,7 +530,7 @@ function BrandDashboardContent() {
                     </select>
                     <select
                       value={timeRange}
-                      onChange={(e) => setTimeRange(e.target.value as any)}
+                      onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d' | '1y')}
                       className="text-[12px] font-semibold text-black border border-gray-300 rounded-lg px-3 py-1.5 hover:border-black transition-colors"
                     >
                       <option value="7d">Last 7 days</option>

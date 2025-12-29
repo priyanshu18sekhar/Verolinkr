@@ -56,7 +56,16 @@ function CreatorCampaignsContent() {
   const [selectedForCompare, setSelectedForCompare] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [modalContent, setModalContent] = useState({ title: '', message: '', campaign: null as any });
+  interface Campaign {
+    id: number;
+    brand: string;
+    title: string;
+    category: string;
+    type: string;
+    budget: number;
+    [key: string]: unknown;
+  }
+  const [modalContent, setModalContent] = useState<{ title: string; message: string; campaign: Campaign | null }>({ title: '', message: '', campaign: null });
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [currentStackIndex, setCurrentStackIndex] = useState(0);
@@ -241,7 +250,7 @@ function CreatorCampaignsContent() {
     }
   };
 
-  const handleApply = async (campaign: any) => {
+  const handleApply = async (campaign: Campaign) => {
     setModalContent({
       title: 'Apply to Campaign',
       message: 'Are you sure you want to apply to this campaign? The brand will review your profile.',
@@ -681,7 +690,7 @@ function CreatorCampaignsContent() {
               ].map(({ mode, icon: Icon, label }) => (
                 <motion.button
                   key={mode}
-                  onClick={() => setViewMode(mode as any)}
+                  onClick={() => setViewMode(mode as 'list' | 'grid' | 'cards' | 'stack')}
                   className={`px-4 py-2 rounded-lg text-[12px] font-bold transition-all duration-200 ${
                     viewMode === mode ? 'bg-black text-white' : 'text-gray-600 hover:bg-white'
                   }`}

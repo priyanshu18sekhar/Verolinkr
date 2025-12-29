@@ -648,7 +648,7 @@ function BrandProfileContent() {
                   <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                     <p className="text-[12px] text-gray-600">
                       <strong>Review Time:</strong> {brandData.verification.reviewTime}. 
-                      You'll be notified via email once the verification is complete.
+                      You&apos;ll be notified via email once the verification is complete.
                     </p>
                   </div>
                 </div>

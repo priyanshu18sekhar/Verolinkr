@@ -899,7 +899,7 @@ function CreatorDashboardContent() {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as 'overview' | 'campaigns' | 'mycampaigns' | 'earnings' | 'analytics')}
                   className={`py-4 px-1 border-b-2 font-semibold text-[13px] flex items-center space-x-2 transition-all duration-200 whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-black text-black'
@@ -1119,7 +1119,7 @@ function CreatorDashboardContent() {
                         </div>
                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                           <p className="text-[11px] text-gray-500 font-semibold uppercase mb-1">Brand Review</p>
-                          <p className="text-[13px] text-gray-700 italic">"{campaign.review}"</p>
+                          <p className="text-[13px] text-gray-700 italic">&quot;{campaign.review}&quot;</p>
                         </div>
                       </div>
                       <button className="bg-white border border-gray-300 text-black px-4 py-2 rounded-lg font-semibold text-[12px] hover:border-black transition-colors duration-200 ml-4">
