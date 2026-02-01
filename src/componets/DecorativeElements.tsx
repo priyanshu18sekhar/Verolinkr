@@ -177,8 +177,8 @@ export default function DecorativeElements({ section = 'hero' }: DecorativeEleme
                 left: '50%',
                 top: '50%',
                 rotate: angle,
-                x: useTransform(distance, (d) => Math.cos(angle * Math.PI / 180) * d),
-                y: useTransform(distance, (d) => Math.sin(angle * Math.PI / 180) * d),
+                x: useTransform(distance, [100, 300], (d) => Math.cos(angle * Math.PI / 180) * d),
+                y: useTransform(distance, [100, 300], (d) => Math.sin(angle * Math.PI / 180) * d),
                 opacity: useTransform(scrollYProgress, [0, 1], [0, 0.3]),
               }}
             />

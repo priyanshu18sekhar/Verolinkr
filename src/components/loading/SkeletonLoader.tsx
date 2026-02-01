@@ -18,7 +18,7 @@ const shimmerAnimation = {
       repeat: Infinity,
       repeatType: 'loop' as const,
       duration: 1.5,
-      ease: 'linear' as const,
+      ease: 'linear',
     },
   },
 };

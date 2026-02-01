@@ -43,12 +43,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } else {
       setCurrentTheme(theme);
     }
-  }, [theme]);
 
-  useEffect(() => {
     // Apply theme class to document
     document.documentElement.classList.remove('light', 'dark');
-    const themeToApply: 'light' | 'dark' = (theme as Theme) === 'auto' ? currentTheme : (theme as 'light' | 'dark');
+    const themeToApply = theme === 'auto' ? currentTheme : theme;
     document.documentElement.classList.add(themeToApply);
   }, [theme, currentTheme]);
 

@@ -165,22 +165,22 @@ export default function CreatorRegistrationStep7() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Name:</span>
-                  <span className="font-medium text-gray-900">{creatorData.fullName as string}</span>
+                  <span className="font-medium text-gray-900">{creatorData.fullName}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Handle:</span>
-                  <span className="font-medium text-gray-900">@{creatorData.professionalHandle as string}</span>
+                  <span className="font-medium text-gray-900">@{creatorData.professionalHandle}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Categories:</span>
                   <span className="font-medium text-gray-900">
-                    {(creatorData.primaryCategories as string[])?.slice(0, 2).join(', ')}
-                    {(creatorData.primaryCategories as string[])?.length > 2 && '...'}
+                    {creatorData.primaryCategories?.slice(0, 2).join(', ')}
+                    {creatorData.primaryCategories?.length > 2 && '...'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Location:</span>
-                  <span className="font-medium text-gray-900">{creatorData.primaryCity as string}, {creatorData.primaryState as string}</span>
+                  <span className="font-medium text-gray-900">{creatorData.primaryCity}, {creatorData.primaryState}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Status:</span>

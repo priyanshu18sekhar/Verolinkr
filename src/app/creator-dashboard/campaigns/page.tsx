@@ -396,7 +396,7 @@ function CreatorCampaignsContent() {
                       <EyeIcon className="w-5 h-5 text-black" />
                       <p className="text-[11px] text-gray-500 uppercase font-bold">Est. Reach</p>
                     </div>
-                    <p className="text-[16px] font-black text-black">{campaign.estimatedReach as string}</p>
+                    <p className="text-[16px] font-black text-black">{campaign.estimatedReach}</p>
                   </div>
 
                   <div className="border border-gray-200 rounded-lg p-3 hover:border-black transition-all duration-200">
@@ -404,7 +404,7 @@ function CreatorCampaignsContent() {
                       <MapPinIcon className="w-5 h-5 text-black" />
                       <p className="text-[11px] text-gray-500 uppercase font-bold">Location</p>
                     </div>
-                    <p className="text-[16px] font-black text-black truncate">{campaign.location as string}</p>
+                    <p className="text-[16px] font-black text-black truncate">{campaign.location}</p>
                   </div>
 
                   <div className="border border-gray-200 rounded-lg p-3 hover:border-black transition-all duration-200">
@@ -412,7 +412,7 @@ function CreatorCampaignsContent() {
                       <RocketLaunchIcon className="w-5 h-5 text-black" />
                       <p className="text-[11px] text-gray-500 uppercase font-bold">Goal</p>
                     </div>
-                    <p className="text-[16px] font-black text-black truncate">{campaign.campaignGoal as string}</p>
+                    <p className="text-[16px] font-black text-black truncate">{campaign.campaignGoal}</p>
                   </div>
                 </div>
 
@@ -423,7 +423,7 @@ function CreatorCampaignsContent() {
                     <p className="text-[12px] font-bold text-black uppercase">Deliverables</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {(campaign.deliverables as string[]).map((item: string, idx: number) => (
+                    {campaign.deliverables.map((item: string, idx: number) => (
                       <motion.span
                         key={idx}
                         initial={{ opacity: 0, scale: 0.8 }}
@@ -818,14 +818,14 @@ function CreatorCampaignsContent() {
                           </div>
                           <div className="border border-gray-200 rounded p-2">
                             <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Reach</p>
-                            <p className="text-[14px] font-black text-black">{campaign.estimatedReach as string}</p>
+                            <p className="text-[14px] font-black text-black">{campaign.estimatedReach}</p>
                           </div>
                         </div>
 
                         <div className="bg-gray-50 border border-gray-200 rounded p-3">
                           <p className="text-[10px] font-bold text-black uppercase mb-2">Deliverables</p>
                           <div className="flex flex-wrap gap-1">
-                            {(campaign.deliverables as string[]).map((item: string, idx: number) => (
+                            {campaign.deliverables.map((item: string, idx: number) => (
                               <span key={idx} className="px-2 py-1 bg-white border border-gray-200 rounded text-[10px] font-semibold text-black">
                                 {item}
                               </span>
@@ -946,7 +946,7 @@ function CreatorCampaignsContent() {
                             <EyeIcon className="w-4 h-4" />
                             Reach
                           </span>
-                          <span className="font-bold text-black">{campaign.estimatedReach as string}</span>
+                          <span className="font-bold text-black">{campaign.estimatedReach}</span>
                         </div>
                       </div>
 
@@ -1038,11 +1038,11 @@ function CreatorCampaignsContent() {
                           </div>
                           <div className="flex items-center gap-2">
                             <EyeIcon className="w-4 h-4 text-black" />
-                            <span className="font-bold text-black">{campaign.estimatedReach as string}</span>
+                            <span className="font-bold text-black">{campaign.estimatedReach}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <MapPinIcon className="w-4 h-4 text-black" />
-                            <span className="font-bold text-black">{campaign.location as string}</span>
+                            <span className="font-bold text-black">{campaign.location}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <StarIcon className="w-4 h-4 text-black" />
@@ -1056,7 +1056,7 @@ function CreatorCampaignsContent() {
                     <div className="flex-shrink-0">
                       <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">Deliverables</p>
                       <div className="flex flex-wrap gap-2 max-w-xs">
-                        {(campaign.deliverables as string[]).slice(0, 3).map((item: string, idx: number) => (
+                        {campaign.deliverables.slice(0, 3).map((item: string, idx: number) => (
                           <span key={idx} className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-[11px] font-semibold text-black">
                             {item}
                           </span>
