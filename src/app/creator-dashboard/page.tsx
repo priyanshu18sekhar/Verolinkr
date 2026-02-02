@@ -27,7 +27,8 @@ import {
   ArrowDownIcon,
   VideoCameraIcon,
   PhotoIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  ShareIcon
 } from '@heroicons/react/24/outline';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import FloatingNav from '../../componets/ui/FloatingNav';
@@ -41,24 +42,33 @@ function CreatorDashboardContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
   const [showBankModal, setShowBankModal] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
 
   // Check if bank details need to be completed
   const needsBankDetails = creatorProfile && !creatorProfile.bankDetailsCompleted;
+  const noPlatformsConnected = creatorProfile && creatorProfile.platformsLinked === 0;
 
   useEffect(() => {
-    async function fetchProfile() {
+    async function fetchData() {
       try {
-        const response = await apiGet<{ creator: any }>('/api/creators/me');
-        if (response && response.creator) {
-          setCreatorProfile(response.creator);
+        const [profileRes, analyticsRes] = await Promise.all([
+            apiGet<{ creator: any }>('/api/creators/me'),
+            apiGet<any>('/api/creators/analytics')
+        ]);
+        
+        if (profileRes && profileRes.creator) {
+          setCreatorProfile(profileRes.creator);
+        }
+        if (analyticsRes) {
+            setAnalyticsData(analyticsRes);
         }
       } catch (error) {
-        console.error('Failed to fetch creator profile:', error);
+        console.error('Failed to fetch dashboard data:', error);
       } finally {
         setIsLoading(false);
       }
     }
-    fetchProfile();
+    fetchData();
   }, []);
 
   const defaultStats = {
@@ -77,242 +87,27 @@ function CreatorDashboardContent() {
     averageRating: 0
   };
 
-  // Use real stats if available, otherwise default to 0 (or mock for demo if preferred, but instruction said fetch real data)
+  // Use real stats if available
   const creatorStats = creatorProfile?.stats ? { ...defaultStats, ...creatorProfile.stats } : defaultStats;
 
-  // Monthly earnings data for graph
-  const monthlyEarnings = [
-    { month: 'Jan', amount: 15000 },
-    { month: 'Feb', amount: 22000 },
-    { month: 'Mar', amount: 18000 },
-    { month: 'Apr', amount: 28000 },
-    { month: 'May', amount: 32000 },
-    { month: 'Jun', amount: 45000 },
-  ];
+  // Real graph data or empty state
+  const monthlyEarnings = analyticsData?.monthlyEarnings || [];
+  const maxEarning = monthlyEarnings.length > 0 ? Math.max(...monthlyEarnings.map((m: any) => m.amount)) : 100;
 
-  const maxEarning = Math.max(...monthlyEarnings.map(m => m.amount));
+  // Placeholder for these until fully implemented in API
+  const campaignPerformance = analyticsData?.performanceData || [];
 
-  // Campaign performance data
-  const campaignPerformance = [
-    { name: 'Views', value: 85, change: '+12%' },
-    { name: 'Engagement', value: 72, change: '+8%' },
-    { name: 'Conversion', value: 68, change: '+5%' },
-    { name: 'Reach', value: 90, change: '+15%' },
-  ];
+  // Empty states for now to strictly follow "no mock data"
+  const platformStats: any[] = [];
+  const recentActivity: any[] = [];
+  const upcomingDeadlines: any[] = [];
+  const achievements: any[] = [];
+  const availableCampaigns: any[] = [];
+  const myCampaigns: any[] = [];
+  const completedCampaigns: any[] = [];
+  const paymentHistory: any[] = [];
 
-  // Platform performance
-  const platformStats = [
-    { platform: 'Instagram', followers: 65000, engagement: 9.2, posts: 156 },
-    { platform: 'YouTube', followers: 45000, engagement: 7.8, posts: 89 },
-    { platform: 'TikTok', followers: 15000, engagement: 12.5, posts: 234 },
-  ];
 
-  // Recent activity
-  const recentActivity = [
-    { 
-      type: 'completed', 
-      text: 'Campaign "Winter Collection" completed and approved',
-      time: '2 hours ago',
-      amount: 20000
-    },
-    { 
-      type: 'payment', 
-      text: 'Payment of ₹15,000 received',
-      time: '5 hours ago',
-      amount: 15000
-    },
-    { 
-      type: 'new', 
-      text: 'New campaign opportunity from TechGiant',
-      time: '1 day ago',
-      amount: null
-    },
-    { 
-      type: 'milestone', 
-      text: 'Reached 100K views milestone!',
-      time: '2 days ago',
-      amount: null
-    },
-  ];
-
-  // Upcoming deadlines
-  const upcomingDeadlines = [
-    { campaign: 'Smartphone Review', deadline: '2 days', urgency: 'high' },
-    { campaign: 'Fashion Photoshoot', deadline: '5 days', urgency: 'medium' },
-    { campaign: 'Product Unboxing', deadline: '1 week', urgency: 'low' },
-  ];
-
-  // Achievements
-  const achievements = [
-    { title: '100K Views', icon: EyeIcon, earned: true },
-    { title: 'Top Rated', icon: StarIcon, earned: true },
-    { title: 'Fast Responder', icon: BellIcon, earned: true },
-    { title: 'Rising Star', icon: SparklesIcon, earned: true },
-    { title: 'Brand Favorite', icon: HeartIcon, earned: false },
-    { title: 'Elite Creator', icon: TrophyIcon, earned: false },
-  ];
-
-  const availableCampaigns = [
-    {
-      id: 1,
-      brand: 'SkincareBrand',
-      brandLogo: '🧴',
-      title: 'Product Review Video',
-      category: 'Beauty & Skincare',
-      type: 'gigs',
-      budget: 15000,
-      duration: '1 week',
-      requirements: '1 unboxing video + 1 review video',
-      deadline: '2024-01-15',
-      difficulty: 'Easy',
-      match: 92,
-      featured: true
-    },
-    {
-      id: 2,
-      brand: 'TechGiant',
-      brandLogo: '📱',
-      title: 'Smartphone Launch Campaign',
-      category: 'Technology',
-      type: 'cpv',
-      budget: 50000,
-      duration: '2 weeks',
-      requirements: '1 Instagram Reel showcasing features',
-      deadline: '2024-01-20',
-      difficulty: 'Medium',
-      match: 88,
-      featured: true
-    },
-    {
-      id: 3,
-      brand: 'FashionHouse',
-      brandLogo: '👗',
-      title: 'Winter Collection Launch',
-      category: 'Fashion',
-      type: 'onetime',
-      budget: 25000,
-      duration: '1 week',
-      requirements: '3 Instagram posts with product',
-      deadline: '2024-01-18',
-      difficulty: 'Easy',
-      match: 95,
-      featured: false
-    },
-    {
-      id: 4,
-      brand: 'FitnessApp',
-      brandLogo: '💪',
-      title: 'Fitness Challenge Series',
-      category: 'Health & Fitness',
-      type: 'cpv',
-      budget: 35000,
-      duration: '3 weeks',
-      requirements: '5 workout videos + daily stories',
-      deadline: '2024-01-25',
-      difficulty: 'Hard',
-      match: 78,
-      featured: false
-    },
-  ];
-
-  const myCampaigns = [
-    {
-      id: 1,
-      brand: 'TechGiant',
-      brandLogo: '📱',
-      title: 'Smartphone Review Campaign',
-      type: 'cpv',
-      status: 'active',
-      earnings: 25000,
-      progress: 75,
-      deadline: '2024-01-10',
-      views: 100000,
-      targetViews: 150000,
-      engagement: 8.5,
-      deliverables: 'Video posted, tracking views'
-    },
-    {
-      id: 2,
-      brand: 'FashionHouse',
-      brandLogo: '👗',
-      title: 'Winter Collection Launch',
-      type: 'onetime',
-      status: 'pending',
-      earnings: 15000,
-      progress: 100,
-      deadline: '2024-01-08',
-      views: 45000,
-      targetViews: 50000,
-      engagement: 9.2,
-      deliverables: 'Awaiting brand approval'
-    },
-    {
-      id: 3,
-      brand: 'FitnessApp',
-      brandLogo: '💪',
-      title: 'Morning Workout Series',
-      type: 'gigs',
-      status: 'active',
-      earnings: 18000,
-      progress: 40,
-      deadline: '2024-01-15',
-      views: 35000,
-      targetViews: 80000,
-      engagement: 7.8,
-      deliverables: '2 of 5 videos posted'
-    },
-  ];
-
-  const completedCampaigns = [
-    {
-      id: 1,
-      brand: 'FashionHouse',
-      brandLogo: '👗',
-      title: 'Summer Collection Launch',
-      type: 'onetime',
-      earnings: 20000,
-      completedDate: '2024-01-05',
-      views: 85000,
-      engagement: 10.2,
-      rating: 5.0,
-      review: 'Exceptional work! Professional and creative.'
-    },
-    {
-      id: 2,
-      brand: 'SkincareBrand',
-      brandLogo: '🧴',
-      title: 'Moisturizer Review',
-      type: 'gigs',
-      earnings: 12000,
-      completedDate: '2023-12-28',
-      views: 52000,
-      engagement: 8.9,
-      rating: 4.8,
-      review: 'Great content quality and timely delivery.'
-    },
-    {
-      id: 3,
-      brand: 'TechStore',
-      brandLogo: '🎧',
-      title: 'Headphones Unboxing',
-      type: 'cpv',
-      earnings: 18000,
-      completedDate: '2023-12-20',
-      views: 95000,
-      engagement: 9.5,
-      rating: 5.0,
-      review: 'Outstanding! Exceeded our expectations.'
-    },
-  ];
-
-  // Payment history
-  const paymentHistory = [
-    { date: '2024-01-05', campaign: 'Winter Collection', amount: 20000, status: 'completed' },
-    { date: '2023-12-28', campaign: 'Moisturizer Review', amount: 12000, status: 'completed' },
-    { date: '2023-12-20', campaign: 'Headphones Unboxing', amount: 18000, status: 'completed' },
-    { date: '2023-12-15', campaign: 'Fashion Photoshoot', amount: 25000, status: 'completed' },
-    { date: '2023-12-10', campaign: 'Tech Review Series', amount: 30000, status: 'completed' },
-  ];
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -489,6 +284,37 @@ function CreatorDashboardContent() {
           </div>
         </div>
       </motion.div>
+
+      {/* Connect Platform Banner */}
+      {noPlatformsConnected && (
+        <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-black text-white"
+        >
+            <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-4">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
+                    <ShareIcon className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                    <p className="text-sm font-bold">Connect your Social Platforms</p>
+                    <p className="text-xs text-gray-400">Link your Instagram or YouTube to start getting campaigns.</p>
+                </div>
+                </div>
+                <motion.button
+                onClick={() => window.location.href = '/creator-dashboard/settings'} 
+                className="px-4 py-2 bg-white text-black rounded-lg font-bold text-sm hover:bg-gray-200 transition-colors"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                >
+                Connect Now
+                </motion.button>
+            </div>
+            </div>
+        </motion.div>
+      )}
 
       {/* Bank Details Completion Banner */}
       {needsBankDetails && (
@@ -773,22 +599,32 @@ function CreatorDashboardContent() {
                   <span className="text-[11px] font-semibold text-gray-600 uppercase">Last 6 Months</span>
                 </div>
                 <div className="flex items-end justify-between h-[180px] space-x-2">
-                  {monthlyEarnings.map((data, index) => (
-                    <div key={index} className="flex-1 flex flex-col items-center justify-end space-y-2">
-                      <motion.div
-                        className="w-full bg-black rounded-t"
-                        initial={{ height: 0 }}
-                        animate={{ height: `${(data.amount / maxEarning) * 100}%` }}
-                        transition={{ duration: 0.8, delay: index * 0.1 }}
-                      />
-                      <span className="text-[10px] font-medium text-gray-600">{data.month}</span>
+                  {monthlyEarnings.length > 0 ? (
+                      monthlyEarnings.map((data: any, index: number) => (
+                        <div key={index} className="flex-1 flex flex-col items-center justify-end space-y-2">
+                          <motion.div
+                            className="w-full bg-black rounded-t"
+                            initial={{ height: 0 }}
+                            animate={{ height: `${(data.amount / maxEarning) * 100}%` }}
+                            transition={{ duration: 0.8, delay: index * 0.1 }}
+                          />
+                          <span className="text-[10px] font-medium text-gray-600">{data.month}</span>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                        No earnings data available yet
                     </div>
-                  ))}
+                  )}
                 </div>
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="flex items-center justify-between">
                     <span className="text-[12px] text-gray-600">Average</span>
-                    <span className="text-[14px] font-bold text-black">₹{Math.round(monthlyEarnings.reduce((a, b) => a + b.amount, 0) / monthlyEarnings.length).toLocaleString()}</span>
+                    <span className="text-[14px] font-bold text-black">
+                        {monthlyEarnings.length > 0 
+                            ? `₹${Math.round(monthlyEarnings.reduce((a: number, b: any) => a + (b.amount || 0), 0) / monthlyEarnings.length).toLocaleString()}`
+                            : '₹0'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -800,30 +636,38 @@ function CreatorDashboardContent() {
                   <span className="text-[11px] font-semibold text-gray-600 uppercase">This Month</span>
                 </div>
                 <div className="space-y-4">
-                  {campaignPerformance.map((metric, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[13px] font-medium text-gray-700">{metric.name}</span>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-[11px] font-semibold text-black">{metric.change}</span>
-                          <span className="text-[13px] font-bold text-black">{metric.value}%</span>
+                  {campaignPerformance.length > 0 ? (
+                      campaignPerformance.map((metric: any, index: number) => (
+                        <div key={index}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[13px] font-medium text-gray-700">{metric.name}</span>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-[11px] font-semibold text-black">{metric.change}</span>
+                              <span className="text-[13px] font-bold text-black">{metric.value}%</span>
+                            </div>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-2">
+                            <motion.div
+                              className="bg-black h-2 rounded-full"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${metric.value}%` }}
+                              transition={{ duration: 0.8, delay: index * 0.1 }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2">
-                        <motion.div
-                          className="bg-black h-2 rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${metric.value}%` }}
-                          transition={{ duration: 0.8, delay: index * 0.1 }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                      ))
+                  ) : (
+                      <div className="py-8 text-center text-gray-500 text-xs">No performance data</div>
+                  )}
                 </div>
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="flex items-center justify-between">
                     <span className="text-[12px] text-gray-600">Overall Score</span>
-                    <span className="text-[14px] font-bold text-black">{Math.round(campaignPerformance.reduce((a, b) => a + b.value, 0) / campaignPerformance.length)}%</span>
+                    <span className="text-[14px] font-bold text-black">
+                        {campaignPerformance.length > 0 
+                            ? Math.round(campaignPerformance.reduce((a: number, b: any) => a + (b.value || 0), 0) / campaignPerformance.length)
+                            : 0}%
+                    </span>
                   </div>
                 </div>
               </div>
@@ -837,28 +681,32 @@ function CreatorDashboardContent() {
             >
               <h3 className="text-[18px] font-bold text-black mb-6">Platform Performance</h3>
               <div className="space-y-4">
-                {platformStats.map((platform, index) => (
-                  <div key={index} className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0">
-                    <div className="flex-1">
-                      <p className="text-[14px] font-bold text-black mb-1">{platform.platform}</p>
-                      <div className="flex items-center space-x-4 text-[11px] text-gray-600">
-                        <span>{(platform.followers / 1000).toFixed(0)}K followers</span>
-                        <span>•</span>
-                        <span>{platform.engagement}% engagement</span>
-                        <span>•</span>
-                        <span>{platform.posts} posts</span>
+                {platformStats.length > 0 ? (
+                    platformStats.map((platform: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0">
+                        <div className="flex-1">
+                          <p className="text-[14px] font-bold text-black mb-1">{platform.platform}</p>
+                          <div className="flex items-center space-x-4 text-[11px] text-gray-600">
+                            <span>{(platform.followers / 1000).toFixed(0)}K followers</span>
+                            <span>•</span>
+                            <span>{platform.engagement}% engagement</span>
+                            <span>•</span>
+                            <span>{platform.posts} posts</span>
+                          </div>
+                        </div>
+                        <div className="w-20 bg-gray-100 rounded-full h-2">
+                          <motion.div
+                            className="bg-black h-2 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(platform.engagement / 15) * 100}%` }}
+                            transition={{ duration: 0.8, delay: index * 0.1 }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="w-20 bg-gray-100 rounded-full h-2">
-                      <motion.div
-                        className="bg-black h-2 rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(platform.engagement / 15) * 100}%` }}
-                        transition={{ duration: 0.8, delay: index * 0.1 }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                    ))
+                ) : (
+                    <div className="py-6 text-center text-gray-500 text-xs">Connect platforms to see stats</div>
+                )}
               </div>
             </motion.div>
           </div>
@@ -876,23 +724,27 @@ function CreatorDashboardContent() {
                 <BellIcon className="w-4 h-4 text-gray-400" />
               </div>
               <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      {activity.type === 'completed' && <CheckCircleIcon className="w-4 h-4 text-black" />}
-                      {activity.type === 'payment' && <CurrencyDollarIcon className="w-4 h-4 text-black" />}
-                      {activity.type === 'new' && <SparklesIcon className="w-4 h-4 text-black" />}
-                      {activity.type === 'milestone' && <TrophyIcon className="w-4 h-4 text-black" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[13px] font-medium text-gray-900">{activity.text}</p>
-                      <p className="text-[11px] text-gray-500 mt-1">{activity.time}</p>
-                    </div>
-                    {activity.amount && (
-                      <span className="text-[12px] font-bold text-black">+₹{activity.amount.toLocaleString()}</span>
-                    )}
-                  </div>
-                ))}
+                {recentActivity.length > 0 ? (
+                    recentActivity.map((activity: any, index: number) => (
+                      <div key={index} className="flex items-start space-x-3">
+                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                          {activity.type === 'completed' && <CheckCircleIcon className="w-4 h-4 text-black" />}
+                          {activity.type === 'payment' && <CurrencyDollarIcon className="w-4 h-4 text-black" />}
+                          {activity.type === 'new' && <SparklesIcon className="w-4 h-4 text-black" />}
+                          {activity.type === 'milestone' && <TrophyIcon className="w-4 h-4 text-black" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[13px] font-medium text-gray-900">{activity.text}</p>
+                          <p className="text-[11px] text-gray-500 mt-1">{activity.time}</p>
+                        </div>
+                        {activity.amount && (
+                          <span className="text-[12px] font-bold text-black">+₹{activity.amount.toLocaleString()}</span>
+                        )}
+                      </div>
+                    ))
+                ) : (
+                    <div className="py-6 text-center text-gray-500 text-xs">No recent activity</div>
+                )}
               </div>
             </motion.div>
 
@@ -907,15 +759,19 @@ function CreatorDashboardContent() {
                 <CalendarIcon className="w-4 h-4 text-gray-400" />
               </div>
               <div className="space-y-3">
-                {upcomingDeadlines.map((item, index) => (
-                  <div key={index} className={`border-l-2 ${getUrgencyColor(item.urgency)} pl-4 py-2`}>
-                    <p className="text-[13px] font-bold text-black">{item.campaign}</p>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <ClockIcon className="w-3 h-3 text-gray-500" />
-                      <p className="text-[11px] text-gray-600">{item.deadline} remaining</p>
-                    </div>
-                  </div>
-                ))}
+                {upcomingDeadlines.length > 0 ? (
+                    upcomingDeadlines.map((item: any, index: number) => (
+                      <div key={index} className={`border-l-2 ${getUrgencyColor(item.urgency)} pl-4 py-2`}>
+                        <p className="text-[13px] font-bold text-black">{item.campaign}</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <ClockIcon className="w-3 h-3 text-gray-500" />
+                          <p className="text-[11px] text-gray-600">{item.deadline} remaining</p>
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                    <div className="py-2 text-center text-gray-500 text-xs">No upcoming deadlines</div>
+                )}
               </div>
             </motion.div>
 
@@ -930,15 +786,19 @@ function CreatorDashboardContent() {
                 <TrophyIcon className="w-4 h-4 text-gray-400" />
               </div>
               <div className="grid grid-cols-3 gap-3">
-                {achievements.map((achievement, index) => (
-                  <div 
-                    key={index} 
-                    className={`flex flex-col items-center p-3 rounded-lg border ${achievement.earned ? 'border-black bg-gray-50' : 'border-gray-200 opacity-40'}`}
-                  >
-                    <achievement.icon className={`w-5 h-5 mb-2 ${achievement.earned ? 'text-black' : 'text-gray-400'}`} />
-                    <span className="text-[10px] font-semibold text-center">{achievement.title}</span>
-                  </div>
-                ))}
+                {achievements.length > 0 ? (
+                    achievements.map((achievement: any, index: number) => (
+                      <div 
+                        key={index} 
+                        className={`flex flex-col items-center p-3 rounded-lg border ${achievement.earned ? 'border-black bg-gray-50' : 'border-gray-200 opacity-40'}`}
+                      >
+                        <achievement.icon className={`w-5 h-5 mb-2 ${achievement.earned ? 'text-black' : 'text-gray-400'}`} />
+                        <span className="text-[10px] font-semibold text-center">{achievement.title}</span>
+                      </div>
+                    ))
+                ) : (
+                    <div className="col-span-3 py-4 text-center text-gray-500 text-xs">No achievements yet</div>
+                )}
               </div>
             </motion.div>
           </div>

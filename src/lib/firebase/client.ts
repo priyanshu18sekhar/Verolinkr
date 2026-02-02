@@ -76,3 +76,19 @@ export async function initAnalytics(): Promise<Analytics | null> {
   return getAnalytics(getFirebaseApp());
 }
 
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
+
+let _storage: FirebaseStorage | null = null;
+export function getClientStorage(): FirebaseStorage {
+  if (!_storage) {
+    _storage = getStorage(getFirebaseApp());
+  }
+  return _storage;
+}
+
+export const storage: FirebaseStorage = new Proxy({} as FirebaseStorage, {
+  get(_, prop) {
+    return (getClientStorage() as any)[prop];
+  },
+});
+

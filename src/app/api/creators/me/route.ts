@@ -17,17 +17,45 @@ export async function GET(request: NextRequest) {
 
         const creatorData = doc.data();
 
-        // Also fetch platform count
+        // Fetch platform count
         const platformsSnap = await db
             .collection('creators')
             .doc(auth.uid)
             .collection('platforms')
             .get();
 
+        // Fetch creator stats
+        const statsDoc = await db
+            .collection('creators')
+            .doc(auth.uid)
+            .collection('stats')
+            .doc('overview')
+            .get();
+
+        const defaultStats = {
+            totalEarnings: 0,
+            thisMonthEarnings: 0,
+            pendingEarnings: 0,
+            activeCampaigns: 0,
+            completedCampaigns: 0,
+            totalFollowers: 0,
+            avgEngagement: 0,
+            authenticityScore: 0,
+            trustworthinessRating: 0,
+            totalViews: 0,
+            responseRate: 0,
+            completionRate: 0,
+            averageRating: 0
+        };
+
+        const stats = statsDoc.exists ? { ...defaultStats, ...statsDoc.data() } : defaultStats;
+
         return NextResponse.json({
             creator: {
                 ...creatorData,
-                platformsLinked: platformsSnap.size
+                platformsLinked: platformsSnap.size,
+                platforms: platformsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })),
+                stats
             }
         });
     } catch (error) {
@@ -51,7 +79,12 @@ export async function PATCH(request: NextRequest) {
     const allowedFields = [
         'displayName', 'fullName', 'bio', 'avatarUrl', 'categories',
         'audienceAgeRange', 'audienceGender', 'audienceLocations', 'followerCount',
-        'contentTypes', 'languages', 'city', 'state', 'country'
+        'contentTypes', 'languages', 'city', 'state', 'country',
+        'phone', 'website', 'dateOfBirth', 'interests', 'skills',
+        'priceRange', 'deliveryTime', 'availability', 'responseTime',
+        'experience', 'gender',
+        'bankName', 'accountNumber', 'ifscCode', 'pan', 'upiId', 'gstNumber', 'payoutMethod',
+        'professionalHandle', 'shortBio'
     ];
 
     const updateData: Record<string, any> = {

@@ -39,159 +39,69 @@ function CreatorAnalyticsContent() {
   const [selectedMetric, setSelectedMetric] = useState('earnings');
   const [isLoading, setIsLoading] = useState(true);
   const [chartType, setChartType] = useState<'area' | 'bar'>('area');
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    async function fetchData() {
+       try {
+         // In a real app we'd pass timeRange to the API
+         const response = await fetch('/api/creators/analytics');
+         const json = await response.json();
+         setData(json);
+       } catch (e) {
+         console.error(e);
+       } finally {
+         setIsLoading(false);
+       }
+    }
+    fetchData();
+  }, [timeRange]);
 
-  const stats = {
-    totalEarnings: 185000,
-    earningsGrowth: 24.5,
-    thisMonthEarnings: 45000,
-    totalViews: 1250000,
-    viewsGrowth: 18.3,
-    verifiedViews: 1180000,
-    engagementRate: 8.5,
-    engagementGrowth: 3.2,
-    avgEngagement: 9.2,
-    completedCampaigns: 12,
-    activeCampaigns: 3,
-    totalFollowers: 125000,
-    followerGrowth: 12.5,
-    authenticityScore: 95,
-    rating: 4.9,
-    avgCompletionTime: '2.5 days',
-    topCategory: 'Technology',
-    peakPerformance: 'Jan 2024',
-    clickThroughRate: 4.2,
-    conversionRate: 2.8,
-    avgDealValue: 22500
+  const stats = data?.stats || {
+    totalEarnings: 0,
+    earningsGrowth: 0,
+    thisMonthEarnings: 0,
+    totalViews: 0,
+    viewsGrowth: 0,
+    verifiedViews: 0,
+    engagementRate: 0,
+    engagementGrowth: 0,
+    avgEngagement: 0,
+    completedCampaigns: 0,
+    activeCampaigns: 0,
+    totalFollowers: 0,
+    followerGrowth: 0,
+    authenticityScore: 0,
+    rating: 0,
+    avgCompletionTime: 'N/A',
+    topCategory: 'N/A',
+    peakPerformance: 'N/A',
+    clickThroughRate: 0,
+    conversionRate: 0,
+    avgDealValue: 0
   };
 
-  const performanceData = [
-    { month: 'Jan', earnings: 15000, views: 85000, engagement: 8.2, conversions: 120, clicks: 3400 },
-    { month: 'Feb', earnings: 18000, views: 95000, engagement: 8.8, conversions: 145, clicks: 3850 },
-    { month: 'Mar', earnings: 22000, views: 110000, engagement: 9.1, conversions: 168, clicks: 4200 },
-    { month: 'Apr', earnings: 25000, views: 125000, engagement: 9.3, conversions: 192, clicks: 4680 },
-    { month: 'May', earnings: 28000, views: 135000, engagement: 9.5, conversions: 210, clicks: 5100 },
-    { month: 'Jun', earnings: 32000, views: 145000, engagement: 9.7, conversions: 235, clicks: 5550 },
-    { month: 'Jul', earnings: 35000, views: 155000, engagement: 9.9, conversions: 258, clicks: 5890 }
-  ];
+  const performanceData = data?.performanceData || [];
 
+  // Empty states for missing API data
   const heatmapData = {
     days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     hours: ['00', '04', '08', '12', '16', '20'],
-    data: [
-      [15, 12, 18, 25, 35, 22],
-      [18, 14, 22, 30, 42, 28],
-      [16, 15, 25, 35, 45, 30],
-      [20, 18, 30, 42, 50, 35],
-      [22, 20, 32, 45, 48, 32],
-      [25, 28, 40, 50, 42, 30],
-      [20, 22, 35, 40, 35, 25]
-    ]
+    data: data?.heatmapData || [] // Should be 2D array if exists
   };
 
-  const categoryDistribution = [
-    { category: 'Technology', percentage: 45, earnings: 85000, campaigns: 5, color: 'bg-black' },
-    { category: 'Fashion', percentage: 25, earnings: 45000, campaigns: 3, color: 'bg-gray-700' },
-    { category: 'Beauty', percentage: 20, earnings: 35000, campaigns: 2, color: 'bg-gray-500' },
-    { category: 'Food', percentage: 10, earnings: 20000, campaigns: 2, color: 'bg-gray-300' }
-  ];
-
-  const deviceBreakdown = [
-    { device: 'Mobile', percentage: 62, icon: DevicePhoneMobileIcon },
-    { device: 'Desktop', percentage: 28, icon: ComputerDesktopIcon },
-    { device: 'Tablet', percentage: 10, icon: Square2StackIcon }
-  ];
-
-  const audienceMetrics = {
-    ageGroups: [
-      { age: '18-24', percentage: 35 },
-      { age: '25-34', percentage: 45 },
-      { age: '35-44', percentage: 15 },
-      { age: '45+', percentage: 5 }
-    ],
-    topLocations: [
-      { city: 'Mumbai', percentage: 28 },
-      { city: 'Delhi', percentage: 22 },
-      { city: 'Bangalore', percentage: 18 },
-      { city: 'Chennai', percentage: 12 },
-      { city: 'Others', percentage: 20 }
-    ],
-    gender: [
-      { type: 'Female', percentage: 58 },
-      { type: 'Male', percentage: 40 },
-      { type: 'Other', percentage: 2 }
-    ]
+  const categoryDistribution = data?.categoryDistribution || [];
+  const deviceBreakdown = data?.deviceBreakdown || [];
+  const audienceMetrics = data?.audienceMetrics || {
+      ageGroups: [],
+      topLocations: [],
+      gender: []
   };
 
-  const funnelData = [
-    { stage: 'Profile Views', count: 12500, percentage: 100, icon: EyeIcon },
-    { stage: 'Campaign Inquiries', count: 1875, percentage: 15, icon: ChatBubbleLeftRightIcon },
-    { stage: 'Proposals Sent', count: 875, percentage: 7, icon: ShareIcon },
-    { stage: 'Deals Closed', count: 350, percentage: 2.8, icon: CheckCircleIcon }
-  ];
+  const funnelData = data?.funnelData || [];
+  const skillPerformance = data?.skillPerformance || [];
 
-  const skillPerformance = [
-    { skill: 'Video Production', score: 95 },
-    { skill: 'Engagement', score: 88 },
-    { skill: 'Authenticity', score: 92 },
-    { skill: 'Communication', score: 85 },
-    { skill: 'Delivery Time', score: 90 },
-    { skill: 'Quality', score: 93 }
-  ];
-
-  const recentCampaigns = [
-    {
-      id: 1,
-      brand: 'TechGiant',
-      title: 'Smartphone Review',
-      type: 'cpv',
-      earnings: 25000,
-      views: 100000,
-      engagement: 12.5,
-      status: 'completed',
-      completedDate: '2024-01-15',
-      roi: 240,
-      conversionRate: 2.5,
-      clicks: 4200,
-      shares: 850
-    },
-    {
-      id: 2,
-      brand: 'FashionHouse',
-      title: 'Winter Collection',
-      type: 'onetime',
-      earnings: 20000,
-      views: 85000,
-      engagement: 9.8,
-      status: 'completed',
-      completedDate: '2024-01-10',
-      roi: 180,
-      conversionRate: 2.1,
-      clicks: 3100,
-      shares: 620
-    },
-    {
-      id: 3,
-      brand: 'SkincareBrand',
-      title: 'Product Review',
-      type: 'gigs',
-      earnings: 15000,
-      views: 65000,
-      engagement: 11.2,
-      status: 'completed',
-      completedDate: '2024-01-08',
-      roi: 165,
-      conversionRate: 1.8,
-      clicks: 2450,
-      shares: 480
-    }
-  ];
+  const recentCampaigns: any[] = [];
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -200,16 +110,18 @@ function CreatorAnalyticsContent() {
 
   const getTypeColor = (type: string) => 'bg-gray-100 text-gray-700';
 
-  const maxValue = Math.max(...performanceData.map(d => {
-    if (selectedMetric === 'earnings') return d.earnings;
-    if (selectedMetric === 'views') return d.views;
-    if (selectedMetric === 'engagement') return d.engagement;
-    if (selectedMetric === 'conversions') return d.conversions;
-    return d.clicks;
-  }));
+  const maxValue = performanceData.length > 0 ? Math.max(...performanceData.map((d: any) => {
+    if (selectedMetric === 'earnings') return d.earnings || 0;
+    if (selectedMetric === 'views') return d.views || 0;
+    if (selectedMetric === 'engagement') return d.engagement || 0;
+    if (selectedMetric === 'conversions') return d.conversions || 0;
+    return d.clicks || 0;
+  })) : 100;
 
   const getIntensityColor = (value: number) => {
-    const max = Math.max(...heatmapData.data.flat());
+    if (!heatmapData.data.length) return 'bg-gray-100';
+    const max = Math.max(...(heatmapData.data.flat() as number[]));
+    if (max === 0) return 'bg-gray-100';
     const intensity = (value / max) * 100;
     if (intensity > 75) return 'bg-black';
     if (intensity > 50) return 'bg-gray-700';
@@ -409,13 +321,14 @@ function CreatorAnalyticsContent() {
             
             <div className="relative h-64">
               <div className="absolute inset-0 flex items-end justify-between gap-2">
-              {performanceData.map((data, index) => {
+              {performanceData.length > 0 ? (
+                  performanceData.map((data: any, index: number) => {
                   let value = 0;
-                  if (selectedMetric === 'earnings') value = data.earnings;
-                  if (selectedMetric === 'views') value = data.views;
-                  if (selectedMetric === 'engagement') value = data.engagement;
-                  if (selectedMetric === 'conversions') value = data.conversions;
-                  if (selectedMetric === 'clicks') value = data.clicks;
+                  if (selectedMetric === 'earnings') value = data.earnings || 0;
+                  if (selectedMetric === 'views') value = data.views || 0;
+                  if (selectedMetric === 'engagement') value = data.engagement || 0;
+                  if (selectedMetric === 'conversions') value = data.conversions || 0;
+                  if (selectedMetric === 'clicks') value = data.clicks || 0;
                   
                   const percentage = (value / maxValue) * 100;
                   
@@ -455,7 +368,10 @@ function CreatorAnalyticsContent() {
                       <p className="text-[11px] font-bold text-gray-600 mt-2">{data.month}</p>
                     </motion.div>
                   );
-                })}
+                })
+              ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No chart data available</div>
+              )}
               </div>
             </div>
           </motion.div>
@@ -472,37 +388,43 @@ function CreatorAnalyticsContent() {
             </div>
             
             <div className="space-y-3">
-              {funnelData.map((stage, index) => {
-                const Icon = stage.icon;
-                return (
-                  <motion.div
-                    key={stage.stage}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="relative"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4 text-black" />
-                        <span className="text-[13px] font-bold text-black">{stage.stage}</span>
-                      </div>
-                      <span className="text-[13px] font-black text-black">{stage.count.toLocaleString()}</span>
-                    </div>
-                    <div className="relative">
-                      <div className="w-full bg-gray-200 rounded-full h-3 border border-gray-300 overflow-hidden">
-                        <motion.div 
-                          className="h-full bg-black rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${stage.percentage}%` }}
-                          transition={{ delay: index * 0.1, duration: 0.5 }}
-                          />
-                      </div>
-                      <span className="absolute right-2 top-0 text-[10px] font-bold text-white">{stage.percentage}%</span>
-                    </div>
-                  </motion.div>
-                );
-              })}
+            <div className="space-y-3">
+              {funnelData.length > 0 ? (
+                  funnelData.map((stage: any, index: number) => {
+                    const Icon = stage.icon;
+                    return (
+                      <motion.div
+                        key={stage.stage}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="relative"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Icon className="w-4 h-4 text-black" />
+                            <span className="text-[13px] font-bold text-black">{stage.stage}</span>
+                          </div>
+                          <span className="text-[13px] font-black text-black">{stage.count.toLocaleString()}</span>
+                        </div>
+                        <div className="relative">
+                          <div className="w-full bg-gray-200 rounded-full h-3 border border-gray-300 overflow-hidden">
+                            <motion.div 
+                              className="h-full bg-black rounded-full"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${stage.percentage}%` }}
+                              transition={{ delay: index * 0.1, duration: 0.5 }}
+                              />
+                          </div>
+                          <span className="absolute right-2 top-0 text-[10px] font-bold text-white">{stage.percentage}%</span>
+                        </div>
+                      </motion.div>
+                    );
+                  })
+              ) : (
+                  <div className="text-center text-gray-500 text-xs py-4">No funnel data</div>
+              )}
+            </div>
             </div>
           </motion.div>
         </div>
@@ -525,8 +447,8 @@ function CreatorAnalyticsContent() {
               <div className="relative w-48 h-48">
                 <svg className="transform -rotate-90 w-full h-full">
                   <circle cx="96" cy="96" r="80" fill="none" stroke="#f3f4f6" strokeWidth="32" />
-                  {categoryDistribution.reduce((acc, cat, index) => {
-                    const prevPercentage = categoryDistribution.slice(0, index).reduce((sum, c) => sum + c.percentage, 0);
+                  {categoryDistribution.reduce((acc: React.ReactElement[], cat: any, index: number) => {
+                    const prevPercentage = categoryDistribution.slice(0, index).reduce((sum: number, c: any) => sum + (c.percentage || 0), 0);
                     const circumference = 2 * Math.PI * 80;
                     const strokeDasharray = `${(cat.percentage / 100) * circumference} ${circumference}`;
                     const strokeDashoffset = -((prevPercentage / 100) * circumference);
@@ -558,7 +480,7 @@ function CreatorAnalyticsContent() {
 
               {/* Legend */}
               <div className="flex-1 ml-6 space-y-3">
-                {categoryDistribution.map((cat, index) => (
+                {categoryDistribution.map((cat: any, index: number) => (
                   <motion.div
                     key={cat.category}
                     initial={{ opacity: 0, x: 20 }}
@@ -595,35 +517,39 @@ function CreatorAnalyticsContent() {
             </div>
             
             <div className="space-y-6">
-              {deviceBreakdown.map((device, index) => {
-                const Icon = device.icon;
-                return (
-                  <motion.div
-                    key={device.device}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-                          <Icon className="w-5 h-5 text-black" />
-                        </div>
-                        <span className="text-[16px] font-bold text-black">{device.device}</span>
-                      </div>
-                      <span className="text-[24px] font-black text-black">{device.percentage}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-4 border border-gray-300 overflow-hidden">
+              {deviceBreakdown.length > 0 ? (
+                  deviceBreakdown.map((device: any, index: number) => {
+                    const Icon = device.icon;
+                    return (
                       <motion.div
-                        className="h-full bg-black rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${device.percentage}%` }}
-                        transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
-                      />
-                    </div>
-                  </motion.div>
-                );
-              })}
+                        key={device.device}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 + index * 0.1 }}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                              <Icon className="w-5 h-5 text-black" />
+                            </div>
+                            <span className="text-[16px] font-bold text-black">{device.device}</span>
+                          </div>
+                          <span className="text-[24px] font-black text-black">{device.percentage}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-4 border border-gray-300 overflow-hidden">
+                          <motion.div
+                            className="h-full bg-black rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${device.percentage}%` }}
+                            transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                  })
+              ) : (
+                  <div className="text-center text-gray-500 text-xs py-4">No device data available</div>
+              )}
             </div>
           </motion.div>
         </div>
@@ -653,20 +579,25 @@ function CreatorAnalyticsContent() {
               {heatmapData.days.map((day, dayIndex) => (
                 <div key={day} className="flex gap-2 items-center">
                   <div className="w-16 text-[11px] font-bold text-gray-600">{day}</div>
-                  {heatmapData.data[dayIndex].map((value, hourIndex) => (
-                    <motion.div
-                      key={`${dayIndex}-${hourIndex}`}
-                      className={`flex-1 h-10 rounded ${getIntensityColor(value)} border border-gray-300 hover:scale-110 transition-transform cursor-pointer relative group`}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: (dayIndex * 6 + hourIndex) * 0.01 }}
-                      title={`${value} activities`}
-                    >
-                      <span className="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white px-2 py-1 rounded text-[10px] font-bold whitespace-nowrap">
-                        {value} activities
-                      </span>
-                    </motion.div>
-                  ))}
+                  {heatmapData.data && heatmapData.data[dayIndex] ? (
+                      heatmapData.data[dayIndex].map((value: any, hourIndex: number) => (
+                        <motion.div
+                          key={`${dayIndex}-${hourIndex}`}
+                          className={`flex-1 h-10 rounded ${getIntensityColor(value)} border border-gray-300 hover:scale-110 transition-transform cursor-pointer relative group`}
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: (dayIndex * 6 + hourIndex) * 0.01 }}
+                          title={`${value} activities`}
+                        >
+                          <span className="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white px-2 py-1 rounded text-[10px] font-bold whitespace-nowrap">
+                            {value} activities
+                          </span>
+                        </motion.div>
+                      ))
+                  ) : (
+                      // Fallback for missing data rows
+                      new Array(6).fill(0).map((_, i) => <div key={i} className="flex-1 h-10 bg-gray-100 rounded border border-gray-200"></div>)
+                  )}
                 </div>
               ))}
               <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-gray-200">
@@ -696,27 +627,31 @@ function CreatorAnalyticsContent() {
             <div className="relative">
               {/* Radar Chart (Simplified) */}
               <div className="space-y-3">
-                {skillPerformance.map((skill, index) => (
-                  <motion.div
-                    key={skill.skill}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + index * 0.05 }}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[13px] font-bold text-black">{skill.skill}</span>
-                      <span className="text-[16px] font-black text-black">{skill.score}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3 border border-gray-300 overflow-hidden">
+                {skillPerformance.length > 0 ? (
+                    skillPerformance.map((skill: any, index: number) => (
                       <motion.div
-                        className="h-full bg-gradient-to-r from-gray-800 to-black rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${skill.score}%` }}
-                        transition={{ delay: 0.4 + index * 0.05, duration: 0.5 }}
-                      />
-              </div>
-                  </motion.div>
-                ))}
+                        key={skill.skill}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 + index * 0.05 }}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[13px] font-bold text-black">{skill.skill}</span>
+                          <span className="text-[16px] font-black text-black">{skill.score}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3 border border-gray-300 overflow-hidden">
+                          <motion.div
+                            className="h-full bg-gradient-to-r from-gray-800 to-black rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${skill.score}%` }}
+                            transition={{ delay: 0.4 + index * 0.05, duration: 0.5 }}
+                          />
+                        </div>
+                      </motion.div>
+                    ))
+                ) : (
+                    <div className="text-center text-gray-500 text-xs py-4">No skill data available</div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -738,27 +673,32 @@ function CreatorAnalyticsContent() {
             <div>
               <h4 className="text-[14px] font-bold text-black mb-4">Age Distribution</h4>
               <div className="space-y-3">
-                {audienceMetrics.ageGroups.map((age, index) => (
-                  <motion.div
-                    key={age.age}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.45 + index * 0.05 }}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[12px] font-bold text-black">{age.age}</span>
-                      <span className="text-[14px] font-black text-black">{age.percentage}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                {audienceMetrics && audienceMetrics.ageGroups && audienceMetrics.ageGroups.length > 0 ? (
+                    audienceMetrics.ageGroups.map((age: any, index: number) => (
                       <motion.div
-                        className="h-full bg-black rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${age.percentage}%` }}
-                        transition={{ delay: 0.45 + index * 0.05, duration: 0.5 }}
-                      />
-                    </div>
-                  </motion.div>
-                ))}
+                        key={age.age}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.45 + index * 0.05 }}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[12px] font-bold text-black">{age.age}</span>
+                          <span className="text-[14px] font-black text-black">{age.percentage}%</span>
+                        </div>
+
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <motion.div
+                            className="h-full bg-black rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${age.percentage}%` }}
+                            transition={{ delay: 0.45 + index * 0.05, duration: 0.5 }}
+                          />
+                        </div>
+                      </motion.div>
+                    ))
+                ) : (
+                    <div className="text-center text-gray-500 text-xs text-center py-2">No age data</div>
+                )}
               </div>
             </div>
 
@@ -766,30 +706,34 @@ function CreatorAnalyticsContent() {
             <div>
               <h4 className="text-[14px] font-bold text-black mb-4">Top Locations</h4>
               <div className="space-y-3">
-                {audienceMetrics.topLocations.map((location, index) => (
-                <motion.div
-                    key={location.city}
-                    initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + index * 0.05 }}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <MapPinIcon className="w-3 h-3 text-black" />
-                        <span className="text-[12px] font-bold text-black">{location.city}</span>
-                      </div>
-                      <span className="text-[14px] font-black text-black">{location.percentage}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <motion.div
-                        className="h-full bg-black rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${location.percentage}%` }}
-                        transition={{ delay: 0.5 + index * 0.05, duration: 0.5 }}
-                      />
-                    </div>
-                  </motion.div>
-                ))}
+                {audienceMetrics && audienceMetrics.topLocations && audienceMetrics.topLocations.length > 0 ? (
+                    audienceMetrics.topLocations.map((location: any, index: number) => (
+                    <motion.div
+                        key={location.city}
+                        initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 + index * 0.05 }}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <MapPinIcon className="w-3 h-3 text-black" />
+                            <span className="text-[12px] font-bold text-black">{location.city}</span>
+                          </div>
+                          <span className="text-[14px] font-black text-black">{location.percentage}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <motion.div
+                            className="h-full bg-black rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${location.percentage}%` }}
+                            transition={{ delay: 0.5 + index * 0.05, duration: 0.5 }}
+                          />
+                        </div>
+                      </motion.div>
+                    ))
+                ) : (
+                    <div className="text-center text-gray-500 text-xs text-center py-2">No location data</div>
+                )}
               </div>
             </div>
 
@@ -797,27 +741,31 @@ function CreatorAnalyticsContent() {
                     <div>
               <h4 className="text-[14px] font-bold text-black mb-4">Gender Split</h4>
               <div className="space-y-3">
-                {audienceMetrics.gender.map((gender, index) => (
-                  <motion.div
-                    key={gender.type}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.55 + index * 0.05 }}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[12px] font-bold text-black">{gender.type}</span>
-                      <span className="text-[14px] font-black text-black">{gender.percentage}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                {audienceMetrics && audienceMetrics.gender && audienceMetrics.gender.length > 0 ? (
+                    audienceMetrics.gender.map((gender: any, index: number) => (
                       <motion.div
-                        className="h-full bg-black rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${gender.percentage}%` }}
-                        transition={{ delay: 0.55 + index * 0.05, duration: 0.5 }}
-                      />
-                    </div>
-                  </motion.div>
-                ))}
+                        key={gender.type}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.55 + index * 0.05 }}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[12px] font-bold text-black">{gender.type}</span>
+                          <span className="text-[14px] font-black text-black">{gender.percentage}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <motion.div
+                            className="h-full bg-black rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${gender.percentage}%` }}
+                            transition={{ delay: 0.55 + index * 0.05, duration: 0.5 }}
+                          />
+                        </div>
+                      </motion.div>
+                    ))
+                ) : (
+                    <div className="text-center text-gray-500 text-xs text-center py-2">No gender data</div>
+                )}
                     </div>
                   </div>
           </div>
@@ -837,52 +785,56 @@ function CreatorAnalyticsContent() {
           </div>
           
           <div className="space-y-4">
-            {recentCampaigns.map((campaign, index) => (
-              <motion.div
-                key={campaign.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
-              >
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                    <h4 className="text-[16px] font-black text-black mb-1">{campaign.title}</h4>
-                    <p className="text-[13px] text-gray-600">by {campaign.brand}</p>
+            {recentCampaigns.length > 0 ? (
+                recentCampaigns.map((campaign: any, index: number) => (
+                  <motion.div
+                    key={campaign.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    className="border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                        <h4 className="text-[16px] font-black text-black mb-1">{campaign.title}</h4>
+                        <p className="text-[13px] text-gray-600">by {campaign.brand}</p>
+                        </div>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-semibold ${getTypeColor(campaign.type)} uppercase`}>
+                        {campaign.type}
+                        </span>
+                      </div>
+                      
+                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                        <div>
+                        <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Earnings</p>
+                        <p className="text-[18px] font-black text-black">₹{(campaign.earnings / 1000).toFixed(0)}K</p>
+                        </div>
+                        <div>
+                        <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Views</p>
+                        <p className="text-[18px] font-black text-black">{(campaign.views / 1000).toFixed(0)}K</p>
+                        </div>
+                        <div>
+                        <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Engagement</p>
+                        <p className="text-[18px] font-black text-black">{campaign.engagement}%</p>
+                        </div>
+                        <div>
+                        <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">ROI</p>
+                        <p className="text-[18px] font-black text-black">{campaign.roi}%</p>
+                      </div>
+                        <div>
+                        <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Clicks</p>
+                        <p className="text-[18px] font-black text-black">{campaign.clicks}</p>
+                        </div>
+                        <div>
+                        <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Shares</p>
+                        <p className="text-[18px] font-black text-black">{campaign.shares}</p>
+                      </div>
                     </div>
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-semibold ${getTypeColor(campaign.type)} uppercase`}>
-                    {campaign.type}
-                    </span>
-                  </div>
-                  
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-                    <div>
-                    <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Earnings</p>
-                    <p className="text-[18px] font-black text-black">₹{(campaign.earnings / 1000).toFixed(0)}K</p>
-                    </div>
-                    <div>
-                    <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Views</p>
-                    <p className="text-[18px] font-black text-black">{(campaign.views / 1000).toFixed(0)}K</p>
-                    </div>
-                    <div>
-                    <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Engagement</p>
-                    <p className="text-[18px] font-black text-black">{campaign.engagement}%</p>
-                    </div>
-                    <div>
-                    <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">ROI</p>
-                    <p className="text-[18px] font-black text-black">{campaign.roi}%</p>
-                  </div>
-                    <div>
-                    <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Clicks</p>
-                    <p className="text-[18px] font-black text-black">{campaign.clicks}</p>
-                    </div>
-                    <div>
-                    <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Shares</p>
-                    <p className="text-[18px] font-black text-black">{campaign.shares}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                  </motion.div>
+                ))
+            ) : (
+                <div className="text-center text-gray-500 text-xs py-8">No recent campaigns found</div>
+            )}
           </div>
         </motion.div>
 
@@ -920,7 +872,13 @@ function CreatorAnalyticsContent() {
                 <div className="bg-white border border-gray-200 rounded-lg p-4">
                   <p className="text-[14px] text-gray-700 font-medium">
                     <ArrowTrendingUpIcon className="w-4 h-4 inline mr-2 text-black" />
-                    <span className="font-black text-black">{stats.topCategory}</span> category shows highest ROI at {categoryDistribution[0].percentage}% of total earnings.
+                    {categoryDistribution.length > 0 ? (
+                        <>
+                            <span className="font-black text-black">{stats.topCategory}</span> category shows highest ROI at {categoryDistribution[0].percentage}% of total earnings.
+                        </>
+                    ) : (
+                        <span>Not enough data for category insights yet.</span>
+                    )}
                   </p>
                 </div>
                 <div className="bg-white border border-gray-200 rounded-lg p-4">
