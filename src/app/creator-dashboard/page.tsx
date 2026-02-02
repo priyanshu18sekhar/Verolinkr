@@ -31,6 +31,8 @@ import {
 } from '@heroicons/react/24/outline';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import FloatingNav from '../../componets/ui/FloatingNav';
+import CompleteBankDetails from '../../components/dashboard/CompleteBankDetails';
+import { DashboardEmptyState } from '../../components/dashboard/DashboardEmptyStates';
 
 import { apiGet } from '@/lib/api/client';
 
@@ -38,6 +40,10 @@ function CreatorDashboardContent() {
   const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'mycampaigns' | 'earnings' | 'analytics'>('overview');
   const [isLoading, setIsLoading] = useState(true);
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
+  const [showBankModal, setShowBankModal] = useState(false);
+
+  // Check if bank details need to be completed
+  const needsBankDetails = creatorProfile && !creatorProfile.bankDetailsCompleted;
 
   useEffect(() => {
     async function fetchProfile() {
@@ -483,6 +489,49 @@ function CreatorDashboardContent() {
           </div>
         </div>
       </motion.div>
+
+      {/* Bank Details Completion Banner */}
+      {needsBankDetails && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200"
+        >
+          <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <BanknotesIcon className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-amber-900">Complete Your Bank Details</p>
+                  <p className="text-xs text-amber-700">Add your bank details to receive payments for completed campaigns</p>
+                </div>
+              </div>
+              <motion.button
+                onClick={() => setShowBankModal(true)}
+                className="px-4 py-2 bg-amber-600 text-white rounded-lg font-semibold text-sm hover:bg-amber-700 transition-colors"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Add Bank Details
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Bank Details Modal */}
+      <CompleteBankDetails
+        isOpen={showBankModal}
+        onClose={() => setShowBankModal(false)}
+        onSuccess={() => {
+          // Refresh profile to get updated bankDetailsCompleted status
+          apiGet<{ creator: any }>('/api/creators/me').then(response => {
+            if (response?.creator) setCreatorProfile(response.creator);
+          });
+        }}
+      />
 
       <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8">
         {/* Quick Actions Section */}

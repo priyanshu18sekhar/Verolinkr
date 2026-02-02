@@ -11,6 +11,9 @@ export interface UserContextType {
   userEmail?: string;
   userId?: string;
   loading: boolean;
+  onboardingCompleted: boolean;
+  bankDetailsCompleted: boolean;
+  platformsLinked: number;
   signOut: () => Promise<void>;
 }
 
@@ -41,6 +44,9 @@ export function UserProvider({
         userEmail,
         userId,
         loading: false,
+        onboardingCompleted: true, // Assume completed in legacy provider
+        bankDetailsCompleted: true,
+        platformsLinked: 0,
         signOut: async () => {},
       }}
     >

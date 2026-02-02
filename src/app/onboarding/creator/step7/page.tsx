@@ -20,7 +20,9 @@ export default function CreatorOnboardingStep7() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [skippedBankDetails, setSkippedBankDetails] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -40,66 +42,90 @@ export default function CreatorOnboardingStep7() {
     }
   };
 
-  const validateForm = () => {
+  const validateForm = (skipBankDetails = false) => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.asciGuidelines) {
       newErrors.asciGuidelines = 'You must acknowledge the ASCI guidelines';
     }
 
-    if (!formData.bankName.trim()) {
-      newErrors.bankName = 'Bank name is required';
-    }
+    // Only validate bank details if not skipping
+    if (!skipBankDetails) {
+      if (!formData.bankName.trim()) {
+        newErrors.bankName = 'Bank name is required';
+      }
 
-    if (!formData.accountNumber.trim()) {
-      newErrors.accountNumber = 'Account number is required';
-    } else if (!/^\d{9,18}$/.test(formData.accountNumber.replace(/\D/g, ''))) {
-      newErrors.accountNumber = 'Please enter a valid account number (9-18 digits)';
-    }
+      if (!formData.accountNumber.trim()) {
+        newErrors.accountNumber = 'Account number is required';
+      } else if (!/^\d{9,18}$/.test(formData.accountNumber.replace(/\D/g, ''))) {
+        newErrors.accountNumber = 'Please enter a valid account number (9-18 digits)';
+      }
 
-    if (!formData.ifscCode.trim()) {
-      newErrors.ifscCode = 'IFSC code is required';
-    } else if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(formData.ifscCode.toUpperCase())) {
-      newErrors.ifscCode = 'Please enter a valid IFSC code (e.g., SBIN0001234)';
-    }
+      if (!formData.ifscCode.trim()) {
+        newErrors.ifscCode = 'IFSC code is required';
+      } else if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(formData.ifscCode.toUpperCase())) {
+        newErrors.ifscCode = 'Please enter a valid IFSC code (e.g., SBIN0001234)';
+      }
 
-    if (!formData.pan.trim()) {
-      newErrors.pan = 'PAN is required';
-    } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.pan.toUpperCase())) {
-      newErrors.pan = 'Please enter a valid PAN (e.g., ABCDE1234F)';
+      if (!formData.pan.trim()) {
+        newErrors.pan = 'PAN is required';
+      } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.pan.toUpperCase())) {
+        newErrors.pan = 'Please enter a valid PAN (e.g., ABCDE1234F)';
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = async () => {
-    if (validateForm()) {
-      setIsSubmitting(true);
+  const submitOnboarding = async (skipBankDetails: boolean) => {
+    try {
+      const existingData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
       
-      try {
-        const existingData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
-        const creatorData = {
-          ...existingData.creator,
-          ...formData
-        };
+      // Build creator data based on whether we're skipping bank details
+      const creatorData = {
+        ...existingData.creator,
+        asciGuidelines: formData.asciGuidelines,
+        bankDetailsCompleted: !skipBankDetails,
+        ...(skipBankDetails ? {} : {
+          bankName: formData.bankName,
+          accountNumber: formData.accountNumber,
+          ifscCode: formData.ifscCode.toUpperCase(),
+          pan: formData.pan.toUpperCase()
+        })
+      };
 
-        await apiPost('/api/onboarding/creator', {
-          creator: creatorData
-        });
+      await apiPost('/api/onboarding/creator', {
+        creator: creatorData,
+        skippedBankDetails: skipBankDetails
+      });
 
-        localStorage.removeItem('onboardingData'); // Cleanup
-        setIsComplete(true);
-        setIsSubmitting(false);
-        
-        // Redirect to dashboard after 3 seconds
-        setTimeout(() => {
-          router.push('/creator-dashboard');
-        }, 3000);
-      } catch (error) {
-        setErrors({ submit: 'Submission failed. Please try again.' });
-        setIsSubmitting(false);
-      }
+      localStorage.removeItem('onboardingData'); // Cleanup
+      setSkippedBankDetails(skipBankDetails);
+      setIsComplete(true);
+      
+      // Redirect to dashboard after 3 seconds
+      setTimeout(() => {
+        router.push('/creator-dashboard');
+      }, 3000);
+    } catch (error) {
+      setErrors({ submit: 'Submission failed. Please try again.' });
+    }
+  };
+
+  const handleNext = async () => {
+    if (validateForm(false)) {
+      setIsSubmitting(true);
+      await submitOnboarding(false);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSkip = async () => {
+    if (validateForm(true)) {
+      setIsSkipping(true);
+      await submitOnboarding(true);
+      setIsSkipping(false);
     }
   };
 
@@ -142,8 +168,24 @@ export default function CreatorOnboardingStep7() {
             transition={{ delay: 0.2 }}
             className="text-xl text-gray-600 mb-8 font-light"
           >
-            Your creator profile has been submitted for review. You&apos;re one step closer to connecting with amazing brands and monetizing your content.
+            {skippedBankDetails 
+              ? "Your creator profile has been created! You can add your bank details later from your dashboard to receive payments."
+              : "Your creator profile has been submitted for review. You're one step closer to connecting with amazing brands and monetizing your content."
+            }
           </motion.p>
+
+          {skippedBankDetails && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6"
+            >
+              <p className="text-sm text-amber-800">
+                <strong>Reminder:</strong> You&apos;ll need to add your bank details before you can withdraw earnings.
+              </p>
+            </motion.div>
+          )}
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -164,7 +206,7 @@ export default function CreatorOnboardingStep7() {
       totalSteps={7}
       stepTitle="Bank Details & Final Steps"
       title="Complete Your Profile"
-      subtitle="Add your payment details and acknowledge our guidelines to complete your registration."
+      subtitle="Add your payment details and acknowledge our guidelines. You can also skip bank details for now and add them later."
       icon={icon}
       onNext={handleNext}
       onBack={handleBack}
@@ -196,7 +238,10 @@ export default function CreatorOnboardingStep7() {
 
         {/* Bank Details */}
         <div className="space-y-6">
-          <h3 className="text-lg font-black text-gray-900">Bank Account Details</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-black text-gray-900">Bank Account Details</h3>
+            <span className="text-sm text-gray-500">(Optional - can be added later)</span>
+          </div>
           
           <Input
             label="Bank Name"
@@ -206,7 +251,6 @@ export default function CreatorOnboardingStep7() {
             onChange={handleInputChange}
             placeholder="Enter bank name"
             error={errors.bankName}
-            required
           />
 
           <Input
@@ -217,7 +261,6 @@ export default function CreatorOnboardingStep7() {
             onChange={handleInputChange}
             placeholder="Enter account number"
             error={errors.accountNumber}
-            required
           />
 
           <Input
@@ -232,7 +275,6 @@ export default function CreatorOnboardingStep7() {
             placeholder="SBIN0001234"
             error={errors.ifscCode}
             hint="Format: 4 letters, 0, 6 alphanumeric (e.g., SBIN0001234)"
-            required
           />
 
           <Input
@@ -247,7 +289,6 @@ export default function CreatorOnboardingStep7() {
             placeholder="ABCDE1234F"
             error={errors.pan}
             hint="Format: 5 letters, 4 numbers, 1 letter (e.g., ABCDE1234F)"
-            required
           />
         </div>
 
@@ -266,6 +307,23 @@ export default function CreatorOnboardingStep7() {
           </div>
         </div>
 
+        {/* Skip Button */}
+        <div className="pt-4 border-t border-gray-200">
+          <motion.button
+            type="button"
+            onClick={handleSkip}
+            disabled={isSkipping || isSubmitting}
+            className="w-full py-4 px-6 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+          >
+            {isSkipping ? "Setting up your profile..." : "Skip for Now — Add Bank Details Later"}
+          </motion.button>
+          <p className="text-center text-xs text-gray-500 mt-2">
+            You can complete your bank details anytime from your dashboard settings.
+          </p>
+        </div>
+
         {errors.submit && (
           <p className="text-sm font-medium text-red-600">{errors.submit}</p>
         )}
@@ -273,4 +331,5 @@ export default function CreatorOnboardingStep7() {
     </StepLayout>
   );
 }
+
 

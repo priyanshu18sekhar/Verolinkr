@@ -23,12 +23,20 @@ export async function POST(request: NextRequest) {
   // Extract data sections (assuming the frontend sends the structure { creator: { ... } })
   // Adjusting based on how we plan to send data from Step 7
   const creatorData = body.creator || body;
+  const skippedBankDetails = body.skippedBankDetails === true;
 
   const db = getAdminFirestore();
   const batch = db.batch();
 
   // 1. Create/Update Creator Document
   const creatorRef = db.collection('creators').doc(auth.uid);
+
+  // Determine bankDetailsCompleted based on whether bank details were provided
+  const hasBankDetails = !skippedBankDetails &&
+    creatorData.bankName &&
+    creatorData.accountNumber &&
+    creatorData.ifscCode &&
+    creatorData.pan;
 
   const creatorProfile = {
     ...creatorData,
@@ -37,6 +45,7 @@ export async function POST(request: NextRequest) {
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
     onboardingCompleted: true,
+    bankDetailsCompleted: hasBankDetails,
   };
 
   batch.set(creatorRef, creatorProfile, { merge: true });
