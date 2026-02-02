@@ -11,7 +11,7 @@ interface SkeletonLoaderProps {
   children?: React.ReactNode;
 }
 
-const shimmerAnimation = {
+const shimmerAnimation: any = {
   x: ['-100%', '100%'],
   transition: {
     x: {

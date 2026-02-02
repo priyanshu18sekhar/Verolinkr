@@ -5,12 +5,12 @@ import { UserIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/r
 import { useRouter } from 'next/navigation';
 
 export default function AccountPanel() {
-  const { userType, userName, userEmail } = useUser();
+  const { userType, userName, userEmail, signOut } = useUser();
   const router = useRouter();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (confirm('Are you sure you want to logout?')) {
-      // TODO: Implement logout logic
+      await signOut();
       router.push('/');
     }
   };

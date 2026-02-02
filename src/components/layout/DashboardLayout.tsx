@@ -9,6 +9,7 @@ import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { ModalProvider } from '@/contexts/ModalContext';
 import { PaymentProvider } from '@/contexts/PaymentContext';
 import { NotificationProvider, useNotification } from '@/contexts/NotificationContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import ToastContainer from '@/components/notifications/ToastContainer';
 import RightSidebar from './RightSidebar';
 import { Cog6ToothIcon, PlusIcon, UserGroupIcon, BuildingOfficeIcon, ArrowRightOnRectangleIcon, CogIcon, HomeIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
@@ -190,6 +191,16 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
 }
 
 export default function DashboardLayout({ children, userType, userName, userEmail, userId }: DashboardLayoutProps) {
+  const { isAuthenticated, loading } = useRequireAuth('/auth', true);
+
+  if (loading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-pulse text-gray-500">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <LayoutProvider>
       <ThemeProvider>

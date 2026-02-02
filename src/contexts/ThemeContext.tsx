@@ -29,26 +29,26 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Resolve current theme based on preference
     if (theme === 'auto') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setCurrentTheme(prefersDark ? 'dark' : 'light');
-
-      // Listen for changes
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = (e: MediaQueryListEvent) => {
-        setCurrentTheme(e.matches ? 'dark' : 'light');
-      };
-      mediaQuery.addEventListener('change', handleChange);
       
-      return () => mediaQuery.removeEventListener('change', handleChange);
+      const updateTheme = () => {
+        setCurrentTheme(mediaQuery.matches ? 'dark' : 'light');
+      };
+      
+      updateTheme();
+      mediaQuery.addEventListener('change', updateTheme);
+      
+      return () => mediaQuery.removeEventListener('change', updateTheme);
     } else {
       setCurrentTheme(theme);
     }
+  }, [theme]);
 
-    // Apply theme class to document
+  useEffect(() => {
+    // Apply theme class to document whenever currentTheme changes
     document.documentElement.classList.remove('light', 'dark');
-    const themeToApply = theme === 'auto' ? currentTheme : theme;
-    document.documentElement.classList.add(themeToApply);
-  }, [theme, currentTheme]);
+    document.documentElement.classList.add(currentTheme);
+  }, [currentTheme]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);

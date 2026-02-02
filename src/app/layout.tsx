@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ConditionalNavigation from "../componets/ConditionalNavigation";
+import AnalyticsInit from "../components/AnalyticsInit";
+import { AuthProvider } from "../contexts/AuthProvider";
 import { CurrencyProvider } from "../contexts/CurrencyContext";
 
 const geistSans = Geist({
@@ -30,10 +32,13 @@ export default function RootLayout({
         suppressHydrationWarning={true}
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <CurrencyProvider>
-          <ConditionalNavigation />
-          {children}
-        </CurrencyProvider>
+        <AuthProvider>
+          <AnalyticsInit />
+          <CurrencyProvider>
+            <ConditionalNavigation />
+            {children}
+          </CurrencyProvider>
+        </AuthProvider>
       </body>
     </html>
   );

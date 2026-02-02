@@ -1,16 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from 'firebase/auth';
+import { auth } from '@/lib/firebase/client';
+import {
+  isEmailLinkSignIn,
+  getStoredEmailForSignIn,
+  completeEmailLinkSignIn,
+  sendSignInLink,
+} from '@/lib/firebase/emailLinkAuth';
 import { Input, Button, Container, Typography } from '../../components/design-system';
 import { AnimatedParticles } from '../../components/onboarding';
 import { fadeInUp } from '../../utils/animations';
 
-export default function AuthPage() {
+function getAuthErrorMessage(code: string): string {
+  const messages: Record<string, string> = {
+    'auth/email-already-in-use': 'This email is already registered.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/operation-not-allowed': 'Email/password sign-in is not enabled.',
+    'auth/weak-password': 'Password should be at least 6 characters.',
+    'auth/invalid-credential': 'Invalid email or password.',
+    'auth/user-disabled': 'This account has been disabled.',
+    'auth/user-not-found': 'No account found with this email.',
+    'auth/wrong-password': 'Invalid password.',
+    'auth/popup-closed-by-user': 'Sign-in was cancelled.',
+    'auth/cancelled-popup-request': 'Sign-in was cancelled.',
+    'auth/account-exists-with-different-credential':
+      'An account already exists with the same email. Try signing in with your password or link accounts in settings.',
+    'auth/invalid-action-code': 'This sign-in link is invalid or has expired. Request a new one.',
+    'auth/expired-action-code': 'This sign-in link has expired. Request a new one.',
+  };
+  return messages[code] ?? 'An error occurred. Please try again.';
+}
+
+import { Suspense } from 'react';
+
+function AuthContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = useCallback(() => {
+    const redirect = searchParams.get('redirect');
+    if (redirect && redirect.startsWith('/')) return redirect;
+    return '/creator-dashboard';
+  }, [searchParams]);
+
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -20,15 +62,90 @@ export default function AuthPage() {
     confirmPassword: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Email link (passwordless) flow
+  const [emailLinkState, setEmailLinkState] = useState<
+    'none' | 'completing' | 'need-email' | 'link-sent'
+  >('none');
+  const [linkSentToEmail, setLinkSentToEmail] = useState<string | null>(null);
+  const [showEmailLinkForm, setShowEmailLinkForm] = useState(false);
+
+  // On mount: detect if we're opening an email sign-in link and complete or ask for email
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const href = window.location.href;
+    if (!isEmailLinkSignIn(href)) return;
+
+    const storedEmail = getStoredEmailForSignIn();
+    if (storedEmail) {
+      setEmailLinkState('completing');
+      setSubmitError(null);
+      completeEmailLinkSignIn(href, storedEmail)
+        .then(() => {
+          router.replace(redirectTo());
+        })
+        .catch((err: unknown) => {
+          const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : '';
+          setSubmitError(getAuthErrorMessage(code));
+          setEmailLinkState('none');
+        });
+    } else {
+      setEmailLinkState('need-email');
+    }
+  }, [router, redirectTo]);
+
+  const handleCompleteEmailLinkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (typeof window === 'undefined' || emailLinkState !== 'need-email') return;
+    const email = formData.email.trim();
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setSubmitError('Please enter a valid email address.');
+      return;
+    }
+    setSubmitError(null);
+    setEmailLinkState('completing');
+    try {
+      await completeEmailLinkSignIn(window.location.href, email);
+      router.replace(redirectTo());
+    } catch (err: unknown) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : '';
+      setSubmitError(getAuthErrorMessage(code));
+      setEmailLinkState('need-email');
+    }
+  };
+
+  const handleSendEmailLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = formData.email.trim();
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setSubmitError('Please enter a valid email address.');
+      return;
+    }
+    setSubmitError(null);
+    try {
+      await sendSignInLink(email);
+      setLinkSentToEmail(email);
+      setEmailLinkState('link-sent');
+    } catch (err: unknown) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : '';
+      setSubmitError(getAuthErrorMessage(code));
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Clear error when user starts typing
+    setSubmitError(null);
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handleTabChange = (tab: 'login' | 'signup') => {
+    setActiveTab(tab);
+    setSubmitError(null);
+    setShowEmailLinkForm(false);
   };
 
   const validateForm = (isSignup: boolean = false) => {
@@ -58,24 +175,44 @@ export default function AuthPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isSignup = activeTab === 'signup';
-    
-    if (validateForm(isSignup)) {
-      // Store user data
-      localStorage.setItem('authData', JSON.stringify({
-        email: formData.email,
-        userType: null // Will be set during onboarding
-      }));
-      
+    setSubmitError(null);
+
+    if (!validateForm(isSignup)) return;
+
+    try {
       if (isSignup) {
-        // Redirect to onboarding role selection
+        await createUserWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
         router.push('/onboarding/role-selection');
       } else {
-        // Redirect to dashboard (will need auth check)
-        router.push('/creator-dashboard');
+        await signInWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+        router.push(redirectTo());
       }
+    } catch (err: unknown) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : '';
+      setSubmitError(getAuthErrorMessage(code));
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setSubmitError(null);
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      router.push(redirectTo());
+    } catch (err: unknown) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : '';
+      setSubmitError(getAuthErrorMessage(code));
     }
   };
 
@@ -114,10 +251,79 @@ export default function AuthPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {/* Tab Navigation */}
-            <div className="flex mb-12 bg-gray-50 rounded-2xl p-1">
+            {/* Email link: completing or need email */}
+            {emailLinkState === 'completing' && (
+              <div className="mb-8 py-8 text-center">
+                <div className="animate-pulse text-gray-600">Completing sign-in...</div>
+              </div>
+            )}
+
+            {emailLinkState === 'need-email' && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8"
+              >
+                <Typography variant="h3" className="mb-4 font-bold">
+                  Confirm your email
+                </Typography>
+                <p className="text-gray-600 mb-6 text-sm">
+                  You opened this link on a different device. Enter the email address you used to request the sign-in link.
+                </p>
+                <form onSubmit={handleCompleteEmailLinkSubmit} className="space-y-4">
+                  {submitError && (
+                    <p className="text-sm font-medium text-red-600">{submitError}</p>
+                  )}
+                  <Input
+                    label="Email address"
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="you@example.com"
+                    error={errors.email}
+                    required
+                  />
+                  <Button type="submit" variant="primary" size="lg" className="w-full">
+                    Complete sign-in
+                  </Button>
+                </form>
+              </motion.div>
+            )}
+
+            {emailLinkState === 'link-sent' && linkSentToEmail && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8 rounded-2xl border-2 border-gray-200 bg-gray-50 p-6 text-center"
+              >
+                <EnvelopeIcon className="w-12 h-12 mx-auto text-gray-700 mb-4" />
+                <Typography variant="h3" className="mb-2 font-bold">
+                  Check your email
+                </Typography>
+                <p className="text-gray-600 text-sm mb-4">
+                  We sent a sign-in link to <strong>{linkSentToEmail}</strong>. Click the link in that email to sign in.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmailLinkState('none');
+                    setLinkSentToEmail(null);
+                  }}
+                  className="text-sm font-bold text-black hover:underline"
+                >
+                  Use a different method
+                </button>
+              </motion.div>
+            )}
+
+            {/* Tab Navigation – hide when in email-link flow */}
+            {emailLinkState === 'none' && !linkSentToEmail && (
+            <>
+            <div className="flex mb-8 bg-gray-50 rounded-2xl p-1">
               <button
-                onClick={() => setActiveTab('login')}
+                type="button"
+                onClick={() => handleTabChange('login')}
                 className={`flex-1 py-4 px-6 rounded-xl text-lg font-black transition-all duration-200 ${
                   activeTab === 'login'
                     ? 'bg-white text-black shadow-sm'
@@ -127,7 +333,8 @@ export default function AuthPage() {
                 Login
               </button>
               <button
-                onClick={() => setActiveTab('signup')}
+                type="button"
+                onClick={() => handleTabChange('signup')}
                 className={`flex-1 py-4 px-6 rounded-xl text-lg font-black transition-all duration-200 ${
                   activeTab === 'signup'
                     ? 'bg-white text-black shadow-sm'
@@ -136,6 +343,46 @@ export default function AuthPage() {
               >
                 Sign Up
               </button>
+            </div>
+
+            {/* Google Sign-In */}
+            <div className="mb-8">
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                className="w-full flex items-center justify-center gap-3"
+                onClick={handleGoogleSignIn}
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden>
+                  <path
+                    fill="currentColor"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
+                </svg>
+                Continue with Google
+              </Button>
+            </div>
+
+            <div className="relative mb-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-4 text-gray-500">Or continue with email</span>
+              </div>
             </div>
 
             <AnimatePresence mode="wait">
@@ -147,65 +394,112 @@ export default function AuthPage() {
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <form onSubmit={handleSubmit} className="space-y-8">
-                    <Input
-                      label="Email Address"
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="you@example.com"
-                      error={errors.email}
-                      required
-                    />
-
-                    <div>
-                      <div className="relative">
+                  {!showEmailLinkForm ? (
+                    <form onSubmit={handleSubmit} className="space-y-8">
+                      {submitError && (
+                        <p className="text-sm font-medium text-red-600">{submitError}</p>
+                      )}
                       <Input
-                        label="Password"
-                        type={showPassword ? 'text' : 'password'}
-                        name="password"
-                        value={formData.password}
+                        label="Email Address"
+                        type="email"
+                        name="email"
+                        value={formData.email}
                         onChange={handleInputChange}
-                        placeholder="Enter your password"
-                          error={errors.password}
+                        placeholder="you@example.com"
+                        error={errors.email}
                         required
                       />
+
+                      <div>
+                        <div className="relative">
+                        <Input
+                          label="Password"
+                          type={showPassword ? 'text' : 'password'}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          placeholder="Enter your password"
+                            error={errors.password}
+                          required
+                        />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-12 text-gray-500 hover:text-black"
+                          >
+                            {showPassword ? (
+                              <EyeSlashIcon className="w-6 h-6" />
+                            ) : (
+                              <EyeIcon className="w-6 h-6" />
+                            )}
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="h-5 w-5 rounded border-gray-300 text-black focus:ring-black"
+                            />
+                            <span className="text-sm font-medium text-gray-700">Remember me</span>
+                          </label>
+                          <Link href="/forgot-password" className="text-sm font-bold text-black hover:underline">
+                            Forgot password?
+                          </Link>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="primary"
+                        size="lg"
+                        type="submit"
+                        className="w-full"
+                      >
+                        Sign In
+                      </Button>
+                      <div className="text-center">
                         <button
                           type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-12 text-gray-500 hover:text-black"
+                          onClick={() => setShowEmailLinkForm(true)}
+                          className="text-sm font-bold text-black hover:underline"
                         >
-                          {showPassword ? (
-                            <EyeSlashIcon className="w-6 h-6" />
-                          ) : (
-                            <EyeIcon className="w-6 h-6" />
-                          )}
+                          Sign in with email link instead
                         </button>
                       </div>
-                      <div className="flex items-center justify-between mt-4">
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="h-5 w-5 rounded border-gray-300 text-black focus:ring-black"
-                          />
-                          <span className="text-sm font-medium text-gray-700">Remember me</span>
-                        </label>
-                        <Link href="/forgot-password" className="text-sm font-bold text-black hover:underline">
-                          Forgot password?
-                        </Link>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleSendEmailLink} className="space-y-6">
+                      {submitError && (
+                        <p className="text-sm font-medium text-red-600">{submitError}</p>
+                      )}
+                      <Input
+                        label="Email address"
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="you@example.com"
+                        error={errors.email}
+                        required
+                      />
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        size="lg"
+                        className="w-full"
+                      >
+                        Send sign-in link
+                      </Button>
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={() => setShowEmailLinkForm(false)}
+                          className="text-sm font-bold text-black hover:underline"
+                        >
+                          Back to password
+                        </button>
                       </div>
-                    </div>
-
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      type="submit"
-                      className="w-full"
-                    >
-                      Sign In
-                    </Button>
-                  </form>
+                    </form>
+                  )}
                 </motion.div>
               ) : (
                 <motion.div
@@ -216,6 +510,9 @@ export default function AuthPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <form onSubmit={handleSubmit} className="space-y-8">
+                    {submitError && (
+                      <p className="text-sm font-medium text-red-600">{submitError}</p>
+                    )}
                     <Input
                       label="Email Address"
                       type="email"
@@ -324,6 +621,9 @@ export default function AuthPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+            </>
+            )}
+
           </motion.div>
 
           {/* Footer Links */}
@@ -345,5 +645,13 @@ export default function AuthPage() {
         </motion.div>
       </Container>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div></div>}>
+      <AuthContent />
+    </Suspense>
   );
 }

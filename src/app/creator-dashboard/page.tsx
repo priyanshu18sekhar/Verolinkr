@@ -32,35 +32,47 @@ import {
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import FloatingNav from '../../componets/ui/FloatingNav';
 
+import { apiGet } from '@/lib/api/client';
+
 function CreatorDashboardContent() {
   const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'mycampaigns' | 'earnings' | 'analytics'>('overview');
   const [isLoading, setIsLoading] = useState(true);
+  const [creatorProfile, setCreatorProfile] = useState<any>(null);
 
-  // Simple loading simulation
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
+    async function fetchProfile() {
+      try {
+        const response = await apiGet<{ creator: any }>('/api/creators/me');
+        if (response && response.creator) {
+          setCreatorProfile(response.creator);
+        }
+      } catch (error) {
+        console.error('Failed to fetch creator profile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchProfile();
   }, []);
 
-  // Enhanced Mock data
-  const creatorStats = {
-    totalEarnings: 185000,
-    thisMonthEarnings: 45000,
-    pendingEarnings: 32000,
-    activeCampaigns: 3,
-    completedCampaigns: 12,
-    totalFollowers: 125000,
-    avgEngagement: 8.5,
-    authenticityScore: 95,
-    trustworthinessRating: 4.9,
-    totalViews: 2500000,
-    responseRate: 98,
-    completionRate: 100,
-    averageRating: 4.8
+  const defaultStats = {
+    totalEarnings: 0,
+    thisMonthEarnings: 0,
+    pendingEarnings: 0,
+    activeCampaigns: 0,
+    completedCampaigns: 0,
+    totalFollowers: 0,
+    avgEngagement: 0,
+    authenticityScore: 0,
+    trustworthinessRating: 0,
+    totalViews: 0,
+    responseRate: 0,
+    completionRate: 0,
+    averageRating: 0
   };
+
+  // Use real stats if available, otherwise default to 0 (or mock for demo if preferred, but instruction said fetch real data)
+  const creatorStats = creatorProfile?.stats ? { ...defaultStats, ...creatorProfile.stats } : defaultStats;
 
   // Monthly earnings data for graph
   const monthlyEarnings = [

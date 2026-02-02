@@ -7,6 +7,7 @@ import { Input } from '../../../../components/design-system';
 import { StepLayout, AnimatedParticles } from '../../../../components/onboarding';
 import { CheckCircleIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { apiPost } from '@/lib/api/client';
 
 export default function CreatorOnboardingStep7() {
   const router = useRouter();
@@ -78,16 +79,16 @@ export default function CreatorOnboardingStep7() {
       
       try {
         const existingData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
-        localStorage.setItem('onboardingData', JSON.stringify({
-          ...existingData,
-          creator: {
-            ...existingData.creator,
-            ...formData
-          }
-        }));
-        
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
+        const creatorData = {
+          ...existingData.creator,
+          ...formData
+        };
+
+        await apiPost('/api/onboarding/creator', {
+          creator: creatorData
+        });
+
+        localStorage.removeItem('onboardingData'); // Cleanup
         setIsComplete(true);
         setIsSubmitting(false);
         

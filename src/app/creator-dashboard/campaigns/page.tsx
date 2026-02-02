@@ -50,6 +50,20 @@ interface Campaign {
   category: string;
   type: string;
   budget: number;
+  duration: string;
+  requirements: string;
+  location: string;
+  deadline: string;
+  brandRating: number;
+  applicants: number;
+  maxApplicants: number;
+  posted: string;
+  matchScore: number;
+  recommended: boolean;
+  urgency: string;
+  estimatedReach: string;
+  campaignGoal: string;
+  deliverables: string[];
   [key: string]: unknown;
 }
 

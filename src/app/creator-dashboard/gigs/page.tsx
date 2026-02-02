@@ -619,7 +619,7 @@ function GigsMarketplaceContent() {
                               className="border-2 border-gray-200 rounded-lg p-4 hover:border-black transition-all duration-200 cursor-pointer"
                             >
                               <div className="text-center mb-3">
-                                <p className="text-[11px] font-bold text-gray-600 uppercase mb-2">{pkg.name || key}</p>
+                                <p className="text-[11px] font-bold text-gray-600 uppercase mb-2">{key}</p>
                                 <p className="text-[24px] font-black text-black leading-none">₹{(pkg.price / 1000).toFixed(0)}K</p>
                                 <p className="text-[10px] text-gray-500 mt-1">{pkg.delivery}</p>
                               </div>

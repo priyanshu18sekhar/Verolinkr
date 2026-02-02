@@ -2,14 +2,16 @@
 
 import { createContext, useContext, ReactNode } from 'react';
 
-type UserType = 'brand' | 'creator';
+export type UserType = 'brand' | 'creator';
 
-interface UserContextType {
-  userType: UserType;
+export interface UserContextType {
+  userType: UserType | null;
   isAuthenticated: boolean;
   userName?: string;
   userEmail?: string;
   userId?: string;
+  loading: boolean;
+  signOut: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -22,12 +24,13 @@ interface UserProviderProps {
   userId?: string;
 }
 
-export function UserProvider({ 
-  children, 
-  userType, 
-  userName, 
-  userEmail, 
-  userId 
+/** Legacy: use when you need to inject user props (e.g. in a route that has already resolved user). */
+export function UserProvider({
+  children,
+  userType,
+  userName,
+  userEmail,
+  userId,
 }: UserProviderProps) {
   return (
     <UserContext.Provider
@@ -37,6 +40,8 @@ export function UserProvider({
         userName,
         userEmail,
         userId,
+        loading: false,
+        signOut: async () => {},
       }}
     >
       {children}
@@ -44,11 +49,12 @@ export function UserProvider({
   );
 }
 
-export function useUser() {
+export function useUser(): UserContextType {
   const context = useContext(UserContext);
   if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error('useUser must be used within a UserProvider or AuthProvider');
   }
   return context;
 }
 
+export { UserContext };
