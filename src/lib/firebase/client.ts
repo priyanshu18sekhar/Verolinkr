@@ -16,24 +16,48 @@ const firebaseConfig = {
   }),
 };
 
+// Lazy initialization to avoid SSR issues
+let _app: FirebaseApp | null = null;
+let _auth: Auth | null = null;
+
 function getFirebaseApp(): FirebaseApp {
-  return getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  // Skip initialization on server during prerender
+  if (typeof window === 'undefined') {
+    throw new Error('Firebase client cannot be used on the server');
+  }
+
+  if (!_app) {
+    _app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  }
+  return _app;
 }
 
-const app = getFirebaseApp();
-
-export const auth: Auth = getAuth(app);
-
-/** Backward-compat alias. Prefer importing `auth` directly. */
+// Auth getter with lazy initialization
 export function getClientAuth(): Auth {
-  return auth;
+  if (!_auth) {
+    _auth = getAuth(getFirebaseApp());
+  }
+  return _auth;
 }
 
-export const firebaseApp = app;
+// For backward compatibility - use getter to lazily init
+export const auth: Auth = new Proxy({} as Auth, {
+  get(_, prop) {
+    return (getClientAuth() as any)[prop];
+  },
+});
+
+// Lazy firebaseApp getter
+export const firebaseApp = new Proxy({} as FirebaseApp, {
+  get(_, prop) {
+    return (getFirebaseApp() as any)[prop];
+  },
+});
 
 /** Initialize Analytics in the browser when supported. Call once from a client component. */
 export async function initAnalytics(): Promise<Analytics | null> {
   if (typeof window === 'undefined') return null;
   if (!(await isSupported())) return null;
-  return getAnalytics(app);
+  return getAnalytics(getFirebaseApp());
 }
+
