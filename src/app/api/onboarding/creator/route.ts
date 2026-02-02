@@ -19,17 +19,17 @@ export async function POST(request: NextRequest) {
 
   // Basic validation - check for essential fields from various steps
   // Note: Detailed validation can be added here or in a separate schema validator
-  
+
   // Extract data sections (assuming the frontend sends the structure { creator: { ... } })
   // Adjusting based on how we plan to send data from Step 7
-  const creatorData = body.creator || body; 
+  const creatorData = body.creator || body;
 
   const db = getAdminFirestore();
   const batch = db.batch();
 
   // 1. Create/Update Creator Document
   const creatorRef = db.collection('creators').doc(auth.uid);
-  
+
   const creatorProfile = {
     ...creatorData,
     uid: auth.uid,
@@ -52,10 +52,17 @@ export async function POST(request: NextRequest) {
   }, { merge: true });
 
   try {
+    console.log(`[API] Attempting to save profile for uid: ${auth.uid}`);
+    console.log(`[API] Using project ID: ${process.env.FIREBASE_PROJECT_ID}`);
     await batch.commit();
+    console.log('[API] Profile saved successfully');
     return Response.json({ success: true, uid: auth.uid });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating creator profile:', error);
+    // Log specific details if available
+    if (error.code) console.error('Error Code:', error.code);
+    if (error.details) console.error('Error Details:', error.details);
+
     return Response.json(
       { error: 'Internal Server Error' },
       { status: 500 }
