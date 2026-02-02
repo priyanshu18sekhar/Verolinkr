@@ -1,13 +1,14 @@
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { InputHTMLAttributes, forwardRef, ReactNode } from 'react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   hint?: string;
+  icon?: ReactNode;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, className = '', ...props }, ref) => {
+  ({ label, error, hint, icon, className = '', ...props }, ref) => {
     return (
       <div className="w-full">
         {label && (
@@ -18,23 +19,31 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <input
-          ref={ref}
-          className={`
-            w-full px-6 py-4 text-lg
-            border-2 rounded-xl
-            transition-all duration-200
-            focus:outline-none
-            disabled:opacity-50 disabled:cursor-not-allowed
-            ${
-              error
-                ? 'border-red-500 focus:border-red-600'
-                : 'border-gray-300 focus:border-black'
-            }
-            ${className}
-          `}
-          {...props}
-        />
+        <div className="relative">
+          {icon && (
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              {icon}
+            </div>
+          )}
+          <input
+            ref={ref}
+            className={`
+              w-full py-4 text-lg
+              border-2 rounded-xl
+              transition-all duration-200
+              focus:outline-none
+              disabled:opacity-50 disabled:cursor-not-allowed
+              ${icon ? 'pl-12 pr-6' : 'px-6'}
+              ${
+                error
+                  ? 'border-red-500 focus:border-red-600'
+                  : 'border-gray-300 focus:border-black'
+              }
+              ${className}
+            `}
+            {...props}
+          />
+        </div>
         {error && (
           <p className="mt-2 text-sm font-medium text-red-600">{error}</p>
         )}
