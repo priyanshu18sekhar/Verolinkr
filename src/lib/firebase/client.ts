@@ -16,6 +16,21 @@ const firebaseConfig = {
   }),
 };
 
+// Debugging: Check if config is loaded
+if (typeof window !== 'undefined') {
+  console.log('[Firebase] Config check:', {
+    hasApiKey: !!firebaseConfig.apiKey,
+    hasAuthDomain: !!firebaseConfig.authDomain,
+    hasProjectId: !!firebaseConfig.projectId,
+    projectId: firebaseConfig.projectId,
+    authDomain: firebaseConfig.authDomain,
+    envCheck: {
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    }
+  });
+}
+
+
 // Lazy initialization to avoid SSR issues
 let _app: FirebaseApp | null = null;
 let _auth: Auth | null = null;
