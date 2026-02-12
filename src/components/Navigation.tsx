@@ -75,6 +75,7 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
                 </Link>
                 <Link href="/auth">
                   <motion.button
+                    suppressHydrationWarning
                     className="px-6 py-2.5 bg-black text-white rounded-full font-bold text-[13px] relative premium-glow-button"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -147,6 +148,7 @@ export default function Navigation({ userType, isLoggedIn = false }: NavigationP
                     </Link>
                     <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
                       <motion.button
+                        suppressHydrationWarning
                         className="w-full px-6 py-2.5 bg-black text-white rounded-full font-bold text-[13px] relative premium-glow-button"
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}

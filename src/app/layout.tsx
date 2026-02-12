@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import ConditionalNavigation from "../components/ConditionalNavigation";
 import AnalyticsInit from "../components/AnalyticsInit";
@@ -32,6 +33,11 @@ export default function RootLayout({
         suppressHydrationWarning={true}
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Load error suppression BEFORE React hydration */}
+        <Script 
+          src="/suppress-hydration-warnings.js" 
+          strategy="beforeInteractive"
+        />
         <AuthProvider>
           <AnalyticsInit />
           <CurrencyProvider>

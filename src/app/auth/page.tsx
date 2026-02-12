@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -8,7 +8,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
@@ -42,8 +43,6 @@ function getAuthErrorMessage(code: string): string {
   return messages[code] ?? 'An error occurred. Please try again.';
 }
 
-import { Suspense } from 'react';
-
 function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,6 +62,7 @@ function AuthContent() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Email link (passwordless) flow
   const [emailLinkState, setEmailLinkState] = useState<
@@ -70,6 +70,57 @@ function AuthContent() {
   >('none');
   const [linkSentToEmail, setLinkSentToEmail] = useState<string | null>(null);
   const [showEmailLinkForm, setShowEmailLinkForm] = useState(false);
+
+  // Toast State
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  // Handle Redirect Result (Google Sign In)
+  useEffect(() => {
+    const handleRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          const user = result.user;
+          showToast('Successfully signed in with Google!', 'success');
+
+          // Dynamically import db
+          const { doc, getDoc } = await import('firebase/firestore');
+          const { db } = await import('@/lib/firebase/client');
+
+          // Check Creator Profile
+          const creatorDoc = await getDoc(doc(db, 'creators', user.uid));
+          if (creatorDoc.exists()) {
+            showToast('Welcome back, Creator!', 'success');
+            router.push('/creator-dashboard');
+            return;
+          }
+
+          // Check Brand Profile
+          const brandDoc = await getDoc(doc(db, 'brands', user.uid));
+          if (brandDoc.exists()) {
+            showToast('Welcome back, Brand!', 'success');
+            router.push('/brand-dashboard');
+            return;
+          }
+
+          // No profile found -> New User -> Onboarding
+          showToast('Account created! Redirecting to setup...', 'success');
+          router.push('/onboarding/role-selection');
+        }
+      } catch (error: any) {
+        console.error("Redirect auth error:", error);
+        setSubmitError(getAuthErrorMessage(error?.code || 'auth/unknown'));
+        showToast('Authentication failed. Please try again.', 'error');
+      }
+    };
+    
+    handleRedirect();
+  }, [router]);
 
   // On mount: detect if we're opening an email sign-in link and complete or ask for email
   useEffect(() => {
@@ -204,49 +255,19 @@ function AuthContent() {
     }
   };
 
-  // Toast State
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
-
-  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
-
   const handleGoogleSignIn = async () => {
     setSubmitError(null);
+    setIsRedirecting(true); // Show loading state if needed
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+      client_id: '692752815153-itv9q2ntao5s094j9kkog95tdd0f4iep.apps.googleusercontent.com'
+    });
+    
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      
-      showToast('Successfully signed in with Google!', 'success');
-
-      // Check if user has a profile in brands or creators
-      // We need to dynamically import db to avoid server-side issues or verify it's client-side
-      const { doc, getDoc } = await import('firebase/firestore');
-      const { db } = await import('@/lib/firebase/client');
-
-      // Check Creator Profile
-      const creatorDoc = await getDoc(doc(db, 'creators', user.uid));
-      if (creatorDoc.exists()) {
-        showToast('Welcome back, Creator!', 'success');
-        router.push('/creator-dashboard');
-        return;
-      }
-
-      // Check Brand Profile
-      const brandDoc = await getDoc(doc(db, 'brands', user.uid));
-      if (brandDoc.exists()) {
-        showToast('Welcome back, Brand!', 'success');
-        router.push('/brand-dashboard');
-        return;
-      }
-
-      // No profile found -> New User -> Onboarding
-      showToast('Account created! Redirecting to setup...', 'success');
-      router.push('/onboarding/role-selection');
-
+      await signInWithRedirect(auth, provider);
+      // execution ends here as page redirects
     } catch (err: unknown) {
+      setIsRedirecting(false);
       const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : '';
       const msg = getAuthErrorMessage(code);
       setSubmitError(msg);
@@ -255,12 +276,13 @@ function AuthContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-20 relative overflow-hidden">
+    <div suppressHydrationWarning className="min-h-screen bg-white flex items-center justify-center px-4 py-20 relative overflow-hidden">
       {/* Subtle background elements matching Hero */}
       <AnimatedParticles count={40} />
 
       <Container size="sm">
         <motion.div
+          suppressHydrationWarning
           initial="initial"
           animate="animate"
           variants={fadeInUp}
@@ -343,6 +365,7 @@ function AuthContent() {
                   We sent a sign-in link to <strong>{linkSentToEmail}</strong>. Click the link in that email to sign in.
                 </p>
                 <button
+                  suppressHydrationWarning
                   type="button"
                   onClick={() => {
                     setEmailLinkState('none');
@@ -360,6 +383,7 @@ function AuthContent() {
             <>
             <div className="flex mb-8 bg-gray-50 rounded-2xl p-1">
               <button
+                suppressHydrationWarning
                 type="button"
                 onClick={() => handleTabChange('login')}
                 className={`flex-1 py-4 px-6 rounded-xl text-lg font-black transition-all duration-200 ${
@@ -371,6 +395,7 @@ function AuthContent() {
                 Login
               </button>
               <button
+                suppressHydrationWarning
                 type="button"
                 onClick={() => handleTabChange('signup')}
                 className={`flex-1 py-4 px-6 rounded-xl text-lg font-black transition-all duration-200 ${
@@ -461,6 +486,7 @@ function AuthContent() {
                           required
                         />
                           <button
+                            suppressHydrationWarning
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-4 top-12 text-gray-500 hover:text-black"
@@ -475,6 +501,7 @@ function AuthContent() {
                         <div className="flex items-center justify-between mt-4">
                           <label className="flex items-center space-x-2 cursor-pointer">
                             <input
+                              suppressHydrationWarning
                               type="checkbox"
                               className="h-5 w-5 rounded border-gray-300 text-black focus:ring-black"
                             />
@@ -496,6 +523,7 @@ function AuthContent() {
                       </Button>
                       <div className="text-center">
                         <button
+                          suppressHydrationWarning
                           type="button"
                           onClick={() => setShowEmailLinkForm(true)}
                           className="text-sm font-bold text-black hover:underline"
@@ -529,6 +557,7 @@ function AuthContent() {
                       </Button>
                       <div className="text-center">
                         <button
+                          suppressHydrationWarning
                           type="button"
                           onClick={() => setShowEmailLinkForm(false)}
                           className="text-sm font-bold text-black hover:underline"
@@ -576,6 +605,7 @@ function AuthContent() {
                           required
                         />
                         <button
+                          suppressHydrationWarning
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-4 top-12 text-gray-500 hover:text-black"
@@ -602,6 +632,7 @@ function AuthContent() {
                           required
                         />
                         <button
+                          suppressHydrationWarning
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           className="absolute right-4 top-12 text-gray-500 hover:text-black"
@@ -618,6 +649,7 @@ function AuthContent() {
                     {/* Terms and Conditions */}
                     <div className="flex items-start space-x-4">
                       <input
+                        suppressHydrationWarning
                         type="checkbox"
                         id="terms"
                         className="mt-2 h-5 w-5 rounded border-gray-300 text-black focus:ring-black"
@@ -649,6 +681,7 @@ function AuthContent() {
                     <Typography variant="caption" className="text-gray-600">
                       Already have an account?{' '}
                       <button
+                        suppressHydrationWarning
                         onClick={() => setActiveTab('login')}
                         className="text-black font-bold hover:underline"
                       >
@@ -669,16 +702,7 @@ function AuthContent() {
             <Link href="/contact" className="text-sm font-medium text-gray-600 hover:text-black block">
               Contact Support
             </Link>
-            <div className="text-xs text-gray-500">
-              By continuing, you agree to our{' '}
-              <Link href="/terms" className="underline hover:text-gray-700">
-                Terms of Service
-              </Link>{' '}
-              and{' '}
-              <Link href="/privacy" className="underline hover:text-gray-700">
-                Privacy Policy
-              </Link>
-            </div>
+
           </div>
         </motion.div>
       {/* Aesthetic Toast Notification */}

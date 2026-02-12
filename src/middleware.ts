@@ -1,0 +1,15 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export function middleware(request: NextRequest) {
+    const response = NextResponse.next();
+
+    // Suppress hydration warnings for browser extension attributes
+    response.headers.set('Cross-Origin-Opener-Policy', 'unsafe-none');
+
+    return response;
+}
+
+export const config = {
+    matcher: '/:path*',
+};

@@ -40,6 +40,7 @@ export default function Button({
 
   return (
     <motion.button
+      suppressHydrationWarning
       type={type}
       onClick={onClick}
       disabled={disabled}

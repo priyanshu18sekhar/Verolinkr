@@ -26,18 +26,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
           <input
+            suppressHydrationWarning
             ref={ref}
             className={`
               w-full py-4 text-lg
               border-2 rounded-xl
               transition-all duration-200
-              focus:outline-none
+              focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent
               disabled:opacity-50 disabled:cursor-not-allowed
               ${icon ? 'pl-12 pr-6' : 'px-6'}
               ${
                 error
-                  ? 'border-red-500 focus:border-red-600'
-                  : 'border-gray-300 focus:border-black'
+                  ? 'border-red-500'
+                  : 'border-gray-200 hover:border-black'
               }
               ${className}
             `}
