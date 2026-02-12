@@ -10,6 +10,7 @@ import {
   signInWithEmailAndPassword,
   signInWithRedirect,
   getRedirectResult,
+  onAuthStateChanged,
   GoogleAuthProvider,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
@@ -145,6 +146,38 @@ function AuthContent() {
       setEmailLinkState('need-email');
     }
   }, [router, redirectTo]);
+
+  // Monitor Auth State & Redirect
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const { doc, getDoc } = await import('firebase/firestore');
+          const { db } = await import('@/lib/firebase/client');
+
+          // Check Creator Profile
+          const creatorDoc = await getDoc(doc(db, 'creators', user.uid));
+          if (creatorDoc.exists()) {
+            router.push('/creator-dashboard');
+            return;
+          }
+
+          // Check Brand Profile
+          const brandDoc = await getDoc(doc(db, 'brands', user.uid));
+          if (brandDoc.exists()) {
+            router.push('/brand-dashboard');
+            return;
+          }
+
+          // No profile -> Onboarding
+          router.push('/onboarding/role-selection');
+        } catch (error) {
+           console.error("Auth state redirect error:", error);
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   const handleCompleteEmailLinkSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
