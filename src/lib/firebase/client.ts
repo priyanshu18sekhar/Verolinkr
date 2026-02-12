@@ -92,12 +92,15 @@ export const storage: FirebaseStorage = new Proxy({} as FirebaseStorage, {
   },
 });
 
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getFirestore, type Firestore, initializeFirestore, memoryLocalCache } from 'firebase/firestore';
 
 let _db: Firestore | null = null;
 export function getClientDb(): Firestore {
   if (!_db) {
-    _db = getFirestore(getFirebaseApp());
+    _db = initializeFirestore(getFirebaseApp(), {
+      experimentalForceLongPolling: true,
+      localCache: memoryLocalCache(),
+    }, 'verolinkr-native');
   }
   return _db;
 }

@@ -91,7 +91,8 @@ function AuthContent() {
 
           // Dynamically import db
           const { doc, getDoc } = await import('firebase/firestore');
-          const { db } = await import('@/lib/firebase/client');
+          const { getClientDb } = await import('@/lib/firebase/client');
+          const db = getClientDb();
 
           // Check Creator Profile
           const creatorDoc = await getDoc(doc(db, 'creators', user.uid));
@@ -150,29 +151,58 @@ function AuthContent() {
   // Monitor Auth State & Redirect
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log("Auth State Changed:", user ? `User ${user.uid}` : "No User");
       if (user) {
         try {
-          const { doc, getDoc } = await import('firebase/firestore');
-          const { db } = await import('@/lib/firebase/client');
+          // Use Firestore Lite to minimize connection/WebSocket issues
+          const { doc, getDoc, getFirestore } = await import('firebase/firestore/lite');
+          const { getApp } = await import('firebase/app');
+          // Explicitly use the database ID found via CLI
+          const db = getFirestore(getApp(), 'verolinkr-native');
+
+          console.log("Checking Creator Profile for:", user.uid);
+          
+          // Helper for basic timeout if fetch takes too long
+          const getDocWithTimeout = (ref: any, ms = 5000) => {
+            return Promise.race([
+              getDoc(ref),
+              new Promise((_, reject) => setTimeout(() => reject(new Error(`Firestore request timed out after ${ms}ms`)), ms))
+            ]);
+          };
 
           // Check Creator Profile
-          const creatorDoc = await getDoc(doc(db, 'creators', user.uid));
-          if (creatorDoc.exists()) {
-            router.push('/creator-dashboard');
-            return;
+          try {
+            const creatorDoc: any = await getDocWithTimeout(doc(db, 'creators', user.uid));
+            if (creatorDoc.exists()) {
+              console.log("Creator Profile Found!");
+              router.push('/creator-dashboard');
+              return;
+            }
+          } catch (e) {
+             console.error("Creator Profile Check Failed:", e);
+             // Fallback: proceed to Brand check if timed out? Or stop?
+             // Usually if timed out, Brand check will also timeout.
+             // But let's try Brand check anyway.
           }
 
+          console.log("Checking Brand Profile for:", user.uid);
           // Check Brand Profile
-          const brandDoc = await getDoc(doc(db, 'brands', user.uid));
-          if (brandDoc.exists()) {
-            router.push('/brand-dashboard');
-            return;
+          try {
+            const brandDoc: any = await getDocWithTimeout(doc(db, 'brands', user.uid));
+            if (brandDoc.exists()) {
+              console.log("Brand Profile Found!");
+              router.push('/brand-dashboard');
+              return;
+            }
+          } catch (e) {
+             console.error("Brand Profile Check Failed:", e);
           }
 
+          console.log("No profile found (or check failed). Redirecting to Onboarding...");
           // No profile -> Onboarding
           router.push('/onboarding/role-selection');
         } catch (error) {
-           console.error("Auth state redirect error:", error);
+           console.error("Auth state logic error:", error);
         }
       }
     });
@@ -292,9 +322,6 @@ function AuthContent() {
     setSubmitError(null);
     setIsRedirecting(true); // Show loading state if needed
     const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({
-      client_id: '692752815153-itv9q2ntao5s094j9kkog95tdd0f4iep.apps.googleusercontent.com'
-    });
     
     try {
       await signInWithRedirect(auth, provider);
