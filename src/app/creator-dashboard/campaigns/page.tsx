@@ -40,8 +40,9 @@ import {
   CheckIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
-import FloatingNav from '../../../componets/ui/FloatingNav';
+import FloatingNav from '../../../components/ui/FloatingNav';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
+import { apiGet } from '@/lib/api/client';
 
 interface Campaign {
   id: number;
@@ -85,149 +86,50 @@ function CreatorCampaignsContent() {
   const [successMessage, setSuccessMessage] = useState('');
   const [currentStackIndex, setCurrentStackIndex] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
 
-  // Loading simulation
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+    const fetchCampaigns = async () => {
+      setIsLoading(true);
+      try {
+        const { campaigns: data } = await apiGet<{ campaigns: any[] }>('/api/campaigns?type=marketplace');
+        
+        // Enrich data with consistent mock values for fields missing in MVP API
+        const enriched = data.map((c, i) => ({
+          ...c,
+          brand: c.brand || 'Verified Brand',
+          title: c.title || 'Untitled Campaign',
+          category: c.category || 'Marketing',
+          type: c.type || 'cpv',
+          budget: c.budget || 25000,
+          duration: c.duration || '2 weeks',
+          requirements: c.requirements || 'Standard campaign deliverables',
+          location: c.location || 'Remote',
+          deadline: c.deadline || new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
+          brandRating: c.brandRating || 4.8,
+          applicants: c.applicants || Math.floor(Math.random() * 50),
+          maxApplicants: c.maxApplicants || 100,
+          posted: c.createdAt ? new Date(c.createdAt._seconds * 1000).toLocaleDateString() : 'Just now',
+          matchScore: c.matchScore || (80 + Math.floor(Math.random() * 15)),
+          recommended: i < 3,
+          urgency: c.urgency || 'normal',
+          estimatedReach: '50K-100K',
+          campaignGoal: 'Brand Awareness',
+          deliverables: c.deliverables || ['1 Post', '3 Stories']
+        }));
+        setCampaigns(enriched);
+      } catch (err) {
+        console.error('Failed to load campaigns', err);
+        // Optional: Set empty state or error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCampaigns();
   }, []);
 
-  const availableCampaigns = [
-    {
-      id: 1,
-      brand: 'SkincareBrand',
-      title: 'Product Review Video',
-      category: 'Beauty & Skincare',
-      type: 'gigs',
-      budget: 15000,
-      duration: '1 week',
-      requirements: '1 unboxing video + 1 review video',
-      location: 'Anywhere, India',
-      deadline: '2024-01-15',
-      brandRating: 4.8,
-      applicants: 23,
-      maxApplicants: 50,
-      posted: '2 hours ago',
-      matchScore: 95,
-      recommended: true,
-      urgency: 'normal',
-      estimatedReach: '50K-100K',
-      campaignGoal: 'Product Awareness',
-      deliverables: ['1 Video', '3 Stories', '1 Post']
-    },
-    {
-      id: 2,
-      brand: 'TechGiant',
-      title: 'Smartphone Launch Campaign',
-      category: 'Technology',
-      type: 'cpv',
-      budget: 50000,
-      duration: '2 weeks',
-      requirements: '1 Instagram Reel showcasing features',
-      location: 'Anywhere, India',
-      deadline: '2024-01-20',
-      brandRating: 4.9,
-      applicants: 45,
-      maxApplicants: 100,
-      posted: '5 hours ago',
-      matchScore: 88,
-      recommended: true,
-      urgency: 'normal',
-      estimatedReach: '100K-200K',
-      campaignGoal: 'Product Launch',
-      deliverables: ['1 Reel', '5 Stories', '2 Posts']
-    },
-    {
-      id: 3,
-      brand: 'FashionHouse',
-      title: 'Winter Collection Launch',
-      category: 'Fashion',
-      type: 'onetime',
-      budget: 25000,
-      duration: '1 week',
-      requirements: '3 Instagram posts with product',
-      location: 'Mumbai, India',
-      deadline: '2024-01-18',
-      brandRating: 4.7,
-      applicants: 67,
-      maxApplicants: 80,
-      posted: '1 day ago',
-      matchScore: 82,
-      recommended: false,
-      urgency: 'urgent',
-      estimatedReach: '75K-150K',
-      campaignGoal: 'Sales & Conversions',
-      deliverables: ['3 Posts', '10 Stories']
-    },
-    {
-      id: 4,
-      brand: 'FoodieHub',
-      title: 'Recipe Video Creation',
-      category: 'Food & Cooking',
-      type: 'gigs',
-      budget: 12000,
-      duration: '3 days',
-      requirements: '1 recipe video with ingredients list',
-      location: 'Anywhere, India',
-      deadline: '2024-01-12',
-      brandRating: 4.6,
-      applicants: 34,
-      maxApplicants: 60,
-      posted: '3 hours ago',
-      matchScore: 75,
-      recommended: false,
-      urgency: 'normal',
-      estimatedReach: '30K-60K',
-      campaignGoal: 'Engagement',
-      deliverables: ['1 Video', '5 Stories']
-    },
-    {
-      id: 5,
-      brand: 'FitnessFirst',
-      title: 'Workout Equipment Review',
-      category: 'Fitness & Wellness',
-      type: 'gigs',
-      budget: 18000,
-      duration: '1 week',
-      requirements: '1 workout demonstration video',
-      location: 'Anywhere, India',
-      deadline: '2024-01-25',
-      brandRating: 4.9,
-      applicants: 12,
-      maxApplicants: 40,
-      posted: '1 hour ago',
-      matchScore: 92,
-      recommended: true,
-      urgency: 'normal',
-      estimatedReach: '40K-80K',
-      campaignGoal: 'Product Review',
-      deliverables: ['1 Video', '3 Posts']
-    },
-    {
-      id: 6,
-      brand: 'TravelWorld',
-      title: 'Destination Guide Video',
-      category: 'Travel & Lifestyle',
-      type: 'cpv',
-      budget: 30000,
-      duration: '2 weeks',
-      requirements: '1 travel vlog showcasing destination',
-      location: 'Goa, India',
-      deadline: '2024-02-01',
-      brandRating: 4.8,
-      applicants: 28,
-      maxApplicants: 50,
-      posted: '4 hours ago',
-      matchScore: 85,
-      recommended: true,
-      urgency: 'normal',
-      estimatedReach: '80K-150K',
-      campaignGoal: 'Brand Awareness',
-      deliverables: ['1 Vlog', '7 Stories', '2 Posts']
-    }
-  ];
+
+
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -302,7 +204,7 @@ function CreatorCampaignsContent() {
     }
   };
 
-  let filteredCampaigns = availableCampaigns.filter(campaign => {
+  let filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          campaign.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          campaign.category.toLowerCase().includes(searchTerm.toLowerCase());

@@ -76,24 +76,34 @@ export default function BrandOnboardingStep5() {
       
       try {
         const existingData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
+        const completeData = {
+          ...existingData.brand,
+          ...formData,
+          profileComplete: true
+        };
+        
+        // Save locally just in case
         localStorage.setItem('onboardingData', JSON.stringify({
           ...existingData,
-          brand: {
-            ...existingData.brand,
-            ...formData
-          }
+          brand: completeData
         }));
-        
-        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Call Registration API using shared client
+        const { apiPost } = await import('@/lib/api/client');
+        await apiPost('/api/brands/register', completeData);
         
         setIsComplete(true);
         setIsSubmitting(false);
+        
+        // Clear onboarding data on success
+        localStorage.removeItem('onboardingData');
         
         setTimeout(() => {
           router.push('/brand-dashboard');
         }, 3000);
       } catch (error) {
-        setErrors({ submit: 'Submission failed. Please try again.' });
+        console.error('Registration error:', error);
+        setErrors({ submit: error instanceof Error ? error.message : 'Submission failed. Please try again.' });
         setIsSubmitting(false);
       }
     }

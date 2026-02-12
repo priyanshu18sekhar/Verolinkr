@@ -16,7 +16,9 @@ interface StepLayoutProps {
   children: React.ReactNode;
   onNext?: () => void;
   onBack?: () => void;
+  onSkip?: () => void;
   nextLabel?: string;
+  skipLabel?: string;
   showBack?: boolean;
 }
 
@@ -30,7 +32,9 @@ export default function StepLayout({
   children,
   onNext,
   onBack,
+  onSkip,
   nextLabel = 'Continue',
+  skipLabel = 'Skip',
   showBack = true,
 }: StepLayoutProps) {
   return (
@@ -83,8 +87,8 @@ export default function StepLayout({
           {children}
 
           {/* Navigation Buttons */}
-          {(onNext || onBack) && (
-            <div className={`flex gap-4 mt-12 ${showBack ? 'justify-between' : 'justify-end'}`}>
+          {(onNext || onBack || onSkip) && (
+            <div className={`flex gap-4 mt-12 items-center ${showBack ? 'justify-between' : 'justify-end'}`}>
               {showBack && onBack && (
                 <motion.button
                   type="button"
@@ -96,17 +100,32 @@ export default function StepLayout({
                   ← Back
                 </motion.button>
               )}
-              {onNext && (
-                <motion.button
-                  type="button"
-                  onClick={onNext}
-                  className="px-12 py-5 bg-black text-white rounded-full font-black text-xl hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl ml-auto"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {nextLabel} →
-                </motion.button>
-              )}
+              
+              <div className="flex gap-4 ml-auto">
+                {onSkip && (
+                  <motion.button
+                    type="button"
+                    onClick={onSkip}
+                    className="px-8 py-4 text-lg font-bold text-gray-500 hover:text-black transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {skipLabel}
+                  </motion.button>
+                )}
+
+                {onNext && (
+                  <motion.button
+                    type="button"
+                    onClick={onNext}
+                    className="px-12 py-5 bg-black text-white rounded-full font-black text-xl hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {nextLabel} →
+                  </motion.button>
+                )}
+              </div>
             </div>
           )}
         </motion.div>

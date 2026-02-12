@@ -11,17 +11,17 @@ export default function BrandOnboardingStep4() {
   const [formData, setFormData] = useState({
     gstin: '',
     businessPan: '',
-    companyRegistrationProof: null as File | null,
     authorizedSignatoryName: '',
     authorizedSignatoryEmail: '',
     authorizedSignatoryPhone: '',
     authorizedSignatoryDesignation: ''
   });
-  const [docPreview, setDocPreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    // Force re-render
+    console.log('Input changed:', name);
     setFormData(prev => ({ ...prev, [name]: value }));
     
     if (errors[name]) {
@@ -29,36 +29,7 @@ export default function BrandOnboardingStep4() {
     }
   };
 
-  const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.includes('pdf') && !file.type.includes('image/')) {
-        setErrors(prev => ({ ...prev, companyRegistrationProof: 'Please select a PDF or image file' }));
-        return;
-      }
-      
-      if (file.size > 10 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, companyRegistrationProof: 'File size must be less than 10MB' }));
-        return;
-      }
 
-      setFormData(prev => ({ ...prev, companyRegistrationProof: file }));
-      
-      if (file.type.includes('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setDocPreview(e.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        setDocPreview(null);
-      }
-      
-      if (errors.companyRegistrationProof) {
-        setErrors(prev => ({ ...prev, companyRegistrationProof: '' }));
-      }
-    }
-  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -73,9 +44,7 @@ export default function BrandOnboardingStep4() {
       newErrors.businessPan = 'Please enter a valid PAN format (e.g., ABCDE1234F)';
     }
 
-    if (!formData.companyRegistrationProof) {
-      newErrors.companyRegistrationProof = 'Company registration proof is required';
-    }
+
 
     if (!formData.authorizedSignatoryName.trim()) {
       newErrors.authorizedSignatoryName = 'Authorized signatory name is required';
@@ -135,6 +104,8 @@ export default function BrandOnboardingStep4() {
       icon={icon}
       onNext={handleNext}
       onBack={handleBack}
+      onSkip={() => router.push('/onboarding/brand/step5')}
+      skipLabel="Skip Verification"
     >
       <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="space-y-8">
         {/* GSTIN (Optional) */}
@@ -168,41 +139,7 @@ export default function BrandOnboardingStep4() {
           required
         />
 
-        {/* Company Registration Proof */}
-        <div>
-          <label className="block text-sm font-bold text-gray-900 mb-2">
-            Company Registration Proof * (PDF or Image)
-          </label>
-          <div className="space-y-4">
-            {docPreview && (
-              <div className="p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
-                <p className="text-sm font-medium text-gray-900 mb-2">Document uploaded</p>
-                <p className="text-xs text-gray-600">{formData.companyRegistrationProof?.name}</p>
-              </div>
-            )}
-            <label
-              htmlFor="companyRegistrationProof"
-              className="cursor-pointer inline-flex items-center px-6 py-4 border-2 border-gray-300 rounded-xl text-sm font-bold text-gray-700 bg-white hover:border-black transition-colors duration-200"
-            >
-              <DocumentTextIcon className="w-5 h-5 mr-2" />
-              {formData.companyRegistrationProof ? 'Change Document' : 'Upload Document'}
-            </label>
-            <input
-              id="companyRegistrationProof"
-              type="file"
-              accept=".pdf,image/*"
-              onChange={handleDocumentChange}
-              className="hidden"
-              required
-            />
-            <p className="text-xs text-gray-500">
-              PDF or Image up to 10MB. Upload certificate of incorporation or similar document.
-            </p>
-          </div>
-          {errors.companyRegistrationProof && (
-            <p className="mt-2 text-sm font-medium text-red-600">{errors.companyRegistrationProof}</p>
-          )}
-        </div>
+
 
         {/* Authorized Signatory */}
         <div className="space-y-6 border-t-2 border-gray-200 pt-8">

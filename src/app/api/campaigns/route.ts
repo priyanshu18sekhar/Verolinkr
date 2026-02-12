@@ -7,18 +7,36 @@ export async function GET(request: NextRequest) {
   const auth = await requireAuth(request);
   if (!auth.ok) return auth.response;
 
+  const { searchParams } = new URL(request.url);
+  const type = searchParams.get('type');
+
   const db = getAdminFirestore();
-  const snapshot = await db
-    .collection('campaigns')
-    .where('ownerId', '==', auth.uid)
-    .get();
+  let query;
 
-  const campaigns = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
+  if (type === 'marketplace') {
+    // Marketplace view: Fetch all active campaigns
+    query = db.collection('campaigns')
+      .where('status', '==', 'active')
+      .orderBy('createdAt', 'desc')
+      .limit(50);
+  } else {
+    // Default view: Fetch my campaigns (Brand Dashboard)
+    query = db.collection('campaigns')
+      .where('ownerId', '==', auth.uid)
+      .orderBy('createdAt', 'desc');
+  }
 
-  return Response.json({ campaigns });
+  try {
+    const snapshot = await query.get();
+    const campaigns = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return Response.json({ campaigns });
+  } catch (error) {
+    console.error('Error fetching campaigns:', error);
+    return Response.json({ error: 'Failed to fetch campaigns' }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {

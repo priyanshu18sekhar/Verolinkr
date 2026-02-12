@@ -11,6 +11,7 @@ import { PaymentProvider } from '@/contexts/PaymentContext';
 import { NotificationProvider, useNotification } from '@/contexts/NotificationContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import ToastContainer from '@/components/notifications/ToastContainer';
+import { navigationConfig } from '@/config/navigation';
 import RightSidebar from './RightSidebar';
 import { Cog6ToothIcon, PlusIcon, UserGroupIcon, BuildingOfficeIcon, ArrowRightOnRectangleIcon, CogIcon, HomeIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
 
@@ -163,6 +164,7 @@ function WorkspaceMenu() {
 function DashboardLayoutContent({ children }: { children: ReactNode }) {
   const { rightSidebarOpen, setRightSidebarOpen } = useLayout();
   const { toasts, removeToast } = useNotification();
+  const { userType, profile } = useUser();
 
   return (
     <div className="min-h-screen bg-white">

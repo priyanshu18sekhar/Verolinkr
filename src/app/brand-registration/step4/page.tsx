@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRightIcon, ArrowLeftIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -12,15 +12,41 @@ export default function BrandRegistrationStep4() {
   const [formData, setFormData] = useState({
     gstin: '',
     businessPan: '',
-    companyRegistrationProof: null as File | null,
     authorizedSignatoryName: '',
     authorizedSignatoryEmail: '',
     authorizedSignatoryPhone: '',
-    authorizedSignatoryDesignation: ''
+    authorizedSignatoryDesignation: '',
+    // Bank Details
+    bankAccountHolder: '',
+    bankAccountNumber: '',
+    bankIfscCode: '',
+    bankName: '',
+    bankUpiId: '',
+    bankProof: null as File | null
   });
-  const [docPreview, setDocPreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('brandRegistrationData');
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      setFormData(prev => ({
+        ...prev,
+        gstin: parsed.gstin || '',
+        businessPan: parsed.businessPan || '',
+        authorizedSignatoryName: parsed.authorizedSignatoryName || '',
+        authorizedSignatoryEmail: parsed.authorizedSignatoryEmail || '',
+        authorizedSignatoryPhone: parsed.authorizedSignatoryPhone || '',
+        authorizedSignatoryDesignation: parsed.authorizedSignatoryDesignation || '',
+        bankAccountHolder: parsed.bankAccountHolder || '',
+        bankAccountNumber: parsed.bankAccountNumber || '',
+        bankIfscCode: parsed.bankIfscCode || '',
+        bankName: parsed.bankName || '',
+        bankUpiId: parsed.bankUpiId || ''
+      }));
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -32,40 +58,7 @@ export default function BrandRegistrationStep4() {
     }
   };
 
-  const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.includes('pdf') && !file.type.includes('image/')) {
-        setErrors(prev => ({ ...prev, companyRegistrationProof: 'Please select a PDF or image file' }));
-        return;
-      }
-      
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, companyRegistrationProof: 'File size must be less than 10MB' }));
-        return;
-      }
 
-      setFormData(prev => ({ ...prev, companyRegistrationProof: file }));
-      
-      // Create preview for images
-      if (file.type.includes('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setDocPreview(e.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        setDocPreview(null);
-      }
-      
-      // Clear error
-      if (errors.companyRegistrationProof) {
-        setErrors(prev => ({ ...prev, companyRegistrationProof: '' }));
-      }
-    }
-  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -82,9 +75,10 @@ export default function BrandRegistrationStep4() {
       newErrors.businessPan = 'Please enter a valid PAN format (e.g., ABCDE1234F)';
     }
 
-    if (!formData.companyRegistrationProof) {
-      newErrors.companyRegistrationProof = 'Company registration proof is required';
-    }
+    // Company proof is optional for now as storage is pending
+    // if (!formData.companyRegistrationProof) {
+    //   newErrors.companyRegistrationProof = 'Company registration proof is required';
+    // }
 
     if (!formData.authorizedSignatoryName.trim()) {
       newErrors.authorizedSignatoryName = 'Authorized signatory name is required';
@@ -106,6 +100,27 @@ export default function BrandRegistrationStep4() {
       newErrors.authorizedSignatoryDesignation = 'Designation is required';
     }
 
+    // Bank Details validation
+    if (!formData.bankAccountHolder.trim()) {
+      newErrors.bankAccountHolder = 'Account holder name is required';
+    }
+
+    if (!formData.bankAccountNumber.trim()) {
+      newErrors.bankAccountNumber = 'Account number is required';
+    } else if (!/^\d{9,18}$/.test(formData.bankAccountNumber.replace(/\D/g, ''))) {
+      newErrors.bankAccountNumber = 'Please enter a valid account number (9-18 digits)';
+    }
+
+    if (!formData.bankIfscCode.trim()) {
+      newErrors.bankIfscCode = 'IFSC code is required';
+    } else if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(formData.bankIfscCode.toUpperCase())) {
+      newErrors.bankIfscCode = 'Please enter a valid IFSC code (e.g., HDFC0001234)';
+    }
+
+    if (!formData.bankName.trim()) {
+      newErrors.bankName = 'Bank name is required';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -116,21 +131,102 @@ export default function BrandRegistrationStep4() {
       setIsSubmitting(true);
       
       try {
-        // Store form data and proceed to final step
+        // Store form data
         const existingData = JSON.parse(localStorage.getItem('brandRegistrationData') || '{}');
-        const updatedData = { ...existingData, ...formData };
-        localStorage.setItem('brandRegistrationData', JSON.stringify(updatedData));
+        const completeData = {
+          ...existingData,
+          gstin: formData.gstin,
+          businessPan: formData.businessPan,
+          authorizedSignatoryName: formData.authorizedSignatoryName,
+          authorizedSignatoryEmail: formData.authorizedSignatoryEmail,
+          authorizedSignatoryPhone: formData.authorizedSignatoryPhone,
+          authorizedSignatoryDesignation: formData.authorizedSignatoryDesignation,
+          bankAccountHolder: formData.bankAccountHolder,
+          bankAccountNumber: formData.bankAccountNumber,
+          bankIfscCode: formData.bankIfscCode,
+          bankName: formData.bankName,
+          bankUpiId: formData.bankUpiId,
+          profileComplete: true,
+          // Explicitly set these to null to avoid serialization issues with File objects
+          // In the future, these should be uploaded to storage and URLs reserved here
+          bankProof: null,
+          logo: null // From step 3
+        };
         
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        localStorage.setItem('brandRegistrationData', JSON.stringify(completeData));
         
-        router.push('/brand-registration/step5');
+        // Call registration API
+        const response = await fetch('/api/brands/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(completeData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          localStorage.setItem('brandId', result.brandId);
+          router.push('/brand-registration/step5');
+        } else {
+          console.error('Registration failed:', result.error);
+          setErrors({ submit: result.error || 'Registration failed. Please try again.' });
+        }
       } catch (error) {
-        setErrors({ submit: 'Submission failed. Please try again.' });
+        console.error('Registration error:', error);
+        setErrors({ submit: 'An unexpected error occurred. Please try again.' });
       } finally {
         setIsSubmitting(false);
       }
     }
+  };
+
+  const handleSkipRegistration = async () => {
+      setIsSubmitting(true);
+      try {
+        const existingData = JSON.parse(localStorage.getItem('brandRegistrationData') || '{}');
+        // Merge with current (potentially empty) form data
+        const completeData = {
+          ...existingData,
+          gstin: formData.gstin || '',
+          businessPan: formData.businessPan || '',
+          authorizedSignatoryName: formData.authorizedSignatoryName || '',
+          authorizedSignatoryEmail: formData.authorizedSignatoryEmail || '',
+          authorizedSignatoryPhone: formData.authorizedSignatoryPhone || '',
+          authorizedSignatoryDesignation: formData.authorizedSignatoryDesignation || '',
+          bankAccountHolder: formData.bankAccountHolder || '',
+          bankAccountNumber: formData.bankAccountNumber || '',
+          bankIfscCode: formData.bankIfscCode || '',
+          bankName: formData.bankName || '',
+          bankUpiId: formData.bankUpiId || '',
+          profileComplete: true, // It is technically complete registration, just missing verification
+          documentsVerified: false,
+          bankProof: null,
+          logo: null 
+        };
+        
+        localStorage.setItem('brandRegistrationData', JSON.stringify(completeData));
+        
+        const response = await fetch('/api/brands/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(completeData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          localStorage.setItem('brandId', result.brandId);
+          router.push('/brand-registration/step5');
+        } else {
+          console.error('Registration failed:', result.error);
+          setErrors({ submit: result.error || 'Registration failed. Please try again.' });
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        setErrors({ submit: 'An unexpected error occurred. Please try again.' });
+      } finally {
+        setIsSubmitting(false);
+      }
   };
 
   return (
@@ -225,50 +321,6 @@ export default function BrandRegistrationStep4() {
               />
               {errors.businessPan && (
                 <p className="mt-1 text-sm text-red-600">{errors.businessPan}</p>
-              )}
-            </div>
-
-            {/* Company Registration Proof */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Company Registration Proof *
-              </label>
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  {docPreview ? (
-                    <img
-                      src={docPreview}
-                      alt="Document preview"
-                      className="w-20 h-20 rounded-lg object-cover border-2 border-gray-200"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                      <DocumentIcon className="w-8 h-8 text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <label
-                    htmlFor="companyRegistrationProof"
-                    className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
-                  >
-                    <DocumentIcon className="w-4 h-4 mr-2" />
-                    {formData.companyRegistrationProof ? 'Change Document' : 'Upload Document'}
-                  </label>
-                  <input
-                    id="companyRegistrationProof"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={handleDocumentChange}
-                    className="hidden"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    PDF, JPG, PNG up to 10MB
-                  </p>
-                </div>
-              </div>
-              {errors.companyRegistrationProof && (
-                <p className="mt-1 text-sm text-red-600">{errors.companyRegistrationProof}</p>
               )}
             </div>
 
@@ -370,29 +422,171 @@ export default function BrandRegistrationStep4() {
               </div>
             </div>
 
-            {/* Submit Button */}
-            <motion.button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-              whileTap={!isSubmitting ? { scale: 0.98 } : {}}
-            >
-              {isSubmitting ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Submitting for Review...</span>
-                </>
-              ) : (
-                <>
-                  <span>Submit for Verification</span>
-                  <ArrowRightIcon className="w-5 h-5" />
-                </>
-              )}
-            </motion.button>
+            {/* Bank Details Section */}
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Bank Account Details
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="bankAccountHolder" className="block text-sm font-medium text-gray-700 mb-2">
+                    Account Holder Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="bankAccountHolder"
+                    name="bankAccountHolder"
+                    value={formData.bankAccountHolder}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                      errors.bankAccountHolder ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter account holder name"
+                  />
+                  {errors.bankAccountHolder && (
+                    <p className="mt-1 text-sm text-red-600">{errors.bankAccountHolder}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="bankAccountNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                    Account Number *
+                  </label>
+                  <input
+                    type="text"
+                    id="bankAccountNumber"
+                    name="bankAccountNumber"
+                    value={formData.bankAccountNumber}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                      errors.bankAccountNumber ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter account number"
+                  />
+                  {errors.bankAccountNumber && (
+                    <p className="mt-1 text-sm text-red-600">{errors.bankAccountNumber}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="bankIfscCode" className="block text-sm font-medium text-gray-700 mb-2">
+                    IFSC Code *
+                  </label>
+                  <input
+                    type="text"
+                    id="bankIfscCode"
+                    name="bankIfscCode"
+                    value={formData.bankIfscCode}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                      errors.bankIfscCode ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="HDFC0001234"
+                    maxLength={11}
+                    style={{ textTransform: 'uppercase' }}
+                  />
+                  {errors.bankIfscCode && (
+                    <p className="mt-1 text-sm text-red-600">{errors.bankIfscCode}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="bankName" className="block text-sm font-medium text-gray-700 mb-2">
+                    Bank Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="bankName"
+                    name="bankName"
+                    value={formData.bankName}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                      errors.bankName ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Enter bank name"
+                  />
+                  {errors.bankName && (
+                    <p className="mt-1 text-sm text-red-600">{errors.bankName}</p>
+                  )}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label htmlFor="bankUpiId" className="block text-sm font-medium text-gray-700 mb-2">
+                    UPI ID (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    id="bankUpiId"
+                    name="bankUpiId"
+                    value={formData.bankUpiId}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="yourcompany@bank"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Provide UPI ID for faster payments
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col md:flex-row gap-4">
+              <motion.button
+                type="button"
+                onClick={() => {
+                   // Save what we have so far, marking partial completion potentially
+                   const existingData = JSON.parse(localStorage.getItem('brandRegistrationData') || '{}');
+                   localStorage.setItem('brandRegistrationData', JSON.stringify({
+                     ...existingData,
+                     verificationSkipped: true
+                   }));
+                   // Move to next step (Completion/Review)
+                   // We skip the API call here because that happens on "Submit" 
+                   // But if Step 5 is just a success screen, we might need to register NOW with partial data?
+                   // User said "whole step should be skipable", implying we skip entering data.
+                   // If we skip, we probably need to trigger registration OR just move to next step if registration happens there.
+                   // In this flow, registration happens in handleSubmit of Step 4.
+                   // So if we skip, we must REGISTER now with empty verification data.
+                   
+                   // Let's trigger registration with empty verification fields
+                   const event = { preventDefault: () => {} } as React.FormEvent;
+                   // We need to bypass validation.
+                   // Let's create a dedicated skip handler.
+                   handleSkipRegistration();
+                }}
+                className="flex-1 bg-white border-2 border-gray-200 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={isSubmitting}
+              >
+                Skip Verification
+              </motion.button>
+
+              <motion.button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+              >
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Submit Verification</span>
+                    <ArrowRightIcon className="w-5 h-5" />
+                  </>
+                )}
+              </motion.button>
+            </div>
           </form>
 
           {/* Back Button */}

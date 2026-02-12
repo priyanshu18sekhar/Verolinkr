@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -16,6 +16,20 @@ export default function CreatorRegistrationStep4() {
     primaryState: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('creatorRegistrationData');
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      setFormData(prev => ({
+        ...prev,
+        primaryCategories: parsed.primaryCategories || [],
+        languages: parsed.languages || [],
+        primaryCity: parsed.primaryCity || '',
+        primaryState: parsed.primaryState || ''
+      }));
+    }
+  }, []);
 
   const contentCategories = [
     'Fashion & Beauty', 'Lifestyle', 'Food & Cooking', 'Travel', 'Fitness & Wellness',

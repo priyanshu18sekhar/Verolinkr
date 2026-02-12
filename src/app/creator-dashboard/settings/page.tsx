@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useUser } from '@/contexts/UserContext';
 import { motion } from 'framer-motion';
 import { 
   UserCircleIcon, 
@@ -10,30 +11,42 @@ import {
   BellIcon, 
   LinkIcon,
   CheckCircleIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
+  PencilIcon
 } from '@heroicons/react/24/outline';
-import { apiGet } from '@/lib/api/client';
+import { apiGet, apiPatch } from '@/lib/api/client';
 
 function SettingsContent() {
   const [activeTab, setActiveTab] = useState('platforms');
-  const [creatorProfile, setCreatorProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { profile, refreshProfile, loading: contextLoading } = useUser();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({ displayName: '', bio: '' });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    async function fetchProfile() {
-      try {
-        const data = await apiGet<{ creator: any }>('/api/creators/me');
-        setCreatorProfile(data.creator);
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      } finally {
-        setLoading(false);
-      }
+    if (profile) {
+      setFormData({
+        displayName: profile.displayName || '',
+        bio: profile.bio || ''
+      });
     }
-    fetchProfile();
-  }, []);
+  }, [profile]);
 
-  const connectedPlatforms = creatorProfile?.platforms || [];
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await apiPatch('/api/creators/me', formData);
+      await refreshProfile();
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const connectedPlatforms = profile?.platforms || [];
   
   const allPlatforms = [
     { id: 'instagram', name: 'Instagram', icon: '📸', color: 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500' },
@@ -52,7 +65,7 @@ function SettingsContent() {
     animate: { opacity: 1, y: 0 }
   };
 
-  if (loading) return <div className="p-8">Loading settings...</div>;
+  if (contextLoading && !profile) return <div className="p-8">Loading settings...</div>;
 
   return (
     <motion.div 
@@ -132,28 +145,73 @@ function SettingsContent() {
 
       {activeTab === 'profile' && (
         <motion.div {...fadeInUp} className="bg-white border border-gray-200 rounded-xl p-6">
-           <h2 className="text-lg font-bold text-black mb-6">Profile Information</h2>
+           <div className="flex justify-between items-center mb-6">
+             <h2 className="text-lg font-bold text-black">Profile Information</h2>
+             {!isEditing ? (
+               <button 
+                 onClick={() => setIsEditing(true)}
+                 className="flex items-center space-x-2 text-sm font-bold text-black hover:text-gray-600 transition-colors"
+               >
+                 <PencilIcon className="w-4 h-4" />
+                 <span>Edit Profile</span>
+               </button>
+             ) : (
+               <div className="flex space-x-2">
+                 <button 
+                   onClick={() => setIsEditing(false)}
+                   className="px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                 >
+                   Cancel
+                 </button>
+                 <button 
+                   onClick={handleSave}
+                   disabled={saving}
+                   className="px-4 py-2 text-sm font-bold text-white bg-black hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
+                 >
+                   {saving ? 'Saving...' : 'Save Changes'}
+                 </button>
+               </div>
+             )}
+           </div>
+
            <div className="space-y-4">
              <div>
                <label className="block text-sm font-bold text-gray-700 mb-1">Display Name</label>
                <input 
                  type="text" 
-                 value={creatorProfile?.displayName || ''} 
-                 readOnly 
-                 className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50" 
+                 value={isEditing ? formData.displayName : (profile?.displayName || '')} 
+                 onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                 readOnly={!isEditing}
+                 className={`w-full px-4 py-2 border rounded-lg transition-colors ${
+                   isEditing 
+                     ? 'border-gray-300 bg-white focus:ring-2 focus:ring-black focus:border-transparent' 
+                     : 'border-gray-200 bg-gray-50'
+                 }`}
+               />
+             </div>
+             <div>
+               <label className="block text-sm font-bold text-gray-700 mb-1">Bio</label>
+               <textarea 
+                 value={isEditing ? formData.bio : (profile?.bio || '')} 
+                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                 readOnly={!isEditing}
+                 rows={3}
+                 className={`w-full px-4 py-2 border rounded-lg transition-colors ${
+                   isEditing 
+                     ? 'border-gray-300 bg-white focus:ring-2 focus:ring-black focus:border-transparent' 
+                     : 'border-gray-200 bg-gray-50'
+                 }`}
                />
              </div>
              <div>
                <label className="block text-sm font-bold text-gray-700 mb-1">Email</label>
                <input 
                  type="email" 
-                 value={creatorProfile?.email || ''} 
+                 value={profile?.email || ''} 
                  readOnly 
-                 className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50" 
+                 className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed" 
                />
-             </div>
-             <div className="pt-4">
-               <span className="text-xs text-gray-500">To edit your profile, please contact support.</span>
+               <p className="mt-1 text-xs text-gray-500">Email cannot be changed.</p>
              </div>
            </div>
         </motion.div>
@@ -179,7 +237,7 @@ function SettingsContent() {
 
 export default function SettingsPage() {
   return (
-    <DashboardLayout userType="creator" userName="Creator" userEmail="creator@example.com">
+    <DashboardLayout userType="creator">
       <SettingsContent />
     </DashboardLayout>
   );

@@ -42,8 +42,77 @@ import {
   IdentificationIcon,
   BriefcaseIcon
 } from '@heroicons/react/24/outline';
-import FloatingNav from '../../../componets/ui/FloatingNav';
+import FloatingNav from '../../../components/ui/FloatingNav';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
+
+const mockBrandData = {
+  company: {
+    name: 'Acme Corp',
+    legalName: 'Acme Corporation Ltd.',
+    email: 'contact@acme.com',
+    phone: '+91 98765 43210',
+    website: 'https://acme.com',
+    industry: 'Technology',
+    size: '50-100 employees',
+    founded: '2015',
+    description: 'Leading provider of innovative solutions.',
+    address: '123 Tech Park, Bangalore, Karnataka',
+    panCard: 'ABCDE1234F',
+    taxId: '29ABCDE1234F1Z5',
+    cin: 'U12345KA2015PTC123456'
+  },
+  verification: {
+    reviewTime: '24-48 hours',
+    requiredDocuments: [
+      { id: 1, name: 'Certificate of Incorporation', submitted: true },
+      { id: 2, name: 'PAN Card', submitted: true },
+      { id: 3, name: 'GST Certificate', submitted: false }
+    ]
+  },
+  payment: {
+    accountHolder: 'Acme Corporation Ltd.',
+    accountNumber: 'XXXX-XXXX-1234',
+    ifscCode: 'HDFC0001234',
+    bankName: 'HDFC Bank',
+    upiId: 'acme@hdfcbank',
+    paymentMethod: 'Bank Transfer',
+    billingAddress: '123 Tech Park, Bangalore, Karnataka - 560001'
+  },
+  activityTimeline: [
+    { id: 1, type: 'campaign', action: 'Campaign Created', details: 'Summer Collection Launch', timestamp: '2 hours ago', user: 'John Doe' },
+    { id: 2, type: 'team', action: 'Member Added', details: 'Added Sarah Smith to team', timestamp: '1 day ago', user: 'Admin' }
+  ],
+  brandInsights: {
+    performanceScore: 85,
+    growthTrend: '+12% this month',
+    recommendedActions: [
+      { id: 1, action: 'Increase budget', priority: 'high', impact: 'Potential 20% reach increase' },
+      { id: 2, action: 'Update profile', priority: 'medium', impact: 'Better trust score' }
+    ],
+    upcomingDeadlines: [
+      { id: 1, task: 'Approve Content', campaign: 'Summer Launch', date: 'Tomorrow' }
+    ],
+    topPerformingCampaign: 'Holiday Special'
+  },
+  documents: [
+    { id: 1, name: 'Company Profile.pdf', category: 'General', size: '2.5 MB', uploaded: '2 days ago' },
+    { id: 2, name: 'Brand Guidelines.pdf', category: 'Branding', size: '5.1 MB', uploaded: '1 week ago' }
+  ],
+  stats: {
+    totalSpent: 125000,
+    totalCampaigns: 12,
+    activeCampaigns: 3,
+    totalReach: 1500000,
+    avgROI: 320,
+    totalCreators: 45
+  },
+  team: {
+    members: [
+      { id: 1, name: 'John Doe', role: 'Admin', email: 'john@acme.com', access: 'full' },
+      { id: 2, name: 'Jane Smith', role: 'Editor', email: 'jane@acme.com', access: 'campaigns' }
+    ]
+  }
+};
 
 function BrandProfileContent() {
   const [isEditing, setIsEditing] = useState(false);
@@ -71,15 +140,40 @@ function BrandProfileContent() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [activityFilter, setActivityFilter] = useState('all');
+  const [brandData, setBrandData] = useState<any>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+    const fetchBrandData = async () => {
+      try {
+        const brandId = localStorage.getItem('brandId');
+        if (!brandId) {
+          console.log('No brand ID found - using mock data for development');
+          // Use mock data for development/preview
+          setBrandData(null); // Will trigger mockBrandData fallback
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await fetch(`/api/brands/profile?id=${brandId}`);
+        const result = await response.json();
+
+        if (result.success) {
+          setBrandData(result.data);
+        } else {
+          console.error('Failed to fetch brand data:', result.error);
+        }
+      } catch (error) {
+        console.error('Error fetching brand data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBrandData();
   }, []);
 
-  const brandData = {
+  // Mock data structure for fallback (will be replaced by API data)
+  const mockBrandData = {
     company: {
       name: 'TechGiant India',
       legalName: 'TechGiant India Private Limited',
@@ -357,6 +451,22 @@ function BrandProfileContent() {
       </motion.div>
 
       <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8">
+        {/* Development Mode Banner */}
+        {!brandData && (
+          <motion.div
+            className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+              <p className="text-sm text-blue-900 font-medium">
+                Preview Mode: Displaying mock data. Complete brand registration to save your actual profile.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
         {/* Profile Header */}
         <motion.div
           className="bg-white border border-gray-200 rounded-lg p-6 mb-8"
@@ -366,7 +476,7 @@ function BrandProfileContent() {
           <div className="flex items-start space-x-6">
             <div className="relative">
               <div className="w-32 h-32 bg-gradient-to-br from-black to-gray-700 rounded-full flex items-center justify-center text-white text-[48px] font-black">
-                {brandData.company.name.substring(0, 2).toUpperCase()}
+                {(brandData?.companyName || mockBrandData.company.name).substring(0, 2).toUpperCase()}
               </div>
               {isEditing && (
                 <label className="absolute bottom-0 right-0 w-10 h-10 bg-black rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-900 transition-colors">
@@ -381,20 +491,20 @@ function BrandProfileContent() {
               )}
             </div>
             <div className="flex-1">
-              <h2 className="text-[32px] font-black text-black mb-2">{brandData.company.name}</h2>
-              <p className="text-[14px] text-gray-600 mb-4">{brandData.company.description}</p>
+              <h2 className="text-[32px] font-black text-black mb-2">{brandData?.companyName || mockBrandData.company.name}</h2>
+              <p className="text-[14px] text-gray-600 mb-4">{brandData?.aboutUs || mockBrandData.company.description}</p>
               <div className="flex items-center space-x-4 text-[12px] text-gray-600">
                 <div className="flex items-center space-x-1">
                   <MapPinIcon className="w-4 h-4" />
-                  <span>{brandData.company.location}</span>
+                  <span>{brandData?.city && brandData?.state ? `${brandData.city}, ${brandData.state}` : mockBrandData.company.location}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <GlobeAltIcon className="w-4 h-4" />
-                  <span>{brandData.company.website}</span>
+                  <span>{brandData?.website || mockBrandData.company.website}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <TagIcon className="w-4 h-4" />
-                  <span>{brandData.company.industry}</span>
+                  <span>{brandData?.industry || mockBrandData.company.industry}</span>
                 </div>
               </div>
             </div>
@@ -439,11 +549,11 @@ function BrandProfileContent() {
                     {isEditing ? (
                       <input
                         type="text"
-                        defaultValue={brandData.company.name}
+                        defaultValue={brandData?.companyName || mockBrandData.company.name}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                       />
                     ) : (
-                      <p className="text-[16px] font-bold text-black">{brandData.company.name}</p>
+                      <p className="text-[16px] font-bold text-black">{brandData?.companyName || mockBrandData.company.name}</p>
                     )}
                   </div>
                   <div>
@@ -451,11 +561,11 @@ function BrandProfileContent() {
                     {isEditing ? (
                       <input
                         type="text"
-                        defaultValue={brandData.company.legalName}
+                        defaultValue={brandData?.companyName || mockBrandData.company.legalName}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                       />
                     ) : (
-                      <p className="text-[16px] font-bold text-black">{brandData.company.legalName}</p>
+                      <p className="text-[16px] font-bold text-black">{brandData?.companyName || mockBrandData.company.legalName}</p>
                     )}
                   </div>
                   <div>
@@ -463,11 +573,11 @@ function BrandProfileContent() {
                     {isEditing ? (
                       <input
                         type="email"
-                        defaultValue={brandData.company.email}
+                        defaultValue={brandData?.businessEmail || mockBrandData.company.email}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                       />
                     ) : (
-                      <p className="text-[16px] font-bold text-black">{brandData.company.email}</p>
+                      <p className="text-[16px] font-bold text-black">{brandData?.businessEmail || mockBrandData.company.email}</p>
                     )}
                   </div>
                   <div>
@@ -475,11 +585,11 @@ function BrandProfileContent() {
                     {isEditing ? (
                       <input
                         type="tel"
-                        defaultValue={brandData.company.phone}
+                        defaultValue={brandData?.mobileNumber || mockBrandData.company.phone}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                       />
                     ) : (
-                      <p className="text-[16px] font-bold text-black">{brandData.company.phone}</p>
+                      <p className="text-[16px] font-bold text-black">{brandData?.mobileNumber || mockBrandData.company.phone}</p>
                     )}
                   </div>
                   <div>
@@ -487,18 +597,18 @@ function BrandProfileContent() {
                     {isEditing ? (
                       <input
                         type="url"
-                        defaultValue={brandData.company.website}
+                        defaultValue={brandData?.website || mockBrandData.company.website}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                       />
                     ) : (
-                      <p className="text-[16px] font-bold text-black">{brandData.company.website}</p>
+                      <p className="text-[16px] font-bold text-black">{brandData?.website || mockBrandData.company.website}</p>
                     )}
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">Industry</label>
                     {isEditing ? (
                       <select
-                        defaultValue={brandData.company.industry}
+                        defaultValue={brandData?.industry || mockBrandData.company.industry}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                       >
                         <option>Technology</option>
@@ -509,14 +619,14 @@ function BrandProfileContent() {
                         <option>Other</option>
                       </select>
                     ) : (
-                      <p className="text-[16px] font-bold text-black">{brandData.company.industry}</p>
+                      <p className="text-[16px] font-bold text-black">{brandData?.industry || mockBrandData.company.industry}</p>
                     )}
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">Company Size</label>
                     {isEditing ? (
                       <select
-                        defaultValue={brandData.company.size}
+                        defaultValue={brandData?.companySize || mockBrandData.company.size}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                       >
                         <option>1-10 employees</option>
@@ -526,7 +636,7 @@ function BrandProfileContent() {
                         <option>500+ employees</option>
                       </select>
                     ) : (
-                      <p className="text-[16px] font-bold text-black">{brandData.company.size}</p>
+                      <p className="text-[16px] font-bold text-black">{brandData?.companySize || mockBrandData.company.size}</p>
                     )}
                   </div>
                   <div>
@@ -534,11 +644,11 @@ function BrandProfileContent() {
                     {isEditing ? (
                       <input
                         type="text"
-                        defaultValue={brandData.company.founded}
+                        defaultValue={mockBrandData.company.founded}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                       />
                     ) : (
-                      <p className="text-[16px] font-bold text-black">{brandData.company.founded}</p>
+                      <p className="text-[16px] font-bold text-black">{mockBrandData.company.founded}</p>
                     )}
                   </div>
                 </div>
@@ -546,38 +656,38 @@ function BrandProfileContent() {
                   <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">Description</label>
                   {isEditing ? (
                     <textarea
-                      defaultValue={brandData.company.description}
+                      defaultValue={brandData?.aboutUs || mockBrandData.company.description}
                       rows={4}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                     />
                   ) : (
-                    <p className="text-[14px] text-gray-700 leading-relaxed">{brandData.company.description}</p>
+                    <p className="text-[14px] text-gray-700 leading-relaxed">{brandData?.aboutUs || mockBrandData.company.description}</p>
                   )}
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">Address</label>
                   {isEditing ? (
                     <textarea
-                      defaultValue={brandData.company.address}
+                      defaultValue={brandData?.primaryCity && brandData?.primaryState ? `${brandData.primaryCity}, ${brandData.primaryState}` : mockBrandData.company.address}
                       rows={2}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
                     />
                   ) : (
-                    <p className="text-[14px] text-gray-700">{brandData.company.address}</p>
+                    <p className="text-[14px] text-gray-700">{brandData?.primaryCity && brandData?.primaryState ? `${brandData.primaryCity}, ${brandData.primaryState}` : mockBrandData.company.address}</p>
                   )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">PAN Card</label>
-                    <p className="text-[14px] font-semibold text-black">{brandData.company.panCard}</p>
+                    <p className="text-[14px] font-semibold text-black">{brandData?.businessPan || mockBrandData.company.panCard}</p>
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">GST Number</label>
-                    <p className="text-[14px] font-semibold text-black">{brandData.company.taxId}</p>
+                    <p className="text-[14px] font-semibold text-black">{brandData?.gstin || mockBrandData.company.taxId}</p>
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">CIN</label>
-                    <p className="text-[14px] font-semibold text-black">{brandData.company.cin}</p>
+                    <p className="text-[14px] font-semibold text-black">{mockBrandData.company.cin}</p>
                   </div>
                 </div>
               </div>
@@ -623,30 +733,32 @@ function BrandProfileContent() {
                     )}
                   </div>
                   <div className="space-y-4">
-                    {brandData.verification.requiredDocuments.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <DocumentTextIcon className={`w-5 h-5 ${doc.submitted ? 'text-black' : 'text-gray-400'}`} />
-                          <span className="text-[14px] font-medium text-black">{doc.name}</span>
+                    {mockBrandData.verification.requiredDocuments.map((doc: any) => {
+                      return (
+                        <div key={doc.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <DocumentTextIcon className={`w-5 h-5 ${doc.submitted ? 'text-black' : 'text-gray-400'}`} />
+                            <span className="text-[14px] font-medium text-black">{doc.name}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {doc.submitted ? (
+                              <>
+                                <CheckCircleIcon className="w-5 h-5 text-black" />
+                                <span className="text-[12px] font-semibold text-black">Submitted</span>
+                              </>
+                            ) : (
+                              <button className="text-[12px] font-semibold text-gray-600 hover:text-black">
+                                Upload
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          {doc.submitted ? (
-                            <>
-                              <CheckCircleIcon className="w-5 h-5 text-black" />
-                              <span className="text-[12px] font-semibold text-black">Submitted</span>
-                            </>
-                          ) : (
-                            <button className="text-[12px] font-semibold text-gray-600 hover:text-black">
-                              Upload
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
                     <p className="text-[12px] text-gray-600">
-                      <strong>Review Time:</strong> {brandData.verification.reviewTime}. 
+                      <strong>Review Time:</strong> {mockBrandData.verification.reviewTime}. 
                       You&apos;ll be notified via email once the verification is complete.
                     </p>
                   </div>
@@ -660,32 +772,32 @@ function BrandProfileContent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">Account Holder Name</label>
-                    <p className="text-[16px] font-bold text-black">{brandData.payment.accountHolder}</p>
+                    <p className="text-[16px] font-bold text-black">{mockBrandData.payment.accountHolder}</p>
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">Account Number</label>
-                    <p className="text-[16px] font-bold text-black">{brandData.payment.accountNumber}</p>
+                    <p className="text-[16px] font-bold text-black">{mockBrandData.payment.accountNumber}</p>
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">IFSC Code</label>
-                    <p className="text-[16px] font-bold text-black">{brandData.payment.ifscCode}</p>
+                    <p className="text-[16px] font-bold text-black">{mockBrandData.payment.ifscCode}</p>
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">Bank Name</label>
-                    <p className="text-[16px] font-bold text-black">{brandData.payment.bankName}</p>
+                    <p className="text-[16px] font-bold text-black">{mockBrandData.payment.bankName}</p>
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">UPI ID</label>
-                    <p className="text-[16px] font-bold text-black">{brandData.payment.upiId}</p>
+                    <p className="text-[16px] font-bold text-black">{mockBrandData.payment.upiId}</p>
                   </div>
                   <div>
                     <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">Payment Method</label>
-                    <p className="text-[16px] font-bold text-black capitalize">{brandData.payment.paymentMethod}</p>
+                    <p className="text-[16px] font-bold text-black capitalize">{mockBrandData.payment.paymentMethod}</p>
                   </div>
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-500 uppercase mb-2">Billing Address</label>
-                  <p className="text-[14px] text-gray-700">{brandData.payment.billingAddress}</p>
+                  <p className="text-[14px] text-gray-700">{mockBrandData.payment.billingAddress}</p>
                 </div>
                 <div className="pt-6 border-t border-gray-200">
                   <motion.button
@@ -718,7 +830,8 @@ function BrandProfileContent() {
                   </motion.button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {brandData.team.members.map((member) => (
+                  {brandData.team.members.map((member: any) => {
+                    return (
                     <motion.div 
                       key={member.id} 
                       className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200"
@@ -727,7 +840,7 @@ function BrandProfileContent() {
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4">
                           <div className="w-14 h-14 bg-gradient-to-br from-black to-gray-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                            {member.name.split(' ').map(n => n[0]).join('')}
+                            {member.name.split(' ').map((n: any) => n[0]).join('')}
                           </div>
                           <div>
                             <p className="text-[16px] font-bold text-black">{member.name}</p>
@@ -755,7 +868,8 @@ function BrandProfileContent() {
                         </div>
                       </div>
                     </motion.div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -766,7 +880,8 @@ function BrandProfileContent() {
                 <div>
                   <h3 className="text-[20px] font-bold text-black mb-6">Notification Preferences</h3>
                   <div className="space-y-4">
-                    {Object.entries(notifications).map(([key, value]) => (
+                    {Object.entries(notifications).map(([key, value]) => {
+                      return (
                       <div key={key} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                         <div>
                           <p className="text-[14px] font-semibold text-black capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
@@ -786,7 +901,8 @@ function BrandProfileContent() {
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-black rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                         </label>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="pt-6 border-t border-gray-200">
@@ -881,9 +997,10 @@ function BrandProfileContent() {
                   </select>
                 </div>
                 <div className="space-y-4">
-                  {brandData.activityTimeline
+                  {mockBrandData.activityTimeline
                     .filter(activity => activityFilter === 'all' || activity.type === activityFilter)
-                    .map((activity, index) => (
+                    .map((activity, index) => {
+                      return (
                       <motion.div
                         key={activity.id}
                         className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:border-black transition-all duration-200"
@@ -912,7 +1029,8 @@ function BrandProfileContent() {
                           </div>
                         </div>
                       </motion.div>
-                    ))}
+                      );
+                    })}
                 </div>
               </div>
             )}
@@ -927,7 +1045,7 @@ function BrandProfileContent() {
                       <p className="text-gray-300">Based on campaign performance and growth metrics</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[64px] font-black text-white">{brandData.brandInsights.performanceScore}</p>
+                      <p className="text-[64px] font-black text-white">{mockBrandData.brandInsights.performanceScore}</p>
                       <p className="text-gray-300">Out of 100</p>
                     </div>
                   </div>
@@ -935,13 +1053,13 @@ function BrandProfileContent() {
                     <motion.div
                       className="bg-white h-4 rounded-full"
                       initial={{ width: 0 }}
-                      animate={{ width: `${brandData.brandInsights.performanceScore}%` }}
+                      animate={{ width: `${mockBrandData.brandInsights.performanceScore}%` }}
                       transition={{ duration: 1, delay: 0.3 }}
                     />
                   </div>
                   <div className="flex items-center space-x-2">
                     <SparklesIcon className="w-5 h-5 text-white" />
-                    <span className="text-[14px] font-semibold">Growth Trend: {brandData.brandInsights.growthTrend}</span>
+                    <span className="text-[14px] font-semibold">Growth Trend: {mockBrandData.brandInsights.growthTrend}</span>
                   </div>
                 </div>
 
@@ -949,7 +1067,8 @@ function BrandProfileContent() {
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <h4 className="text-[18px] font-bold text-black mb-4">Recommended Actions</h4>
                     <div className="space-y-4">
-                      {brandData.brandInsights.recommendedActions.map((action) => (
+                      {mockBrandData.brandInsights.recommendedActions.map((action) => {
+                        return (
                         <div key={action.id} className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
                           <div className="flex items-start justify-between mb-2">
                             <p className="text-[14px] font-semibold text-black">{action.action}</p>
@@ -961,14 +1080,16 @@ function BrandProfileContent() {
                           </div>
                           <p className="text-[12px] text-gray-600">{action.impact}</p>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <h4 className="text-[18px] font-bold text-black mb-4">Upcoming Deadlines</h4>
                     <div className="space-y-4">
-                      {brandData.brandInsights.upcomingDeadlines.map((deadline) => (
+                      {mockBrandData.brandInsights.upcomingDeadlines.map((deadline) => {
+                        return (
                         <div key={deadline.id} className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg">
                           <div>
                             <p className="text-[14px] font-semibold text-black">{deadline.task}</p>
@@ -979,7 +1100,8 @@ function BrandProfileContent() {
                             <p className="text-[11px] text-gray-500">Due soon</p>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -989,7 +1111,7 @@ function BrandProfileContent() {
                   <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[20px] font-black text-black">{brandData.brandInsights.topPerformingCampaign}</p>
+                        <p className="text-[20px] font-black text-black">{mockBrandData.brandInsights.topPerformingCampaign}</p>
                         <p className="text-[12px] text-gray-600 mt-1">Highest ROI this month</p>
                       </div>
                       <TrophyIcon className="w-12 h-12 text-yellow-500" />
@@ -1014,7 +1136,8 @@ function BrandProfileContent() {
                   </motion.button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {brandData.documents.map((doc) => (
+                  {mockBrandData.documents.map((doc) => {
+                    return (
                     <motion.div
                       key={doc.id}
                       className="bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-200 cursor-pointer"
@@ -1035,7 +1158,8 @@ function BrandProfileContent() {
                       </div>
                       <p className="text-[11px] text-gray-500 mt-2">Uploaded {doc.uploaded}</p>
                     </motion.div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1067,7 +1191,8 @@ function BrandProfileContent() {
                 </button>
               </div>
               <div className="space-y-4">
-                {brandData.verification.requiredDocuments.map((doc) => (
+                {mockBrandData.verification.requiredDocuments.map((doc: any) => {
+                  return (
                   <div key={doc.id} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-[14px] font-semibold text-black">{doc.name}</span>
@@ -1078,7 +1203,8 @@ function BrandProfileContent() {
                     </div>
                     <input type="file" className="hidden" />
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="mt-6 flex items-center justify-end space-x-3">
                 <button
@@ -1197,4 +1323,12 @@ export default function BrandProfile() {
     </DashboardLayout>
   );
 }
+
+
+
+
+
+
+
+
 

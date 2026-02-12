@@ -39,7 +39,7 @@ import {
   ArrowUpTrayIcon,
   DocumentCheckIcon
 } from '@heroicons/react/24/outline';
-import FloatingNav from '../../../componets/ui/FloatingNav';
+import FloatingNav from '../../../components/ui/FloatingNav';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
 import { storage, auth } from '@/lib/firebase/client';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';

@@ -78,17 +78,43 @@ export default function CreatorRegistrationStep6() {
       setIsSubmitting(true);
       
       try {
-        // Store form data and proceed to final step
+        // Get existing data
         const existingData = JSON.parse(localStorage.getItem('creatorRegistrationData') || '{}');
-        const updatedData = { ...existingData, ...formData };
-        localStorage.setItem('creatorRegistrationData', JSON.stringify(updatedData));
         
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        router.push('/creator-registration/step7');
-      } catch (error) {
-        setErrors({ submit: 'Submission failed. Please try again.' });
+        // Combine with current form data
+        const completeData = {
+          ...existingData,
+          ...formData,
+          // Explicitly set profilePhoto to empty string/null to avoid serialization issues
+          // In a real app, this would be a URL from a previous upload step
+          profilePhoto: null
+        };
+
+        // Call registration API
+        const response = await fetch('/api/creators/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(completeData),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          // Update local storage with combined data for the final step display
+          localStorage.setItem('creatorRegistrationData', JSON.stringify({
+            ...completeData,
+            creatorId: result.creatorId
+          }));
+          
+          router.push('/creator-registration/step7');
+        } else {
+          throw new Error(result.error || 'Registration failed');
+        }
+      } catch (error: any) {
+        console.error('Registration error:', error);
+        setErrors({ submit: error.message || 'Submission failed. Please try again.' });
       } finally {
         setIsSubmitting(false);
       }

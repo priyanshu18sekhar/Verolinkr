@@ -14,11 +14,15 @@ export default function BrandRegistrationStep1() {
     password: '',
     confirmPassword: '',
     mobileNumber: '',
-    companyName: ''
+    companyName: '',
+    businessType: '',
+    industry: '',
+    companySize: '',
+    website: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
@@ -57,6 +61,24 @@ export default function BrandRegistrationStep1() {
 
     if (!formData.companyName) {
       newErrors.companyName = 'Company name is required';
+    }
+
+    if (!formData.businessType) {
+      newErrors.businessType = 'Business type is required';
+    }
+
+    if (!formData.industry) {
+      newErrors.industry = 'Industry is required';
+    }
+
+    if (!formData.companySize) {
+      newErrors.companySize = 'Company size is required';
+    }
+
+    if (!formData.website) {
+      newErrors.website = 'Website URL is required';
+    } else if (!/^https?:\/\/.+\..+/.test(formData.website)) {
+      newErrors.website = 'Please enter a valid website URL';
     }
 
     setErrors(newErrors);
@@ -130,6 +152,110 @@ export default function BrandRegistrationStep1() {
               />
               {errors.companyName && (
                 <p className="mt-1 text-sm text-red-600">{errors.companyName}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="businessType" className="block text-sm font-medium text-gray-700 mb-2">
+                Business Type *
+              </label>
+              <select
+                id="businessType"
+                name="businessType"
+                value={formData.businessType}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                  errors.businessType ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select Business Type</option>
+                <option value="startup">Startup</option>
+                <option value="smb">Small & Medium Business</option>
+                <option value="enterprise">Enterprise</option>
+                <option value="agency">Marketing Agency</option>
+                <option value="ecommerce">E-commerce</option>
+                <option value="other">Other</option>
+              </select>
+              {errors.businessType && (
+                <p className="mt-1 text-sm text-red-600">{errors.businessType}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="industry" className="block text-sm font-medium text-gray-700 mb-2">
+                Industry *
+              </label>
+              <select
+                id="industry"
+                name="industry"
+                value={formData.industry}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                  errors.industry ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select Industry</option>
+                <option value="technology">Technology</option>
+                <option value="fashion">Fashion</option>
+                <option value="beauty">Beauty & Cosmetics</option>
+                <option value="food">Food & Beverage</option>
+                <option value="health">Health & Fitness</option>
+                <option value="education">Education</option>
+                <option value="finance">Finance</option>
+                <option value="travel">Travel & Tourism</option>
+                <option value="automotive">Automotive</option>
+                <option value="realestate">Real Estate</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="other">Other</option>
+              </select>
+              {errors.industry && (
+                <p className="mt-1 text-sm text-red-600">{errors.industry}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="companySize" className="block text-sm font-medium text-gray-700 mb-2">
+                Company Size *
+              </label>
+              <select
+                id="companySize"
+                name="companySize"
+                value={formData.companySize}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                  errors.companySize ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select Company Size</option>
+                <option value="1-10">1-10 employees</option>
+                <option value="11-50">11-50 employees</option>
+                <option value="51-200">51-200 employees</option>
+                <option value="201-500">201-500 employees</option>
+                <option value="501-1000">501-1000 employees</option>
+                <option value="1000+">1000+ employees</option>
+              </select>
+              {errors.companySize && (
+                <p className="mt-1 text-sm text-red-600">{errors.companySize}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">
+                Website URL *
+              </label>
+              <input
+                type="url"
+                id="website"
+                name="website"
+                value={formData.website}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                  errors.website ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="https://www.yourcompany.com"
+              />
+              {errors.website && (
+                <p className="mt-1 text-sm text-red-600">{errors.website}</p>
               )}
             </div>
 

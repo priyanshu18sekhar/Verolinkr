@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRightIcon, ArrowLeftIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -18,6 +18,20 @@ export default function CreatorRegistrationStep3() {
   });
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('creatorRegistrationData');
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      setFormData(prev => ({
+        ...prev,
+        fullName: parsed.fullName || '',
+        professionalHandle: parsed.professionalHandle || '',
+        shortBio: parsed.shortBio || ''
+        // Note: File objects (profilePhoto) cannot be restored from localStorage
+      }));
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

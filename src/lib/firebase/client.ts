@@ -92,3 +92,18 @@ export const storage: FirebaseStorage = new Proxy({} as FirebaseStorage, {
   },
 });
 
+import { getFirestore, type Firestore } from 'firebase/firestore';
+
+let _db: Firestore | null = null;
+export function getClientDb(): Firestore {
+  if (!_db) {
+    _db = getFirestore(getFirebaseApp());
+  }
+  return _db;
+}
+
+export const db: Firestore = new Proxy({} as Firestore, {
+  get(_, prop) {
+    return (getClientDb() as any)[prop];
+  },
+});

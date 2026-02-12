@@ -27,7 +27,7 @@ import {
   BellIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
-import FloatingNav from '../../componets/ui/FloatingNav';
+import FloatingNav from '../../components/ui/FloatingNav';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 
 function BrandDashboardContent() {

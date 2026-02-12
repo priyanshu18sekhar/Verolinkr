@@ -2,15 +2,15 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import TrustedBrands from '../componets/TrustedBrands';
-import PhoneDemo from '../componets/PhoneDemo';
-import Hero from '../componets/Hero';
-import ProblemSection from '../componets/ProblemSection';
-import SolutionSection from '../componets/SolutionSection';
-import StatsSection from '../componets/StatsSection';
-import CTASection from '../componets/CTASection';
-import Footer from '../componets/Footer';
-import SectionDivider from '../componets/SectionDivider';
+import TrustedBrands from '../components/TrustedBrands';
+import PhoneDemo from '../components/PhoneDemo';
+import Hero from '../components/Hero';
+import ProblemSection from '../components/ProblemSection';
+import SolutionSection from '../components/SolutionSection';
+import StatsSection from '../components/StatsSection';
+import CTASection from '../components/CTASection';
+import Footer from '../components/Footer';
+import SectionDivider from '../components/SectionDivider';
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);

@@ -28,6 +28,13 @@ export default function BrandRegistrationStep5() {
     router.push('/auth');
   };
 
+  const handleSkip = () => {
+    // Mark profile as incomplete and redirect to dashboard
+    // In real implementation, this would set a flag in Firestore
+    localStorage.setItem('profileIncomplete', 'true');
+    router.push('/brand-dashboard');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -187,15 +194,26 @@ export default function BrandRegistrationStep5() {
             className="space-y-4"
             {...fadeInUp}
           >
-            <motion.button
-              onClick={handleCompleteRegistration}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <span>Continue to Login</span>
-              <ArrowRightIcon className="w-5 h-5" />
-            </motion.button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <motion.button
+                onClick={handleSkip}
+                className="w-full bg-white border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span>Skip for Now</span>
+              </motion.button>
+
+              <motion.button
+                onClick={handleCompleteRegistration}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 premium-glow-button"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span>Continue to Login</span>
+                <ArrowRightIcon className="w-5 h-5" />
+              </motion.button>
+            </div>
 
             <div className="flex space-x-4">
               <Link

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRightIcon, ArrowLeftIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -14,10 +14,48 @@ export default function BrandRegistrationStep3() {
     brandTagline: '',
     aboutUs: '',
     primaryCity: '',
-    primaryState: ''
+    primaryState: '',
+    // Social Media
+    instagram: '',
+    youtube: '',
+    twitter: '',
+    linkedin: '',
+    // Marketing
+    targetAudience: [] as string[],
+    marketingObjectives: [] as string[],
+    monthlyBudget: '',
+    preferredCategories: [] as string[],
+    // Brand Assets
+    brandColors: '',
+    brandGuidelines: ''
   });
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Hydrate form from localStorage
+  useEffect(() => {
+    const savedData = localStorage.getItem('brandRegistrationData');
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      setFormData(prev => ({
+        ...prev,
+        brandTagline: parsedData.brandTagline || '',
+        aboutUs: parsedData.aboutUs || '',
+        primaryCity: parsedData.primaryCity || '',
+        primaryState: parsedData.primaryState || '',
+        instagram: parsedData.instagram || '',
+        youtube: parsedData.youtube || '',
+        twitter: parsedData.twitter || '',
+        linkedin: parsedData.linkedin || '',
+        targetAudience: parsedData.targetAudience || [],
+        marketingObjectives: parsedData.marketingObjectives || [],
+        monthlyBudget: parsedData.monthlyBudget || '',
+        preferredCategories: parsedData.preferredCategories || [],
+        brandColors: parsedData.brandColors || '',
+        brandGuidelines: parsedData.brandGuidelines || ''
+      }));
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -26,6 +64,21 @@ export default function BrandRegistrationStep3() {
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleCheckboxChange = (field: 'targetAudience' | 'marketingObjectives' | 'preferredCategories', value: string) => {
+    setFormData(prev => {
+      const currentArray = prev[field];
+      const newArray = currentArray.includes(value)
+        ? currentArray.filter(item => item !== value)
+        : [...currentArray, value];
+      return { ...prev, [field]: newArray };
+    });
+    
+    // Clear error when user makes selection
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -79,6 +132,18 @@ export default function BrandRegistrationStep3() {
 
     if (!formData.primaryState.trim()) {
       newErrors.primaryState = 'Primary state is required';
+    }
+
+    if (formData.marketingObjectives.length === 0) {
+      newErrors.marketingObjectives = 'Please select at least one marketing objective';
+    }
+
+    if (!formData.monthlyBudget) {
+      newErrors.monthlyBudget = 'Monthly marketing budget is required';
+    }
+
+    if (formData.preferredCategories.length === 0) {
+      newErrors.preferredCategories = 'Please select at least one content category';
     }
 
     setErrors(newErrors);
@@ -288,6 +353,233 @@ export default function BrandRegistrationStep3() {
                   <p className="mt-1 text-sm text-red-600">{errors.primaryState}</p>
                 )}
               </div>
+            </div>
+
+            {/* Social Media Handles */}
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Social Media Presence (Optional)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 mb-2">
+                    Instagram
+                  </label>
+                  <input
+                    type="text"
+                    id="instagram"
+                    name="instagram"
+                    value={formData.instagram}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="@yourbrand"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="youtube" className="block text-sm font-medium text-gray-700 mb-2">
+                    YouTube
+                  </label>
+                  <input
+                    type="text"
+                    id="youtube"
+                    name="youtube"
+                    value={formData.youtube}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="@yourbrand"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="twitter" className="block text-sm font-medium text-gray-700 mb-2">
+                    Twitter/X
+                  </label>
+                  <input
+                    type="text"
+                    id="twitter"
+                    name="twitter"
+                    value={formData.twitter}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="@yourbrand"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="linkedin" className="block text-sm font-medium text-gray-700 mb-2">
+                    LinkedIn
+                  </label>
+                  <input
+                    type="text"
+                    id="linkedin"
+                    name="linkedin"
+                    value={formData.linkedin}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="company/yourbrand"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Marketing Objectives */}
+            <div className="border-t pt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Marketing Objectives *
+              </label>
+              <p className="text-xs text-gray-500 mb-3">Select all that apply</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  'Brand Awareness',
+                  'Product Launches',
+                  'Lead Generation',
+                  'Sales & Conversions',
+                  'Community Building',
+                  'Content Creation'
+                ].map((objective) => (
+                  <label key={objective} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.marketingObjectives.includes(objective)}
+                      onChange={() => handleCheckboxChange('marketingObjectives', objective)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">{objective}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.marketingObjectives && (
+                <p className="mt-2 text-sm text-red-600">{errors.marketingObjectives}</p>
+              )}
+            </div>
+
+            {/* Monthly Budget */}
+            <div>
+              <label htmlFor="monthlyBudget" className="block text-sm font-medium text-gray-700 mb-2">
+                Monthly Marketing Budget *
+              </label>
+              <select
+                id="monthlyBudget"
+                name="monthlyBudget"
+                value={formData.monthlyBudget}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                  errors.monthlyBudget ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select Budget Range</option>
+                <option value="0-50000">₹0 - ₹50,000</option>
+                <option value="50000-100000">₹50,000 - ₹1,00,000</option>
+                <option value="100000-250000">₹1,00,000 - ₹2,50,000</option>
+                <option value="250000-500000">₹2,50,000 - ₹5,00,000</option>
+                <option value="500000-1000000">₹5,00,000 - ₹10,00,000</option>
+                <option value="1000000+">₹10,00,000+</option>
+              </select>
+              {errors.monthlyBudget && (
+                <p className="mt-1 text-sm text-red-600">{errors.monthlyBudget}</p>
+              )}
+            </div>
+
+            {/* Target Audience */}
+            <div className="border-t pt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Target Audience (Optional)
+              </label>
+              <p className="text-xs text-gray-500 mb-3">Select all that apply</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  'Gen Z (18-24)',
+                  'Millennials (25-40)',
+                  'Gen X (41-56)',
+                  'Baby Boomers (57+)',
+                  'Male',
+                  'Female',
+                  'All Genders',
+                  'Urban',
+                  'Rural'
+                ].map((audience) => (
+                  <label key={audience} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.targetAudience.includes(audience)}
+                      onChange={() => handleCheckboxChange('targetAudience', audience)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">{audience}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Preferred Content Categories */}
+            <div className="border-t pt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Preferred Content Categories *
+              </label>
+              <p className="text-xs text-gray-500 mb-3">Select your top content interests</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  'Lifestyle',
+                  'Product Reviews',
+                  'Tutorials',
+                  'Unboxing',
+                  'Behind the Scenes',
+                  'User Stories',
+                  'Influencer Collaborations',
+                  'Educational Content',
+                  'Entertainment'
+                ].map((category) => (
+                  <label key={category} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.preferredCategories.includes(category)}
+                      onChange={() => handleCheckboxChange('preferredCategories', category)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">{category}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.preferredCategories && (
+                <p className="mt-2 text-sm text-red-600">{errors.preferredCategories}</p>
+              )}
+            </div>
+
+            {/* Brand Colors */}
+            <div>
+              <label htmlFor="brandColors" className="block text-sm font-medium text-gray-700 mb-2">
+                Brand Colors (Optional)
+              </label>
+              <input
+                type="text"
+                id="brandColors"
+                name="brandColors"
+                value={formData.brandColors}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="e.g., #FF5733, #3498DB"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Enter hex codes or color names separated by commas
+              </p>
+            </div>
+
+            {/* Brand Guidelines */}
+            <div>
+              <label htmlFor="brandGuidelines" className="block text-sm font-medium text-gray-700 mb-2">
+                Brand Guidelines (Optional)
+              </label>
+              <textarea
+                id="brandGuidelines"
+                name="brandGuidelines"
+                value={formData.brandGuidelines}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                placeholder="Share any specific brand guidelines, tone of voice, or do's and don'ts for creators..."
+                maxLength={300}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {formData.brandGuidelines.length}/300 characters
+              </p>
             </div>
 
             {/* Submit Button */}

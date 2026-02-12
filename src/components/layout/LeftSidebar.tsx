@@ -8,9 +8,14 @@ import { NavItem as NavItemType } from '@/config/navigation';
 
 interface LeftSidebarProps {
   navItems: NavItemType[];
+  user?: {
+    displayName?: string;
+    email?: string;
+    photoURL?: string;
+  };
 }
 
-export default function LeftSidebar({ navItems }: LeftSidebarProps) {
+export default function LeftSidebar({ navItems, user }: LeftSidebarProps) {
   const { leftSidebarOpen, toggleLeftSidebar, isMobile, setLeftSidebarOpen } = useLayout();
 
   // On mobile, show as drawer overlay
@@ -106,6 +111,31 @@ export default function LeftSidebar({ navItems }: LeftSidebarProps) {
             />
           ))}
         </nav>
+
+        {/* User Profile Section */}
+        {user && (
+           <div className={`p-4 border-t border-gray-200 ${!leftSidebarOpen ? 'flex justify-center' : ''}`}>
+             <a 
+               href="/creator-dashboard/settings" 
+               className={`flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors ${!leftSidebarOpen ? 'justify-center' : ''}`}
+             >
+               <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                 {user.photoURL ? (
+                    <img src={user.photoURL} alt={user.displayName} className="w-full h-full rounded-full object-cover" />
+                 ) : (
+                    (user.displayName?.[0] || user.email?.[0] || 'U').toUpperCase()
+                 )}
+               </div>
+               
+               {leftSidebarOpen && (
+                 <div className="flex-1 min-w-0">
+                   <p className="text-sm font-bold text-gray-900 truncate">{user.displayName || 'User'}</p>
+                   <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                 </div>
+               )}
+             </a>
+           </div>
+        )}
       </div>
     </motion.aside>
   );

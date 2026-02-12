@@ -92,6 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         onboardingCompleted,
         bankDetailsCompleted,
         platformsLinked,
+        profile: null,
+        refreshProfile: async () => {},
         signOut,
       }}
     >

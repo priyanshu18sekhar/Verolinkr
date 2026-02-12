@@ -58,6 +58,12 @@ export const navigationConfig: NavigationConfig = {
       icon: ShieldCheckIcon,
       path: '/brand-registration/kyc',
     },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: CogIcon,
+      path: '/brand-dashboard/settings',
+    },
   ],
   creator: [
     {
@@ -89,6 +95,12 @@ export const navigationConfig: NavigationConfig = {
       label: 'Profile',
       icon: UserIcon,
       path: '/creator-dashboard/profile',
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: CogIcon,
+      path: '/creator-dashboard/settings',
     },
   ],
 };

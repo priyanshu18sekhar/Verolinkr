@@ -23,7 +23,7 @@ import {
   FireIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
-import FloatingNav from '../../../componets/ui/FloatingNav';
+import FloatingNav from '../../../components/ui/FloatingNav';
 
 export default function BrandCreators() {
   const [searchTerm, setSearchTerm] = useState('');

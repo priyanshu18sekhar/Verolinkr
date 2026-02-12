@@ -204,15 +204,53 @@ function AuthContent() {
     }
   };
 
+  // Toast State
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const handleGoogleSignIn = async () => {
     setSubmitError(null);
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      router.push(redirectTo());
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      showToast('Successfully signed in with Google!', 'success');
+
+      // Check if user has a profile in brands or creators
+      // We need to dynamically import db to avoid server-side issues or verify it's client-side
+      const { doc, getDoc } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase/client');
+
+      // Check Creator Profile
+      const creatorDoc = await getDoc(doc(db, 'creators', user.uid));
+      if (creatorDoc.exists()) {
+        showToast('Welcome back, Creator!', 'success');
+        router.push('/creator-dashboard');
+        return;
+      }
+
+      // Check Brand Profile
+      const brandDoc = await getDoc(doc(db, 'brands', user.uid));
+      if (brandDoc.exists()) {
+        showToast('Welcome back, Brand!', 'success');
+        router.push('/brand-dashboard');
+        return;
+      }
+
+      // No profile found -> New User -> Onboarding
+      showToast('Account created! Redirecting to setup...', 'success');
+      router.push('/onboarding/role-selection');
+
     } catch (err: unknown) {
       const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : '';
-      setSubmitError(getAuthErrorMessage(code));
+      const msg = getAuthErrorMessage(code);
+      setSubmitError(msg);
+      showToast(msg, 'error');
     }
   };
 
@@ -643,6 +681,26 @@ function AuthContent() {
             </div>
           </div>
         </motion.div>
+      {/* Aesthetic Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-2xl flex items-center space-x-3 ${
+              toast.type === 'error' ? 'bg-red-500 text-white' : 'bg-black text-white'
+            }`}
+          >
+            {toast.type === 'success' && (
+              <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+            <span className="font-medium text-sm">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
       </Container>
     </div>
   );

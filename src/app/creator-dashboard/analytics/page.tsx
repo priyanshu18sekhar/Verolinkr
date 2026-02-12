@@ -31,8 +31,9 @@ import {
   ComputerDesktopIcon,
   GlobeAltIcon
 } from '@heroicons/react/24/outline';
-import FloatingNav from '../../../componets/ui/FloatingNav';
+import FloatingNav from '../../../components/ui/FloatingNav';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
+import { apiGet } from '@/lib/api/client';
 
 function CreatorAnalyticsContent() {
   const [timeRange, setTimeRange] = useState('30d');
@@ -45,8 +46,7 @@ function CreatorAnalyticsContent() {
     async function fetchData() {
        try {
          // In a real app we'd pass timeRange to the API
-         const response = await fetch('/api/creators/analytics');
-         const json = await response.json();
+         const json = await apiGet<any>('/api/creators/analytics');
          setData(json);
        } catch (e) {
          console.error(e);

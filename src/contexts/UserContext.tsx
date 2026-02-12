@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
+import { apiGet } from '@/lib/api/client';
 
 export type UserType = 'brand' | 'creator';
 
@@ -14,6 +15,8 @@ export interface UserContextType {
   onboardingCompleted: boolean;
   bankDetailsCompleted: boolean;
   platformsLinked: number;
+  profile: any | null;
+  refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -35,6 +38,30 @@ export function UserProvider({
   userEmail,
   userId,
 }: UserProviderProps) {
+  const [profile, setProfile] = useState<any>(null);
+  
+  const fetchProfile = useCallback(async () => {
+    if (!userType) return;
+    try {
+      const endpoint = userType === 'creator' ? '/api/creators/me' : '/api/brands/me';
+      const data = await apiGet<{ creator?: any; brand?: any }>(endpoint);
+      setProfile(data.creator || data.brand);
+    } catch (error: any) {
+      // If profile not found (404), it just means user needs to complete onboarding
+      // Don't log as a console error to avoid alarm
+      if (error.message === 'Brand profile not found' || error.message === 'Creator profile not found') {
+        console.log('User profile not found in DB (onboarding pending)');
+        setProfile(null);
+      } else {
+        console.error('Error fetching user profile:', error);
+      }
+    }
+  }, [userType]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
   return (
     <UserContext.Provider
       value={{
@@ -47,6 +74,8 @@ export function UserProvider({
         onboardingCompleted: true, // Assume completed in legacy provider
         bankDetailsCompleted: true,
         platformsLinked: 0,
+        profile,
+        refreshProfile: fetchProfile,
         signOut: async () => {},
       }}
     >

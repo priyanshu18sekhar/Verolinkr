@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -19,6 +19,22 @@ export default function CreatorRegistrationStep5() {
   });
   const [newPlatform, setNewPlatform] = useState({ platform: '', url: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('creatorRegistrationData');
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      setFormData(prev => ({
+        ...prev,
+        instagramConnected: parsed.instagramConnected || false,
+        youtubeConnected: parsed.youtubeConnected || false,
+        tiktokConnected: parsed.tiktokConnected || false,
+        twitterConnected: parsed.twitterConnected || false,
+        linkedinConnected: parsed.linkedinConnected || false,
+        otherPlatforms: parsed.otherPlatforms || []
+      }));
+    }
+  }, []);
 
   const socialPlatforms = [
     { id: 'instagram', name: 'Instagram', icon: '📷', color: 'bg-gradient-to-r from-purple-500 to-pink-500' },

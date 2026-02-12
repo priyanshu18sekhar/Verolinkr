@@ -110,6 +110,8 @@ export default function CreatorOnboardingStep5() {
       icon={icon}
       onNext={handleNext}
       onBack={handleBack}
+      onSkip={() => router.push('/onboarding/creator/step6')}
+      skipLabel="Skip for now"
     >
       <div className="space-y-8">
         {/* Major Social Platforms */}

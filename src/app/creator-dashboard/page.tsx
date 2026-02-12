@@ -31,7 +31,7 @@ import {
   ShareIcon
 } from '@heroicons/react/24/outline';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import FloatingNav from '../../componets/ui/FloatingNav';
+import FloatingNav from '../../components/ui/FloatingNav';
 import CompleteBankDetails from '../../components/dashboard/CompleteBankDetails';
 import { DashboardEmptyState } from '../../components/dashboard/DashboardEmptyStates';
 

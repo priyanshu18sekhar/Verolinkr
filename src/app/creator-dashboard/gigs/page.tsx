@@ -38,8 +38,10 @@ import {
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import FloatingNav from '../../../componets/ui/FloatingNav';
+import FloatingNav from '../../../components/ui/FloatingNav';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
+import { apiGet, apiPost } from '@/lib/api/client';
+import { Gig, GigPackage, GigPackages, GigAPIResponse } from '@/types/gig';
 
 function GigsMarketplaceContent() {
   const [activeTab, setActiveTab] = useState<'browse' | 'my-gigs' | 'create'>('browse');
@@ -52,36 +54,78 @@ function GigsMarketplaceContent() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [favoriteGigs, setFavoriteGigs] = useState<number[]>([]);
+  const [favoriteGigs, setFavoriteGigs] = useState<string[]>([]);
   
   // Gig Builder States
   const [gigTitle, setGigTitle] = useState('');
   const [gigCategory, setGigCategory] = useState('');
   const [gigDescription, setGigDescription] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-  const [packages, setPackages] = useState({
+  
+  // Default packages state
+  const defaultPackage: GigPackage = { name: '', price: 0, delivery: 3, revisions: 1, features: [] };
+  const [packages, setPackages] = useState<GigPackages>({
     basic: { name: 'Basic', price: 15000, delivery: 3, revisions: 1, features: ['1 Video', 'HD Quality', 'Background Music'] },
     standard: { name: 'Standard', price: 25000, delivery: 5, revisions: 2, features: ['2 Videos', '4K Quality', 'Professional Editing', 'Color Grading'] },
     premium: { name: 'Premium', price: 40000, delivery: 7, revisions: 3, features: ['3 Videos', '4K Quality', 'Pro Editing', 'Custom Graphics', 'Fast Delivery'] }
   });
+  
   const [faqs, setFaqs] = useState<{question: string; answer: string}[]>([]);
   const [showPricingCalc, setShowPricingCalc] = useState(false);
 
-  // Loading simulation
+  // Data
+  const [marketGigs, setMarketGigs] = useState<Gig[]>([]);
+  const [myGigs, setMyGigs] = useState<Gig[]>([]);
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+    const loadGigs = async () => {
+      try {
+        const [marketRes, myRes] = await Promise.all([
+          apiGet<GigAPIResponse>('/api/gigs?type=marketplace').catch(() => ({ gigs: [] })),
+          apiGet<GigAPIResponse>('/api/gigs').catch(() => ({ gigs: [] }))
+        ]);
+
+        // Enrich Market Gigs if necessary, or just use as is if API provides enough
+        // Ideally API should return what we need. For now we assume API is good but we fallback.
+        const enrichedMarket = marketRes.gigs.map(g => ({
+          ...g,
+          // Ensure arrays/objects are safe
+          packages: g.packages || packages, 
+          creator: g.creator || 'Verified Creator',
+          rating: g.rating || 0,
+          reviews: g.reviews || 0,
+          totalOrders: g.orders || 0,
+        }));
+        setMarketGigs(enrichedMarket);
+
+        // My Gigs
+        // We will keep 'packages' as the full object in state, but count keys when rendering
+        const enrichedMy = myRes.gigs.map(g => ({
+          ...g,
+          packages: g.packages || packages,
+          orders: g.orders || 0,
+          inQueue: g.inQueue || 0,
+          rating: g.rating || 0,
+          earnings: g.earnings || 0,
+        }));
+        setMyGigs(enrichedMy);
+
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadGigs();
   }, []);
 
   const categories = [
-    { id: 'all', name: 'All Gigs', count: 156, icon: GiftIcon, color: 'bg-black' },
-    { id: 'fashion', name: 'Fashion & Beauty', count: 45, icon: SparklesIcon, color: 'bg-gray-800' },
-    { id: 'tech', name: 'Technology', count: 32, icon: RocketLaunchIcon, color: 'bg-gray-700' },
-    { id: 'food', name: 'Food & Cooking', count: 28, icon: TagIcon, color: 'bg-gray-600' },
-    { id: 'fitness', name: 'Fitness & Wellness', count: 25, icon: BoltIcon, color: 'bg-gray-500' },
-    { id: 'travel', name: 'Travel & Lifestyle', count: 26, icon: PhotoIcon, color: 'bg-gray-800' }
+    { id: 'all', name: 'All Gigs', count: marketGigs.length, icon: GiftIcon, color: 'bg-black' },
+    { id: 'fashion', name: 'Fashion & Beauty', count: marketGigs.filter(g=>g.category==='fashion').length || 45, icon: SparklesIcon, color: 'bg-gray-800' },
+    { id: 'tech', name: 'Technology', count: marketGigs.filter(g=>g.category==='tech').length || 32, icon: RocketLaunchIcon, color: 'bg-gray-700' },
+    { id: 'food', name: 'Food & Cooking', count: marketGigs.filter(g=>g.category==='food').length || 28, icon: TagIcon, color: 'bg-gray-600' },
+    { id: 'fitness', name: 'Fitness & Wellness', count: marketGigs.filter(g=>g.category==='fitness').length || 25, icon: BoltIcon, color: 'bg-gray-500' },
+    { id: 'travel', name: 'Travel & Lifestyle', count: marketGigs.filter(g=>g.category==='travel').length || 26, icon: PhotoIcon, color: 'bg-gray-800' }
   ];
 
   const templates = [
@@ -93,147 +137,18 @@ function GigsMarketplaceContent() {
     { id: 'lookbook', name: 'Fashion Lookbook', category: 'fashion', description: 'Styled outfit showcase', estimatedPrice: 20000, icon: SparklesIcon }
   ];
 
-  const availableGigs = [
-    {
-      id: 1,
-      title: 'Professional Skincare Review',
-      creator: 'Sarah Johnson',
-      creatorImage: 'SJ',
-      category: 'fashion',
-      packages: {
-        basic: { price: 15000, delivery: '3 days', features: ['1 Instagram Video', '60 sec duration', '1 Revision'] },
-        standard: { price: 25000, delivery: '5 days', features: ['1 YouTube Video + 3 Stories', '3-5 min duration', '2 Revisions', 'Professional Editing'] },
-        premium: { price: 40000, delivery: '7 days', features: ['Full Campaign', 'Multiple Platforms', 'Unlimited Revisions', 'Priority Support'] }
-      },
-      rating: 4.9,
-      reviews: 127,
-      totalOrders: 89,
-      description: 'Professional skincare product review with authentic testing and honest feedback. I\'ll create engaging content that resonates with your target audience.',
-      requirements: ['Product sample', 'Brand guidelines', 'Content calendar'],
-      deliverables: ['HD Video', 'Raw Footage', 'Social Media Kit'],
-      skills: ['Video Production', 'Skincare Expert', 'Social Media'],
-      responseTime: '2 hours',
-      verified: true,
-      featured: true,
-      bestseller: true,
-      level: 'Top Rated',
-      completionRate: 100,
-      testimonials: [
-        { author: 'BeautyBrand', rating: 5, text: 'Amazing quality and professionalism!' },
-        { author: 'GlowCo', rating: 5, text: 'Exceeded expectations. Will hire again!' }
-      ]
-    },
-    {
-      id: 2,
-      title: 'Tech Gadget Unboxing & Review',
-      creator: 'Mike Chen',
-      creatorImage: 'MC',
-      category: 'tech',
-      packages: {
-        basic: { price: 20000, delivery: '4 days', features: ['Unboxing Video', '1080p Quality', '1 Revision'] },
-        standard: { price: 35000, delivery: '6 days', features: ['Full Review Video', '4K Quality', '2 Revisions', 'B-Roll Footage'] },
-        premium: { price: 55000, delivery: '8 days', features: ['Complete Campaign', 'Multi-angle Shots', '3 Revisions', 'Motion Graphics'] }
-      },
-      rating: 4.8,
-      reviews: 203,
-      totalOrders: 156,
-      description: 'Detailed tech product reviews with feature highlights, hands-on testing, and honest recommendations.',
-      requirements: ['Product sample', 'Technical specs', 'Target audience info'],
-      deliverables: ['4K Video', 'Thumbnail Design', 'Product Photos'],
-      skills: ['Tech Reviews', '4K Video', 'Motion Graphics'],
-      responseTime: '1 hour',
-      verified: true,
-      featured: true,
-      bestseller: false,
-      level: 'Level 2',
-      completionRate: 98,
-      testimonials: [
-        { author: 'TechGiant', rating: 5, text: 'Best tech reviewer we\'ve worked with!' }
-      ]
-    },
-    {
-      id: 3,
-      title: 'Recipe Video Creation',
-      creator: 'Emma Wilson',
-      creatorImage: 'EW',
-      category: 'food',
-      packages: {
-        basic: { price: 12000, delivery: '2 days', features: ['Simple Recipe Video', 'HD Quality', '1 Revision'] },
-        standard: { price: 20000, delivery: '4 days', features: ['Detailed Tutorial', 'Ingredient List', '2 Revisions'] },
-        premium: { price: 32000, delivery: '6 days', features: ['Professional Video', 'Recipe Card Design', '3 Revisions'] }
-      },
-      rating: 4.9,
-      reviews: 89,
-      totalOrders: 67,
-      description: 'Beautiful recipe videos with step-by-step instructions, perfect for food brands and restaurants.',
-      requirements: ['Recipe details', 'Ingredient list', 'Cooking time'],
-      deliverables: ['Recipe Video', 'Recipe Card', 'Ingredient Photos'],
-      skills: ['Food Photography', 'Recipe Development', 'Video Editing'],
-      responseTime: '3 hours',
-      verified: true,
-      featured: false,
-      bestseller: true,
-      level: 'Level 1',
-      completionRate: 100,
-      testimonials: [
-        { author: 'FoodBrand', rating: 5, text: 'Delicious content that drives sales!' }
-      ]
-    }
-  ];
-
-  const myGigs = [
-    {
-      id: 1,
-      title: 'Fashion Lookbook Creation',
-      category: 'fashion',
-      packages: 3,
-      status: 'active',
-      orders: 23,
-      inQueue: 3,
-      rating: 4.8,
-      lastOrder: '2 days ago',
-      earnings: 414000,
-      views: 1250,
-      clicks: 245,
-      conversionRate: 19.6,
-      impressions: 4580,
-      avgDelivery: '2.3 days',
-      reviewCount: 18,
-      repeatCustomers: 12
-    },
-    {
-      id: 2,
-      title: 'Fitness Routine Video',
-      category: 'fitness',
-      packages: 3,
-      status: 'paused',
-      orders: 15,
-      inQueue: 0,
-      rating: 4.9,
-      lastOrder: '1 week ago',
-      earnings: 210000,
-      views: 890,
-      clicks: 156,
-      conversionRate: 17.5,
-      impressions: 2340,
-      avgDelivery: '1.9 days',
-      reviewCount: 12,
-      repeatCustomers: 8
-    }
-  ];
-
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 }
   };
 
-  const toggleFavorite = (gigId: number) => {
+  const toggleFavorite = (gigId: string) => {
     setFavoriteGigs(prev => 
       prev.includes(gigId) ? prev.filter(id => id !== gigId) : [...prev, gigId]
     );
   };
 
-  const filteredGigs = availableGigs.filter(gig => {
+  const filteredGigs = marketGigs.filter(gig => {
     const matchesSearch = gig.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          gig.creator.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || gig.category === selectedCategory;
@@ -244,7 +159,7 @@ function GigsMarketplaceContent() {
     if (sortBy === 'price_low') return a.packages.basic.price - b.packages.basic.price;
     if (sortBy === 'price_high') return b.packages.basic.price - a.packages.basic.price;
     if (sortBy === 'rating') return b.rating - a.rating;
-    if (sortBy === 'popular') return b.totalOrders - a.totalOrders;
+    if (sortBy === 'popular') return (b.totalOrders || 0) - (a.totalOrders || 0);
     return 0;
   });
 
@@ -257,13 +172,37 @@ function GigsMarketplaceContent() {
     setShowModal(true);
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     setShowModal(false);
     if (modalContent.type === 'create') {
-      setSuccessMessage('✓ Gig created successfully! It will be visible after review.');
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-      setActiveTab('my-gigs');
+      try {
+        const payload: Partial<Gig> = {
+            title: gigTitle,
+            category: gigCategory,
+            description: gigDescription,
+            packages,
+            faqs,
+            price: packages.basic.price,
+            images: [],
+            status: 'active'
+        };
+        
+        await apiPost<Gig>('/api/gigs', payload);
+        
+        setSuccessMessage('✓ Gig created successfully! It will be visible after review.');
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+        
+        // Refresh My Gigs
+        const myRes = await apiGet<GigAPIResponse>('/api/gigs');
+        setMyGigs(myRes.gigs);
+        
+        setActiveTab('my-gigs');
+      } catch (err) {
+        console.error(err);
+        setSuccessMessage('Failed to create gig');
+        setShowSuccess(true);
+      }
     }
   };
 
@@ -745,13 +684,15 @@ function GigsMarketplaceContent() {
                             }`}>
                               {gig.status}
                             </span>
-                            {gig.inQueue > 0 && (
+                            {(gig.inQueue || 0) > 0 && (
                               <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-gray-100 border border-gray-200 text-black">
                                 {gig.inQueue} in queue
                               </span>
                             )}
                           </div>
-                          <p className="text-[13px] text-gray-600">{gig.packages} packages • Last order: {gig.lastOrder}</p>
+                          <p className="text-[13px] text-gray-600">
+                            {Object.keys(gig.packages).length} packages • Last order: {gig.lastOrder ? new Date((gig.lastOrder._seconds || gig.lastOrder.seconds) * 1000).toLocaleDateString() : 'Never'}
+                          </p>
                         </div>
                         <div className="flex gap-2">
                           <motion.button
@@ -774,7 +715,7 @@ function GigsMarketplaceContent() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
                         <div>
                           <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Earnings</p>
-                          <p className="text-[24px] font-black text-black">₹{(gig.earnings / 1000).toFixed(0)}K</p>
+                          <p className="text-[24px] font-black text-black">₹{((gig.earnings || 0) / 1000).toFixed(0)}K</p>
                         </div>
                         <div>
                           <p className="text-[11px] text-gray-500 font-medium mb-1 uppercase">Orders</p>
@@ -797,28 +738,28 @@ function GigsMarketplaceContent() {
                       <div className="grid grid-cols-4 gap-6 pt-6 border-t border-gray-200">
                         <div>
                           <p className="text-[11px] text-gray-500 uppercase mb-2">Impressions</p>
-                          <p className="text-[18px] font-black text-black">{gig.impressions.toLocaleString()}</p>
+                          <p className="text-[18px] font-black text-black">{(gig.impressions || 0).toLocaleString()}</p>
                           <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                             <div className="bg-black h-2 rounded-full" style={{ width: '75%' }} />
                           </div>
                         </div>
                         <div>
                           <p className="text-[11px] text-gray-500 uppercase mb-2">Clicks</p>
-                          <p className="text-[18px] font-black text-black">{gig.clicks}</p>
+                          <p className="text-[18px] font-black text-black">{gig.clicks || 0}</p>
                           <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                             <div className="bg-black h-2 rounded-full" style={{ width: '65%' }} />
                           </div>
                         </div>
                         <div>
                           <p className="text-[11px] text-gray-500 uppercase mb-2">Repeat Customers</p>
-                          <p className="text-[18px] font-black text-black">{gig.repeatCustomers}</p>
+                          <p className="text-[18px] font-black text-black">{gig.repeatCustomers || 0}</p>
                           <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                             <div className="bg-black h-2 rounded-full" style={{ width: '52%' }} />
                           </div>
                         </div>
                         <div>
                           <p className="text-[11px] text-gray-500 uppercase mb-2">Avg Delivery</p>
-                          <p className="text-[18px] font-black text-black">{gig.avgDelivery}</p>
+                          <p className="text-[18px] font-black text-black">{gig.avgDelivery || 0}d</p>
                           <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                             <div className="bg-black h-2 rounded-full" style={{ width: '90%' }} />
                           </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ConditionalNavigation from "../componets/ConditionalNavigation";
+import ConditionalNavigation from "../components/ConditionalNavigation";
 import AnalyticsInit from "../components/AnalyticsInit";
 import { AuthProvider } from "../contexts/AuthProvider";
 import { CurrencyProvider } from "../contexts/CurrencyContext";
