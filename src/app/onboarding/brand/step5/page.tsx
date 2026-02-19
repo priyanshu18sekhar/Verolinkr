@@ -7,6 +7,8 @@ import { Input } from '../../../../components/design-system';
 import { StepLayout, AnimatedParticles } from '../../../../components/onboarding';
 import { CheckCircleIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { auth } from '@/lib/firebase/client';
+import ToastContainer, { ToastItem } from '@/components/notifications/ToastContainer';
 
 export default function BrandOnboardingStep5() {
   const router = useRouter();
@@ -20,6 +22,16 @@ export default function BrandOnboardingStep5() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  const addToast = (message: string, variant: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts((prev) => [...prev, { id, message, variant, duration: 5000 }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const paymentMethods = ['Credit Card', 'Debit Card', 'Net Banking', 'UPI', 'Bank Transfer'];
 
@@ -75,6 +87,12 @@ export default function BrandOnboardingStep5() {
       setIsSubmitting(true);
       
       try {
+        if (!auth.currentUser) {
+           addToast('Authentication failed. Please log in again.', 'error');
+           setIsSubmitting(false);
+           return;
+        }
+
         const existingData = JSON.parse(localStorage.getItem('onboardingData') || '{}');
         const completeData = {
           ...existingData.brand,
@@ -94,6 +112,7 @@ export default function BrandOnboardingStep5() {
         
         setIsComplete(true);
         setIsSubmitting(false);
+        addToast('Registration complete! Welcome aboard.', 'success');
         
         // Clear onboarding data on success
         localStorage.removeItem('onboardingData');
@@ -103,6 +122,7 @@ export default function BrandOnboardingStep5() {
         }, 3000);
       } catch (error) {
         console.error('Registration error:', error);
+        addToast(error instanceof Error ? error.message : 'Submission failed.', 'error');
         setErrors({ submit: error instanceof Error ? error.message : 'Submission failed. Please try again.' });
         setIsSubmitting(false);
       }
@@ -298,6 +318,7 @@ export default function BrandOnboardingStep5() {
           <p className="text-sm font-medium text-red-600">{errors.submit}</p>
         )}
       </form>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </StepLayout>
   );
 }

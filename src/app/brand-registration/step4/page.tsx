@@ -6,6 +6,8 @@ import { ArrowRightIcon, ArrowLeftIcon, DocumentIcon } from '@heroicons/react/24
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fadeInUp } from '@/utils/animations';
+import { auth } from '@/lib/firebase/client';
+import ToastContainer, { ToastItem } from '@/components/notifications/ToastContainer';
 
 export default function BrandRegistrationStep4() {
   const router = useRouter();
@@ -26,6 +28,16 @@ export default function BrandRegistrationStep4() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  const addToast = (message: string, variant: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts((prev) => [...prev, { id, message, variant, duration: 5000 }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   useEffect(() => {
     const savedData = localStorage.getItem('brandRegistrationData');
@@ -131,6 +143,15 @@ export default function BrandRegistrationStep4() {
       setIsSubmitting(true);
       
       try {
+        const user = auth.currentUser;
+        if (!user) {
+            addToast('Authentication failed. Please log in again.', 'error');
+            setErrors({ submit: 'Authentication failed. Please log in again.' });
+            setIsSubmitting(false);
+            return;
+        }
+        const token = await user.getIdToken();
+
         // Store form data
         const existingData = JSON.parse(localStorage.getItem('brandRegistrationData') || '{}');
         const completeData = {
@@ -158,21 +179,29 @@ export default function BrandRegistrationStep4() {
         // Call registration API
         const response = await fetch('/api/brands/register', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(completeData)
         });
         
         const result = await response.json();
         
         if (result.success) {
+          addToast('Verification details submitted successfully!', 'success');
           localStorage.setItem('brandId', result.brandId);
-          router.push('/brand-registration/step5');
+          setTimeout(() => {
+            router.push('/brand-registration/step5');
+          }, 1000);
         } else {
           console.error('Registration failed:', result.error);
+          addToast(result.error || 'Registration failed. Please try again.', 'error');
           setErrors({ submit: result.error || 'Registration failed. Please try again.' });
         }
       } catch (error) {
         console.error('Registration error:', error);
+        addToast('An unexpected error occurred. Please try again.', 'error');
         setErrors({ submit: 'An unexpected error occurred. Please try again.' });
       } finally {
         setIsSubmitting(false);
@@ -183,6 +212,14 @@ export default function BrandRegistrationStep4() {
   const handleSkipRegistration = async () => {
       setIsSubmitting(true);
       try {
+        const user = auth.currentUser;
+        if (!user) {
+            addToast('Authentication failed. Please log in again.', 'error');
+            setIsSubmitting(false);
+            return;
+        }
+        const token = await user.getIdToken();
+
         const existingData = JSON.parse(localStorage.getItem('brandRegistrationData') || '{}');
         // Merge with current (potentially empty) form data
         const completeData = {
@@ -208,21 +245,29 @@ export default function BrandRegistrationStep4() {
         
         const response = await fetch('/api/brands/register', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(completeData)
         });
         
         const result = await response.json();
         
         if (result.success) {
+          addToast('Skipping verification...', 'info');
           localStorage.setItem('brandId', result.brandId);
-          router.push('/brand-registration/step5');
+          setTimeout(() => {
+            router.push('/brand-registration/step5');
+          }, 500);
         } else {
           console.error('Registration failed:', result.error);
+          addToast(result.error || 'Registration failed.', 'error');
           setErrors({ submit: result.error || 'Registration failed. Please try again.' });
         }
       } catch (error) {
         console.error('Registration error:', error);
+        addToast('An unexpected error occurred.', 'error');
         setErrors({ submit: 'An unexpected error occurred. Please try again.' });
       } finally {
         setIsSubmitting(false);
@@ -231,6 +276,7 @@ export default function BrandRegistrationStep4() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
       <div className="max-w-2xl mx-auto">
         {/* Progress Indicator */}
         <motion.div

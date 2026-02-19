@@ -53,16 +53,19 @@ export default function Toast({ id, message, variant = 'info', duration = 5000, 
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
-        if (prev <= 0) {
-          onClose(id);
-          return 0;
-        }
+        if (prev <= 0) return 0;
         return prev - (100 / (duration / 100));
       });
     }, 100);
 
     return () => clearInterval(interval);
-  }, [duration, id, onClose]);
+  }, [duration]);
+
+  useEffect(() => {
+    if (progress <= 0) {
+      onClose(id);
+    }
+  }, [progress, id, onClose]);
 
   const styles = variantStyles[variant];
   const Icon = styles.icon;

@@ -31,7 +31,7 @@ const positionClasses = {
 
 export default function ToastContainer({ toasts, onRemove, position = 'top-right' }: ToastContainerProps) {
   return (
-    <div className={`fixed ${positionClasses[position]} z-50 flex flex-col gap-4 pointer-events-none`}>
+    <div className={`fixed ${positionClasses[position]} z-[9999] flex flex-col gap-4 pointer-events-none mt-16`}>
       <AnimatePresence>
         {toasts.map((toast) => (
           <div key={toast.id} className="pointer-events-auto">

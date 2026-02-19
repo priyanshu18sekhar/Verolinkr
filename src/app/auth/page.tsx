@@ -200,6 +200,7 @@ function AuthContent() {
 
           console.log("No profile found (or check failed). Redirecting to Onboarding...");
           // No profile -> Onboarding
+          showToast('Account created! Redirecting to setup...', 'success');
           router.push('/onboarding/role-selection');
         } catch (error) {
            console.error("Auth state logic error:", error);
