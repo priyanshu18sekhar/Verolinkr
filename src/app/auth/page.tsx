@@ -79,49 +79,29 @@ function AuthContent() {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
-
-  // Handle Redirect Result (Google Sign In)
+  // Handle Google redirect result on page load
   useEffect(() => {
-    const handleRedirect = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          const user = result.user;
-          showToast('Successfully signed in with Google!', 'success');
+    getRedirectResult(auth).then(async (result) => {
+      if (!result) return;
+      const user = result.user;
+      showToast('Successfully signed in with Google!', 'success');
 
-          // Dynamically import db
-          const { doc, getDoc } = await import('firebase/firestore');
-          const { getClientDb } = await import('@/lib/firebase/client');
-          const db = getClientDb();
+      const { doc, getDoc } = await import('firebase/firestore');
+      const { getClientDb } = await import('@/lib/firebase/client');
+      const db = getClientDb();
 
-          // Check Creator Profile
-          const creatorDoc = await getDoc(doc(db, 'creators', user.uid));
-          if (creatorDoc.exists()) {
-            showToast('Welcome back, Creator!', 'success');
-            router.push('/creator-dashboard');
-            return;
-          }
+      const creatorDoc = await getDoc(doc(db, 'creators', user.uid));
+      if (creatorDoc.exists()) { router.push('/creator-dashboard'); return; }
 
-          // Check Brand Profile
-          const brandDoc = await getDoc(doc(db, 'brands', user.uid));
-          if (brandDoc.exists()) {
-            showToast('Welcome back, Brand!', 'success');
-            router.push('/brand-dashboard');
-            return;
-          }
+      const brandDoc = await getDoc(doc(db, 'brands', user.uid));
+      if (brandDoc.exists()) { router.push('/brand-dashboard'); return; }
 
-          // No profile found -> New User -> Onboarding
-          showToast('Account created! Redirecting to setup...', 'success');
-          router.push('/onboarding/role-selection');
-        }
-      } catch (error: any) {
-        console.error("Redirect auth error:", error);
-        setSubmitError(getAuthErrorMessage(error?.code || 'auth/unknown'));
-        showToast('Authentication failed. Please try again.', 'error');
-      }
-    };
-    
-    handleRedirect();
+      router.push('/onboarding/role-selection');
+    }).catch((err: any) => {
+      const msg = getAuthErrorMessage(err?.code ?? '');
+      setSubmitError(msg);
+      showToast(msg, 'error');
+    });
   }, [router]);
 
   // On mount: detect if we're opening an email sign-in link and complete or ask for email
@@ -321,12 +301,11 @@ function AuthContent() {
 
   const handleGoogleSignIn = async () => {
     setSubmitError(null);
-    setIsRedirecting(true); // Show loading state if needed
+    setIsRedirecting(true);
     const provider = new GoogleAuthProvider();
-    
     try {
       await signInWithRedirect(auth, provider);
-      // execution ends here as page redirects
+      // page navigates away — result handled by getRedirectResult on return
     } catch (err: unknown) {
       setIsRedirecting(false);
       const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : '';
