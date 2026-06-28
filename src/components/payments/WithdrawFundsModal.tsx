@@ -89,9 +89,13 @@ export default function WithdrawFundsModal({
     }
 
     setIsProcessing(true);
-    
-    // Simulate withdrawal processing
-    setTimeout(() => {
+
+    try {
+      const { apiPost } = await import('@/lib/api/client');
+      await apiPost('/api/creators/me/withdraw', {
+        amount: withdrawAmount,
+        accountId: selectedAccount,
+      });
       setIsProcessing(false);
       onWithdraw?.(withdrawAmount, selectedAccount);
       openSuccess({
@@ -104,7 +108,13 @@ export default function WithdrawFundsModal({
           setSelectedAccount('');
         },
       });
-    }, 2000);
+    } catch (err) {
+      setIsProcessing(false);
+      openError({
+        message: err instanceof Error ? err.message : 'Could not submit your withdrawal. Please try again.',
+        title: 'Withdrawal Failed',
+      });
+    }
   };
 
   const quickAmounts = [5000, 10000, 25000, availableBalance];
