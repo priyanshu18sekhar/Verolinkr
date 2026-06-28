@@ -2,67 +2,36 @@
 
 import Link from "next/link";
 
-const columns = [
-  {
-    title: "Product",
-    links: [
-      { name: "How it works", href: "/#how" },
-      { name: "For creators", href: "/auth?role=creator" },
-      { name: "For brands", href: "/auth?role=brand" },
-      { name: "Pricing", href: "/#pricing" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { name: "Contact", href: "/contact" },
-      { name: "Privacy", href: "/privacy" },
-      { name: "Terms", href: "/terms" },
-    ],
-  },
-  {
-    title: "Connect",
-    links: [
-      { name: "Instagram", href: "#" },
-      { name: "YouTube", href: "#" },
-      { name: "LinkedIn", href: "#" },
-    ],
-  },
+const links = [
+  { name: "Contact", href: "/contact" },
+  { name: "Privacy", href: "/privacy" },
+  { name: "Terms", href: "/terms" },
+  { name: "Log in", href: "/auth" },
 ];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/10 py-16">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
-          <div>
-            <span className="vl-display text-xl tracking-tight text-white">VeroLinkr</span>
-            <p className="mt-4 max-w-xs text-sm lp-muted">
-              Get paid for proof, not promises. Verified creator marketing for
-              the people who make it.
-            </p>
-          </div>
+    <footer className="border-t border-black/10 py-12">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 md:flex-row">
+        <Link href="/" className="cine-mono text-[0.95rem] font-semibold tracking-tight text-[#08080c]">
+          Vero<span className="text-[#4f2bff]">·</span>Linkr
+        </Link>
 
-          {columns.map((col) => (
-            <div key={col.title}>
-              <p className="lp-eyebrow">{col.title}</p>
-              <ul className="mt-4 space-y-3">
-                {col.links.map((l) => (
-                  <li key={l.name}>
-                    <Link href={l.href} className="text-sm text-white/65 transition-colors hover:text-white">
-                      {l.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <nav className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2">
+          {links.map((l) => (
+            <Link
+              key={l.name}
+              href={l.href}
+              className="cine-mono text-[0.7rem] uppercase tracking-[0.2em] text-[#6b6a7b] transition-colors hover:text-[#08080c]"
+            >
+              {l.name}
+            </Link>
           ))}
-        </div>
+        </nav>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-8 text-sm lp-faint md:flex-row">
-          <p>© {new Date().getFullYear()} VeroLinkr. All rights reserved.</p>
-          <p className="vl-mono text-xs">Built for authentic marketing.</p>
-        </div>
+        <p className="cine-mono text-[0.7rem] uppercase tracking-[0.2em] text-[#a3a2b0]">
+          © {new Date().getFullYear()} VeroLinkr
+        </p>
       </div>
     </footer>
   );

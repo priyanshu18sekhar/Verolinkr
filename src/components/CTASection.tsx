@@ -1,47 +1,40 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { Reveal, Words } from "./cinematic/Cine";
 
 export default function CTASection() {
   return (
-    <section className="border-t border-white/10 py-28 lg:py-40">
-      <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-        >
-          <span className="lp-eyebrow">Free to start</span>
-          <h2 className="lp-giant lp-chrome mx-auto mt-6 max-w-5xl" style={{ fontSize: "clamp(2.6rem,8vw,7rem)" }}>
-            Your reach is real.
-            <br />
-            Your income should be too.
-          </h2>
-          <p className="mx-auto mt-8 max-w-xl text-lg lp-muted">
-            Join VeroLinkr, verify your platforms, and get paid for the audience
-            you actually have.
-          </p>
+    <section className="cine-act items-center overflow-hidden text-center">
+      {/* closing aurora glow (CSS, no WebGL) */}
+      <div className="cine-glow" aria-hidden />
 
-          <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/auth?role=creator" className="lp-btn premium-glow-button">
-              Start as creator <span aria-hidden>→</span>
-            </Link>
-            <Link href="/auth?role=brand" className="lp-btn lp-btn-ghost">
-              Start as brand
-            </Link>
-          </div>
+      <p className="cine-eyebrow relative">Free to start</p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm lp-faint">
-            <span>No setup fees</span>
-            <span aria-hidden>•</span>
-            <span>Escrow-protected</span>
-            <span aria-hidden>•</span>
-            <span>Withdraw anytime</span>
-          </div>
-        </motion.div>
-      </div>
+      <h2 className="cine-giant relative mt-6 px-4">
+        <Words text="Your reach is real." accent={["real"]} />
+      </h2>
+
+      <Reveal delay={0.2} className="relative mt-5">
+        <p className="cine-lead text-[#08080c]">
+          Your income should be <span className="cine-serif">too.</span>
+        </p>
+      </Reveal>
+
+      <Reveal delay={0.35} className="relative mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <Link href="/auth?role=creator" className="cine-btn">
+          Start as creator <span aria-hidden>→</span>
+        </Link>
+        <Link href="/auth?role=brand" className="cine-btn-ghost">
+          Start as brand
+        </Link>
+      </Reveal>
+
+      <Reveal delay={0.5} className="relative mt-10">
+        <p className="cine-mono text-[0.68rem] uppercase tracking-[0.24em] text-[#6b6a7b]">
+          No setup fees · Escrow-protected · Withdraw anytime
+        </p>
+      </Reveal>
     </section>
   );
 }

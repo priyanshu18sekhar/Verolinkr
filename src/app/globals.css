@@ -83,14 +83,34 @@
   }
 }
 
-body {
+html {
+  /* The platform surface is white; the fixed aurora layer glows on top of it
+     while page content keeps black text. */
   background: var(--background);
+}
+
+body {
+  background: transparent;
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   font-feature-settings: 'cv11', 'ss01';
   font-variation-settings: 'opsz' 32;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Non-interactive aurora background — a glow anchored to the top of the page
+   that scrolls away with content, so everything below sits on clean white with
+   readable black text. */
+.aurora-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 /* Typography System — defaults for bare elements. Layered so explicit
@@ -735,12 +755,13 @@ html {
 }
 
 /* =================================================================
-   Landing — dark, cinematic, liquid-metal theme (giant type)
-   Scoped to .lp-wrap so dashboards/admin keep the light system.
+   Landing — white surface, black type, with the aurora glowing behind.
+   Scoped to .lp-wrap; dashboards/admin already use the light system.
    ================================================================= */
 .lp-wrap {
-  background: #060608;
-  color: #edeef2;
+  /* Transparent so the fixed aurora + white html surface shows through. */
+  background: transparent;
+  color: #0b0b12;
 }
 .lp-eyebrow {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
@@ -748,7 +769,7 @@ html {
   letter-spacing: 0.3em;
   font-size: 0.7rem;
   font-weight: 500;
-  color: #8a8f9c;
+  color: #6b6a7b;
 }
 .lp-giant {
   font-family: var(--font-display), system-ui, sans-serif;
@@ -764,27 +785,28 @@ html {
   line-height: 0.95;
   font-size: clamp(2.4rem, 6.5vw, 6rem);
 }
-.lp-muted { color: #9a9fad; }
-.lp-faint { color: #6b7080; }
+.lp-muted { color: #5b5a68; }
+.lp-faint { color: #8a899a; }
 .lp-card {
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(11, 11, 18, 0.08);
   border-radius: 22px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
-.lp-hair { height: 1px; background: rgba(255, 255, 255, 0.1); }
+.lp-hair { height: 1px; background: rgba(11, 11, 18, 0.1); }
 
-/* Liquid-chrome text fill */
+/* Headline text fill — a subtle near-black gradient that reads as solid black
+   on the white surface while keeping a little depth. */
 .lp-chrome {
-  background: linear-gradient(180deg, #ffffff 0%, #cdd2dc 42%, #8b91a1 72%, #babfca 100%);
+  background: linear-gradient(180deg, #0b0b12 0%, #23232c 60%, #0b0b12 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
 }
 
-/* Light pill button on dark, with the kept glow on hover */
+/* Dark pill button on the white surface */
 .lp-btn {
   display: inline-flex;
   align-items: center;
@@ -794,18 +816,143 @@ html {
   font-weight: 600;
   font-size: 0.98rem;
   padding: 0.95rem 1.7rem;
-  background: #fff;
-  color: #060608;
+  background: #0b0b12;
+  color: #ffffff;
   transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out);
   cursor: pointer;
 }
 .lp-btn:hover { transform: translateY(-2px); }
 .lp-btn-ghost {
   background: transparent;
-  color: #edeef2;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #0b0b12;
+  border: 1px solid rgba(11, 11, 18, 0.22);
 }
-.lp-btn-ghost:hover { border-color: rgba(255, 255, 255, 0.55); }
+.lp-btn-ghost:hover { border-color: rgba(11, 11, 18, 0.55); }
 
 /* Big reveal for scroll sections */
 @keyframes lpRise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+
+/* =================================================================
+   Cinematic landing v3 — "Proof, in motion"
+   Giant kinetic type on white, an indigo→cyan→mint aurora, and a
+   floating liquid-glass nav. Less copy, more presence.
+   ================================================================= */
+.cine-wrap {
+  background: transparent;
+  color: #08080c;
+  overflow-x: clip;
+}
+
+/* Receipt/ledger micro-label — the verification vernacular. */
+.cine-eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.34em;
+  font-size: clamp(0.6rem, 0.85vw, 0.74rem);
+  font-weight: 500;
+  color: #6b6a7b;
+}
+
+/* The kinetic title face. */
+.cine-giant {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  font-size: clamp(3rem, 13.5vw, 15rem);
+  color: #08080c;
+}
+.cine-mid {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  font-size: clamp(2.4rem, 8vw, 7rem);
+  color: #08080c;
+}
+.cine-lead {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+  font-size: clamp(1.5rem, 4.2vw, 3rem);
+  color: #08080c;
+}
+
+/* Editorial accent — italic serif, used on one or two words per act. */
+.cine-serif {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+.cine-mono { font-family: var(--font-geist-mono), ui-monospace, monospace; }
+.cine-body {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  color: #46455a;
+  line-height: 1.55;
+}
+
+/* Each scroll act is a viewport-height frame. */
+.cine-act {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Floating liquid-glass navigation. */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.66);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(11, 11, 18, 0.1);
+  box-shadow:
+    0 12px 36px -14px rgba(11, 11, 18, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Dark pill button, refined for the cinematic surface. */
+.cine-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.96rem;
+  letter-spacing: -0.01em;
+  padding: 0.95rem 1.7rem;
+  background: #08080c;
+  color: #ffffff;
+  border: 1px solid #08080c;
+  transition: transform .2s var(--ease-out), box-shadow .2s var(--ease-out);
+  cursor: pointer;
+}
+.cine-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px -16px rgba(8,8,12,0.5); }
+.cine-btn-ghost {
+  background: rgba(255,255,255,0.4);
+  color: #08080c;
+  border: 1px solid rgba(11,11,18,0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.cine-btn-ghost:hover { border-color: rgba(11,11,18,0.4); transform: translateY(-2px); box-shadow: none; }
+
+/* Soft radial aurora tint for closing acts (no WebGL needed). */
+.cine-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 50% 18%, rgba(79,43,255,0.16), transparent 70%),
+    radial-gradient(45% 40% at 72% 30%, rgba(0,224,192,0.12), transparent 70%),
+    radial-gradient(45% 45% at 28% 26%, rgba(43,184,255,0.12), transparent 70%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cine-giant, .cine-mid { letter-spacing: -0.04em; }
+}

@@ -1,54 +1,95 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { Reveal, Words, EASE } from "./cinematic/Cine";
 
-// A real, ordered process — numbering is earned here.
-const steps = [
-  {
-    n: "01",
-    title: "Connect & verify",
-    body: "Link Instagram, YouTube and Facebook. We pull real audience and engagement data straight from the source — and seal it as verified.",
-  },
-  {
-    n: "02",
-    title: "Get matched",
-    body: "Brands find you by your verified reach, niche and authentic engagement. Accept the campaigns that fit, skip the ones that don't.",
-  },
-  {
-    n: "03",
-    title: "Get paid per proof",
-    body: "Post, and earn for every genuine view. Funds sit in escrow until the work is verified, then land in your bank — no chasing invoices.",
-  },
-];
-
+/**
+ * Act 02 — Verify. The signature moment: a verification seal that stamps and
+ * draws itself when scrolled into view, embodying "proof, sealed."
+ */
 export default function HowItWorks() {
-  return (
-    <section className="py-24 lg:py-36">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="max-w-3xl">
-          <span className="lp-eyebrow">How it works</span>
-          <h2 className="lp-h2 mt-5 text-white">
-            From handle to bank account, in three honest steps.
-          </h2>
-        </div>
+  const reduce = useReducedMotion();
 
-        <div className="mt-16 grid gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/[0.06] md:grid-cols-3">
-          {steps.map((s, i) => (
-            <motion.div
-              key={s.n}
-              className="group relative bg-[#060608] p-9 transition-colors hover:bg-white/[0.04]"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.55, delay: i * 0.1 }}
-            >
-              <span className="vl-display block text-6xl text-white/15">{s.n}</span>
-              <h3 className="vl-display mt-5 text-3xl text-white">{s.title}</h3>
-              <p className="mt-3 lp-muted">{s.body}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+  return (
+    <section id="verify" className="cine-act items-center scroll-mt-24 text-center">
+      <p className="cine-eyebrow">Step 02 — Verify</p>
+
+      <h2 className="cine-giant mt-6 px-4">
+        <Words text="Get verified." accent={["verified"]} />
+      </h2>
+
+      {/* The seal */}
+      <motion.div
+        className="relative mt-14 h-56 w-56 sm:h-64 sm:w-64"
+        initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 1.5, rotate: -12 }}
+        whileInView={reduce ? { opacity: 1 } : { opacity: 1, scale: 1, rotate: 0 }}
+        viewport={{ once: true, amount: 0.5 }}
+        transition={{ duration: 0.9, ease: EASE }}
+      >
+        {/* aurora glow under the seal */}
+        <div
+          className="absolute inset-0 -z-10 rounded-full blur-2xl"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(79,43,255,0.28), rgba(0,224,192,0.18) 45%, transparent 70%)",
+          }}
+        />
+
+        <svg viewBox="0 0 220 220" className="h-full w-full">
+          {/* rotating circular caption */}
+          <motion.g
+            style={{ transformOrigin: "110px 110px" }}
+            animate={reduce ? {} : { rotate: 360 }}
+            transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
+          >
+            <defs>
+              <path
+                id="seal-ring"
+                d="M110,110 m-86,0 a86,86 0 1,1 172,0 a86,86 0 1,1 -172,0"
+              />
+            </defs>
+            <text className="cine-mono" fontSize="11" letterSpacing="6" fill="#6b6a7b">
+              <textPath href="#seal-ring" startOffset="0%">
+                VEROLINKR · VERIFIED REACH · PROOF NOT PROMISES ·
+              </textPath>
+            </text>
+          </motion.g>
+
+          {/* inner ring draws on */}
+          <motion.circle
+            cx="110"
+            cy="110"
+            r="64"
+            fill="none"
+            stroke="#08080c"
+            strokeWidth="2"
+            initial={{ pathLength: 0 }}
+            whileInView={{ pathLength: 1 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 1.1, ease: EASE, delay: 0.25 }}
+          />
+
+          {/* check draws on */}
+          <motion.path
+            d="M84 112 l16 16 l34 -38"
+            fill="none"
+            stroke="#4f2bff"
+            strokeWidth="6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            initial={{ pathLength: 0 }}
+            whileInView={{ pathLength: 1 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.6, ease: EASE, delay: 0.9 }}
+          />
+        </svg>
+      </motion.div>
+
+      <Reveal delay={0.3} className="mt-12 max-w-md px-6">
+        <p className="cine-mono text-xs uppercase tracking-[0.22em] text-[#6b6a7b]">
+          We seal your real reach — so brands pay for what&apos;s true.
+        </p>
+      </Reveal>
     </section>
   );
 }

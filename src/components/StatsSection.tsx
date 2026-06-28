@@ -2,59 +2,45 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { Reveal, EASE } from "./cinematic/Cine";
 
-const stats = [
-  { value: 50000, suffix: "+", label: "Creators verified" },
-  { value: 1200, suffix: "+", label: "Brands paying out" },
-  { value: 18, suffix: "M", label: "Verified views / mo" },
-  { value: 9.4, suffix: "M", prefix: "$", decimals: 1, label: "Paid to creators" },
-];
-
-function Stat({
-  value,
-  suffix,
-  prefix = "",
-  label,
-  decimals = 0,
-  start,
-}: {
-  value: number;
-  suffix: string;
-  prefix?: string;
-  label: string;
-  decimals?: number;
-  start: boolean;
-}) {
+function useCountUp(target: number, decimals: number, start: boolean) {
   const [v, setV] = useState(0);
   const reduce = useReducedMotion();
   useEffect(() => {
     if (!start) return;
     if (reduce) {
-      setV(value);
+      setV(target);
       return;
     }
     let raf = 0;
     const t0 = performance.now();
-    const dur = 1700;
+    const dur = 2000;
     const tick = (now: number) => {
       const p = Math.min(1, (now - t0) / dur);
-      setV(value * (1 - Math.pow(1 - p, 3)));
+      setV(target * (1 - Math.pow(1 - p, 3)));
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [start, value, reduce]);
+  }, [start, target, reduce]);
+  return decimals > 0 ? v.toFixed(decimals) : Math.round(v).toLocaleString();
+}
 
-  const display = decimals > 0 ? v.toFixed(decimals) : Math.round(v).toLocaleString();
+const sideStats = [
+  { value: 50000, suffix: "+", label: "creators verified" },
+  { value: 18, suffix: "M", label: "verified views / month" },
+];
 
+function SideStat({ value, suffix, label, start }: { value: number; suffix: string; label: string; start: boolean }) {
+  const display = useCountUp(value, 0, start);
   return (
-    <div className="px-6 py-12 text-center md:py-16">
-      <p className="lp-chrome vl-display text-6xl md:text-7xl" style={{ fontFeatureSettings: '"tnum" 1' }}>
-        {prefix}
+    <div className="text-center">
+      <p className="cine-mid !text-[clamp(2rem,5vw,3.4rem)]" style={{ fontFeatureSettings: '"tnum" 1' }}>
         {display}
         {suffix}
       </p>
-      <p className="mt-3 text-sm lp-muted">{label}</p>
+      <p className="cine-mono mt-2 text-[0.68rem] uppercase tracking-[0.22em] text-[#6b6a7b]">{label}</p>
     </div>
   );
 }
@@ -62,6 +48,7 @@ function Stat({
 export default function StatsSection() {
   const ref = useRef<HTMLDivElement>(null);
   const [start, setStart] = useState(false);
+  const hero = useCountUp(9.4, 1, start);
 
   useEffect(() => {
     const el = ref.current;
@@ -80,21 +67,31 @@ export default function StatsSection() {
   }, []);
 
   return (
-    <section className="py-20 lg:py-28">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <motion.div
-          ref={ref}
-          className="grid divide-y divide-white/10 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] md:grid-cols-4 md:divide-x md:divide-y-0"
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          {stats.map((s) => (
-            <Stat key={s.label} {...s} start={start} />
-          ))}
-        </motion.div>
-      </div>
+    <section id="earn" ref={ref} className="cine-act items-center scroll-mt-24 text-center">
+      <p className="cine-eyebrow">Step 03 — Earn</p>
+
+      <motion.p
+        className="cine-giant mt-6 px-4"
+        style={{ fontFeatureSettings: '"tnum" 1' }}
+        initial={{ opacity: 0, filter: "blur(16px)", scale: 0.96 }}
+        whileInView={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+        viewport={{ once: true, amount: 0.5 }}
+        transition={{ duration: 1.1, ease: EASE }}
+      >
+        ${hero}M
+      </motion.p>
+
+      <Reveal delay={0.2} className="mt-4">
+        <p className="cine-lead text-[#08080c]">
+          paid to creators, for <span className="cine-serif">every real view.</span>
+        </p>
+      </Reveal>
+
+      <Reveal delay={0.4} className="mt-16 flex w-full max-w-2xl items-start justify-center gap-16 px-6">
+        {sideStats.map((s) => (
+          <SideStat key={s.label} {...s} start={start} />
+        ))}
+      </Reveal>
     </section>
   );
 }
