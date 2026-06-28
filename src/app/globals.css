@@ -558,20 +558,22 @@ html {
   --vl-mist: #f4f3fb;          /* violet-tinted light surface */
   --vl-line: #e7e6f0;          /* hairline */
   --vl-muted: #6b6a7b;
-  --vl-indigo: #4f2bff;        /* primary brand */
-  --vl-indigo-ink: #2b16a3;
-  --vl-indigo-soft: #ece8ff;
-  --vl-coral: #ff5436;         /* energy / secondary */
-  --vl-mint: #00c792;          /* verified + money signal */
-  --vl-mint-soft: #d6fbef;
-  --vl-mint-ink: #047a5b;
+  /* Minimalist monochrome: the page is black-on-white. The only colour pop
+     is the glowing CTA (see --gradient-premium / .premium-glow-button). */
+  --vl-indigo: #0b0b12;        /* primary brand -> ink */
+  --vl-indigo-ink: #0b0b12;
+  --vl-indigo-soft: #f1f1f4;
+  --vl-coral: #6b6a7b;         /* secondary -> muted grey */
+  --vl-mint: #0b0b12;          /* verified seal -> ink */
+  --vl-mint-soft: #f1f1f4;
+  --vl-mint-ink: #0b0b12;
 
-  --vl-aurora: linear-gradient(115deg, #4f2bff 0%, #8b3bff 38%, #ff5436 100%);
-  --vl-aurora-soft: linear-gradient(115deg, rgba(79,43,255,0.12), rgba(255,84,54,0.10));
+  --vl-aurora: linear-gradient(115deg, #0b0b12 0%, #3a3a44 100%);
+  --vl-aurora-soft: linear-gradient(115deg, rgba(11,11,18,0.06), rgba(11,11,18,0.03));
 
   /* fill the previously-undefined gradient aliases used by util classes */
-  --gradient-brand: linear-gradient(135deg, #4f2bff 0%, #8b3bff 100%);
-  --gradient-creator: linear-gradient(135deg, #00c792 0%, #4f2bff 100%);
+  --gradient-brand: linear-gradient(135deg, #0b0b12 0%, #3a3a44 100%);
+  --gradient-creator: linear-gradient(135deg, #0b0b12 0%, #3a3a44 100%);
 
   --vl-shadow-card: 0 1px 0 rgba(11,11,18,0.04), 0 18px 40px -24px rgba(11,11,18,0.28);
   --vl-shadow-pop: 0 24px 60px -28px rgba(79,43,255,0.45);
@@ -693,12 +695,20 @@ html {
 }
 @keyframes vlProofFlow { to { background-position: 16px 50%; } }
 
+/* Kept as a solid-ink emphasis in the minimalist palette. */
 .vl-aurora-text {
-  background: var(--vl-aurora);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: var(--vl-ink);
+  position: relative;
+}
+.vl-aurora-text::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.08em;
+  height: 0.09em;
+  background: var(--vl-ink);
+  border-radius: 2px;
 }
 
 /* Marquee (CSS-driven, replaces framer hook loops) --------------- */
