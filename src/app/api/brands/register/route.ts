@@ -120,15 +120,30 @@ export async function POST(req: NextRequest) {
 
             // Meta
             profileComplete: body.profileComplete !== false, // Default true unless explicitly skipped
+            onboardingCompleted: true,
             active: true,
             verified: false,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
 
-        // Save to Firestore using Auth UID
+        // Save to Firestore using Auth UID. Also write the canonical profiles
+        // mapping the session route reads for userType + routing.
         const db = getAdminFirestore();
-        await db.collection('brands').doc(auth.uid).set(brandData);
+        const batch = db.batch();
+        batch.set(db.collection('brands').doc(auth.uid), brandData, { merge: true });
+        batch.set(
+            db.collection('profiles').doc(auth.uid),
+            {
+                uid: auth.uid,
+                userType: 'brand',
+                displayName: brandData.companyName,
+                photoURL: brandData.logo || null,
+                updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+        );
+        await batch.commit();
 
         return NextResponse.json({
             success: true,

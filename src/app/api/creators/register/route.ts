@@ -74,12 +74,28 @@ export async function POST(req: NextRequest) {
             // Meta
             status: 'pending', // pending, approved, rejected
             profileComplete: true,
+            onboardingCompleted: true,
+            bankDetailsCompleted: Boolean(body.bankName && body.accountNumber && body.ifscCode && body.pan),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
 
-        // Save to Firestore using Auth UID
-        await adminDb.collection('creators').doc(auth.uid).set(creatorData);
+        // Save to Firestore using Auth UID. Also write the canonical profiles
+        // mapping the session route reads for userType + routing.
+        const batch = adminDb.batch();
+        batch.set(adminDb.collection('creators').doc(auth.uid), creatorData, { merge: true });
+        batch.set(
+            adminDb.collection('profiles').doc(auth.uid),
+            {
+                uid: auth.uid,
+                userType: 'creator',
+                displayName: creatorData.fullName,
+                photoURL: creatorData.profilePhoto || null,
+                updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+        );
+        await batch.commit();
 
         return NextResponse.json({
             success: true,

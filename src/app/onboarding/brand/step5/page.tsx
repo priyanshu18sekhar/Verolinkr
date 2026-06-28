@@ -106,9 +106,10 @@ export default function BrandOnboardingStep5() {
           brand: completeData
         }));
 
-        // Call Registration API using shared client
+        // Complete onboarding: writes the profiles mapping + brand profile so
+        // the session resolves userType: 'brand' and routing works.
         const { apiPost } = await import('@/lib/api/client');
-        await apiPost('/api/brands/register', completeData);
+        await apiPost('/api/onboarding/brand', { brand: completeData });
         
         setIsComplete(true);
         setIsSubmitting(false);
