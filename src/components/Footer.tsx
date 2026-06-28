@@ -32,14 +32,12 @@ const columns = [
 
 export default function Footer() {
   return (
-    <footer className="vl-section border-t border-[var(--vl-line)] py-16">
+    <footer className="border-t border-white/10 py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
-            <div className="flex items-center gap-2">
-              <Wordmark />
-            </div>
-            <p className="mt-4 max-w-xs text-sm text-[var(--vl-muted)]">
+            <span className="vl-display text-xl tracking-tight text-white">VeroLinkr</span>
+            <p className="mt-4 max-w-xs text-sm lp-muted">
               Get paid for proof, not promises. Verified creator marketing for
               the people who make it.
             </p>
@@ -47,16 +45,11 @@ export default function Footer() {
 
           {columns.map((col) => (
             <div key={col.title}>
-              <p className="vl-mono text-xs uppercase tracking-[0.18em] text-[var(--vl-muted)]">
-                {col.title}
-              </p>
+              <p className="lp-eyebrow">{col.title}</p>
               <ul className="mt-4 space-y-3">
                 {col.links.map((l) => (
                   <li key={l.name}>
-                    <Link
-                      href={l.href}
-                      className="text-sm text-[var(--vl-ink)]/70 transition-colors hover:text-[var(--vl-ink)]"
-                    >
+                    <Link href={l.href} className="text-sm text-white/65 transition-colors hover:text-white">
                       {l.name}
                     </Link>
                   </li>
@@ -66,19 +59,11 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-[var(--vl-line)] pt-8 text-sm text-[var(--vl-muted)] md:flex-row">
+        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-8 text-sm lp-faint md:flex-row">
           <p>© {new Date().getFullYear()} VeroLinkr. All rights reserved.</p>
           <p className="vl-mono text-xs">Built for authentic marketing.</p>
         </div>
       </div>
     </footer>
-  );
-}
-
-function Wordmark() {
-  return (
-    <span className="vl-display text-xl tracking-tight text-[var(--vl-ink)]">
-      Vero<span className="text-[var(--vl-indigo)]">Linkr</span>
-    </span>
   );
 }

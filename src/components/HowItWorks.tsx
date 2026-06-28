@@ -23,31 +23,28 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="vl-section py-24 lg:py-32">
+    <section className="py-24 lg:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="max-w-2xl">
-          <span className="vl-eyebrow">How it works</span>
-          <h2 className="vl-display mt-4 text-4xl text-[var(--vl-ink)] md:text-5xl">
+        <div className="max-w-3xl">
+          <span className="lp-eyebrow">How it works</span>
+          <h2 className="lp-h2 mt-5 text-white">
             From handle to bank account, in three honest steps.
           </h2>
         </div>
 
-        <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-[var(--vl-line)] bg-[var(--vl-line)] md:grid-cols-3">
+        <div className="mt-16 grid gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/[0.06] md:grid-cols-3">
           {steps.map((s, i) => (
             <motion.div
               key={s.n}
-              className="group relative bg-[var(--vl-paper)] p-8 transition-colors hover:bg-[var(--vl-mist)]"
+              className="group relative bg-[#060608] p-9 transition-colors hover:bg-white/[0.04]"
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55, delay: i * 0.1 }}
             >
-              <div className="flex items-center gap-3">
-                <span className="vl-mono text-sm font-semibold text-[var(--vl-indigo)]">{s.n}</span>
-                <span className="vl-proof h-0.5 w-12 rounded-full opacity-0 transition-opacity group-hover:opacity-100" />
-              </div>
-              <h3 className="vl-display mt-5 text-2xl text-[var(--vl-ink)]">{s.title}</h3>
-              <p className="mt-3 text-[var(--vl-muted)]">{s.body}</p>
+              <span className="vl-display block text-6xl text-white/15">{s.n}</span>
+              <h3 className="vl-display mt-5 text-3xl text-white">{s.title}</h3>
+              <p className="mt-3 lp-muted">{s.body}</p>
             </motion.div>
           ))}
         </div>

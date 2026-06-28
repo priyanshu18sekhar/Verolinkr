@@ -48,13 +48,13 @@ function Stat({
   const display = decimals > 0 ? v.toFixed(decimals) : Math.round(v).toLocaleString();
 
   return (
-    <div className="px-6 py-10 text-center md:py-12">
-      <p className="vl-display text-4xl text-[var(--vl-ink)] md:text-5xl" style={{ fontFeatureSettings: '"tnum" 1' }}>
+    <div className="px-6 py-12 text-center md:py-16">
+      <p className="lp-chrome vl-display text-6xl md:text-7xl" style={{ fontFeatureSettings: '"tnum" 1' }}>
         {prefix}
         {display}
         {suffix}
       </p>
-      <p className="mt-2 text-sm text-[var(--vl-muted)]">{label}</p>
+      <p className="mt-3 text-sm lp-muted">{label}</p>
     </div>
   );
 }
@@ -80,11 +80,11 @@ export default function StatsSection() {
   }, []);
 
   return (
-    <section className="vl-section py-20 lg:py-24">
+    <section className="py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <motion.div
           ref={ref}
-          className="grid divide-y divide-[var(--vl-line)] rounded-2xl border border-[var(--vl-line)] bg-[var(--vl-mist)] md:grid-cols-4 md:divide-x md:divide-y-0"
+          className="grid divide-y divide-white/10 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] md:grid-cols-4 md:divide-x md:divide-y-0"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
