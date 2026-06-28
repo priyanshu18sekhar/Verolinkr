@@ -10,6 +10,7 @@ import {
   ShieldCheckIcon,
   CogIcon,
   BellIcon,
+  LinkIcon,
 } from '@heroicons/react/24/outline';
 
 export type NavItem = {
@@ -77,6 +78,12 @@ export const navigationConfig: NavigationConfig = {
       label: 'Campaigns',
       icon: BriefcaseIcon,
       path: '/creator-dashboard/campaigns',
+    },
+    {
+      id: 'connections',
+      label: 'Connections',
+      icon: LinkIcon,
+      path: '/creator-dashboard/connections',
     },
     {
       id: 'gigs',
