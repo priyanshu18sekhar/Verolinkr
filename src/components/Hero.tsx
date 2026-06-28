@@ -2,7 +2,11 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
+
+// WebGL backdrop is client-only.
+const HeroCanvas = dynamic(() => import("./HeroCanvas"), { ssr: false });
 
 interface HeroProps {
   mousePosition?: { x: number; y: number };
@@ -32,9 +36,9 @@ function useCountUp(target: number, durationMs = 1600) {
 }
 
 const platforms = [
-  { id: "ig", label: "Instagram", handle: "@maya.creates", reach: "128K", tint: "#ff5436" },
-  { id: "yt", label: "YouTube", handle: "Maya Makes", reach: "54K", tint: "#ff2f2f" },
-  { id: "fb", label: "Facebook", handle: "Maya Creates", reach: "22K", tint: "#4f2bff" },
+  { id: "ig", label: "Instagram", handle: "@maya.creates", reach: "128K" },
+  { id: "yt", label: "YouTube", handle: "Maya Makes", reach: "54K" },
+  { id: "fb", label: "Facebook", handle: "Maya Creates", reach: "22K" },
 ];
 
 const Hero = (_props: HeroProps) => {
@@ -43,15 +47,10 @@ const Hero = (_props: HeroProps) => {
 
   return (
     <section className="vl-section relative overflow-hidden">
-      {/* ambient brand wash — quiet, two soft blobs only */}
-      <div
-        className="vl-blob"
-        style={{ width: 520, height: 520, top: -140, right: -80, background: "rgba(79,43,255,0.18)" }}
-      />
-      <div
-        className="vl-blob"
-        style={{ width: 440, height: 440, bottom: -160, left: -120, background: "rgba(255,84,54,0.14)" }}
-      />
+      {/* WebGL ambient backdrop — subtle, monochrome */}
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-90">
+        <HeroCanvas />
+      </div>
 
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-16 px-6 pb-24 pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:pb-32 lg:pt-28">
         {/* ---- Left: the thesis ---- */}
@@ -92,7 +91,7 @@ const Hero = (_props: HeroProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.25 }}
           >
-            <Link href="/auth?role=creator" className="vl-btn vl-btn-primary">
+            <Link href="/auth?role=creator" className="vl-btn vl-btn-primary premium-glow-button">
               Start earning <span aria-hidden>→</span>
             </Link>
             <Link href="/auth?role=brand" className="vl-btn vl-btn-ghost">
@@ -128,7 +127,7 @@ const Hero = (_props: HeroProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="vl-card relative mx-auto max-w-md overflow-hidden p-6">
+          <div className="vl-card relative mx-auto max-w-md overflow-hidden p-6 backdrop-blur-sm">
             {/* header */}
             <div className="flex items-center justify-between">
               <div>
@@ -150,10 +149,7 @@ const Hero = (_props: HeroProps) => {
                   className="flex items-center justify-between rounded-xl border border-[var(--vl-line)] bg-[var(--vl-mist)] px-3.5 py-3"
                 >
                   <div className="flex items-center gap-3">
-                    <span
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold text-white"
-                      style={{ background: p.tint }}
-                    >
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--vl-ink)] text-xs font-bold text-white">
                       {p.label[0]}
                     </span>
                     <div className="leading-tight">
@@ -163,7 +159,7 @@ const Hero = (_props: HeroProps) => {
                   </div>
                   <div className="text-right">
                     <p className="vl-mono text-sm font-semibold text-[var(--vl-ink)]">{p.reach}</p>
-                    <p className="text-[0.65rem] uppercase tracking-wider text-[var(--vl-mint-ink)]">
+                    <p className="text-[0.65rem] uppercase tracking-wider text-[var(--vl-muted)]">
                       verified
                     </p>
                   </div>
@@ -196,21 +192,10 @@ const Hero = (_props: HeroProps) => {
               </div>
             </div>
 
-            <button className="vl-btn vl-btn-primary mt-4 w-full">Withdraw to bank</button>
+            <button className="vl-btn vl-btn-primary premium-glow-button mt-4 w-full">
+              Withdraw to bank
+            </button>
           </div>
-
-          {/* floating verified pill — anchored outside the card's right edge */}
-          <motion.div
-            className="vl-tag absolute -bottom-4 -left-3 shadow-lg"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.9 }}
-          >
-            <span className="vl-seal" style={{ width: "1rem", height: "1rem" }}>
-              <CheckIcon className="h-2 w-2" />
-            </span>
-            No fake followers
-          </motion.div>
         </motion.div>
       </div>
     </section>
