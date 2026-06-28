@@ -1,163 +1,100 @@
 "use client";
-/* eslint-disable react-hooks/rules-of-hooks */
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
-const StatsSection = () => {
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start end', 'end start']
-  });
+const stats = [
+  { value: 50000, suffix: "+", label: "Creators verified" },
+  { value: 1200, suffix: "+", label: "Brands paying out" },
+  { value: 18, suffix: "M", label: "Verified views / mo" },
+  { value: 9.4, suffix: "M", prefix: "$", decimals: 1, label: "Paid to creators" },
+];
 
-  const [countedStats, setCountedStats] = useState({
-    creators: 0,
-    brands: 0,
-    success: 0,
-    processed: 0,
-  });
+function Stat({
+  value,
+  suffix,
+  prefix = "",
+  label,
+  decimals = 0,
+  start,
+}: {
+  value: number;
+  suffix: string;
+  prefix?: string;
+  label: string;
+  decimals?: number;
+  start: boolean;
+}) {
+  const [v, setV] = useState(0);
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (!start) return;
+    if (reduce) {
+      setV(value);
+      return;
+    }
+    let raf = 0;
+    const t0 = performance.now();
+    const dur = 1700;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / dur);
+      setV(value * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [start, value, reduce]);
 
-  const stats = [
-    { number: 100, suffix: '+', label: "Active Creators", key: 'creators' },
-    { number: 5, suffix: '+', label: "Brand Partners", key: 'brands' },
-    { number: 98, suffix: '%', label: "Success Rate", key: 'success' },
-    { number: 1, suffix: 'M+', label: "Processed", key: 'processed' },
-  ];
+  const display = decimals > 0 ? v.toFixed(decimals) : Math.round(v).toLocaleString();
 
-  // Parallax effects
-  const sectionY = useTransform(scrollYProgress, [0, 1], [100, -100]);
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1, 0.95]);
+  return (
+    <div className="px-6 py-10 text-center md:py-12">
+      <p className="vl-display text-4xl text-[var(--vl-ink)] md:text-5xl" style={{ fontFeatureSettings: '"tnum" 1' }}>
+        {prefix}
+        {display}
+        {suffix}
+      </p>
+      <p className="mt-2 text-sm text-[var(--vl-muted)]">{label}</p>
+    </div>
+  );
+}
 
-  // Counter animation trigger
-  const shouldAnimate = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+export default function StatsSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [start, setStart] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = shouldAnimate.on('change', (value) => {
-      if (value > 0.5) {
-        const duration = 2000;
-        const steps = 60;
-        const interval = duration / steps;
-
-        const timers = stats.map((stat) => {
-          const maxValue = stat.number;
-          let currentStep = 0;
-
-          return setInterval(() => {
-            currentStep++;
-            if (currentStep > steps) return;
-            const progress = currentStep / steps;
-            const currentValue = Math.floor(maxValue * progress);
-
-            setCountedStats(prev => ({
-              ...prev,
-              [stat.key]: currentValue
-            }));
-          }, interval);
-        });
-
-        return () => timers.forEach(timer => clearInterval(timer));
-      }
-    });
-    return unsubscribe;
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setStart(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.4 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
   return (
-    <section ref={containerRef} className="py-40 bg-white relative overflow-hidden">
-      {/* Decorative background elements */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.2, 0]),
-        }}
-      >
-        {/* Grid pattern */}
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute border border-gray-200"
-            style={{
-              width: '50px',
-              height: '50px',
-              left: `${(i % 5) * 25}%`,
-              top: `${Math.floor(i / 5) * 20}%`,
-              rotate: useTransform(scrollYProgress, [0, 1], [0, 90]),
-              opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.05, 0.15, 0]),
-            }}
-          />
-        ))}
-
-        {/* Numbers pattern */}
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute text-6xl font-black text-gray-100"
-            style={{
-              left: `${(i * 7) % 100}%`,
-              top: `${(Math.sin(i) * 25 + 50)}%`,
-              opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 0.3, 0]),
-              rotate: useTransform(scrollYProgress, [0, 1], [0, 360]),
-            }}
-          >
-            {i + 1}
-          </motion.div>
-        ))}
-      </motion.div>
-
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+    <section className="vl-section py-20 lg:py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <motion.div
-          style={{
-            y: sectionY,
-            opacity: sectionOpacity,
-            scale,
-          }}
+          ref={ref}
+          className="grid divide-y divide-[var(--vl-line)] rounded-2xl border border-[var(--vl-line)] bg-[var(--vl-mist)] md:grid-cols-4 md:divide-x md:divide-y-0"
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
         >
-          {/* Heading */}
-          <motion.div
-            className="text-center mb-32"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1 }}
-          >
-            <h2 className="text-6xl md:text-8xl font-black mb-8 text-black tracking-tighter">
-              Our Impact
-            </h2>
-            <div className="w-24 h-1 bg-black mx-auto"></div>
-          </motion.div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-16">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={index}
-                className="text-center"
-                initial={{ opacity: 0, y: 50, scale: 0.8 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-                whileHover={{ scale: 1.1 }}
-              >
-                <motion.div
-                  className="text-7xl md:text-9xl font-black mb-6 text-black"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: index * 0.2, type: 'spring', stiffness: 200 }}
-                >
-                  {countedStats[stat.key as keyof typeof countedStats].toLocaleString()}{stat.suffix}
-                </motion.div>
-                <p className="text-xl font-regular text-gray-600 uppercase tracking-wider">
-                  {stat.label}
-                </p>
-              </motion.div>
-            ))}
-          </div>
+          {stats.map((s) => (
+            <Stat key={s.label} {...s} start={start} />
+          ))}
         </motion.div>
       </div>
     </section>
   );
-};
-
-export default StatsSection;
+}

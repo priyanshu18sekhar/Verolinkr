@@ -3,17 +3,21 @@
 import { usePathname } from 'next/navigation';
 import Navigation from './Navigation';
 
+// Routes that render their own chrome (or want a focused, distraction-free view).
+const HIDDEN_PREFIXES = [
+  '/brand-dashboard',
+  '/creator-dashboard',
+  '/admin',
+  '/auth',
+  '/onboarding',
+  '/creator-registration',
+  '/brand-registration',
+  '/forgot-password',
+];
+
 export default function ConditionalNavigation() {
   const pathname = usePathname();
-  
-  // Hide navigation on dashboard pages
-  const isDashboardPage = pathname?.startsWith('/brand-dashboard') || 
-                          pathname?.startsWith('/creator-dashboard');
-  
-  if (isDashboardPage) {
-    return null;
-  }
-  
+  const hide = HIDDEN_PREFIXES.some((p) => pathname?.startsWith(p));
+  if (hide) return null;
   return <Navigation />;
 }
-

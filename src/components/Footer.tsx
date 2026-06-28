@@ -1,103 +1,84 @@
 "use client";
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { Container, Typography } from '../components/design-system';
+import Link from "next/link";
 
-interface FooterProps {
-  staggerContainer?: unknown;
-}
+const columns = [
+  {
+    title: "Product",
+    links: [
+      { name: "How it works", href: "/#how" },
+      { name: "For creators", href: "/auth?role=creator" },
+      { name: "For brands", href: "/auth?role=brand" },
+      { name: "Pricing", href: "/#pricing" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { name: "Contact", href: "/contact" },
+      { name: "Privacy", href: "/privacy" },
+      { name: "Terms", href: "/terms" },
+    ],
+  },
+  {
+    title: "Connect",
+    links: [
+      { name: "Instagram", href: "#" },
+      { name: "YouTube", href: "#" },
+      { name: "LinkedIn", href: "#" },
+    ],
+  },
+];
 
-const Footer = ({ staggerContainer }: FooterProps) => {
-  const socialLinks = [
-    { name: 'Twitter', url: '#' },
-    { name: 'LinkedIn', url: '#' },
-    { name: 'Instagram', url: '#' },
-    { name: 'YouTube', url: '#' },
-  ];
-
-  const footerLinks = [
-    { name: 'About', url: '#' },
-    { name: 'Features', url: '#' },
-    { name: 'Pricing', url: '#' },
-    { name: 'Contact', url: '/contact' },
-    { name: 'Privacy', url: '#' },
-    { name: 'Terms', url: '#' },
-  ];
-
+export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 py-24">
-      <Container>
-        <div className="grid md:grid-cols-4 gap-12 mb-12">
-          {/* Brand */}
-          <div className="md:col-span-2">
-            <Typography variant="h4" className="mb-6 font-black">
-              VeroLinkr
-            </Typography>
-            <p className="text-lg text-gray-600 mb-8">
-              Authentic Partnerships, Verified Results
+    <footer className="vl-section border-t border-[var(--vl-line)] py-16">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
+          <div>
+            <div className="flex items-center gap-2">
+              <Wordmark />
+            </div>
+            <p className="mt-4 max-w-xs text-sm text-[var(--vl-muted)]">
+              Get paid for proof, not promises. Verified creator marketing for
+              the people who make it.
             </p>
-            <div className="flex space-x-6">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.name}
-                  href={social.url}
-                  className="text-gray-600 hover:text-black transition-colors duration-200"
-                >
-                  {social.name}
-                </a>
-              ))}
-            </div>
           </div>
 
-          {/* Links */}
-          <div>
-            <Typography variant="h6" className="mb-6 font-black">
-              Company
-            </Typography>
-            <div className="space-y-4">
-              {footerLinks.slice(0, 4).map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.url}
-                  className="block text-gray-600 hover:text-black transition-colors duration-200"
-                >
-                  {link.name}
-                </Link>
-              ))}
+          {columns.map((col) => (
+            <div key={col.title}>
+              <p className="vl-mono text-xs uppercase tracking-[0.18em] text-[var(--vl-muted)]">
+                {col.title}
+              </p>
+              <ul className="mt-4 space-y-3">
+                {col.links.map((l) => (
+                  <li key={l.name}>
+                    <Link
+                      href={l.href}
+                      className="text-sm text-[var(--vl-ink)]/70 transition-colors hover:text-[var(--vl-ink)]"
+                    >
+                      {l.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-
-          <div>
-            <Typography variant="h6" className="mb-6 font-black">
-              Legal
-            </Typography>
-            <div className="space-y-4">
-              {footerLinks.slice(4).map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.url}
-                  className="block text-gray-600 hover:text-black transition-colors duration-200"
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Bottom */}
-        <div className="pt-12 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-gray-600 mb-4 md:mb-0">
-            © 2025 VeroLinkr. All rights reserved.
-          </p>
-          <p className="text-sm text-gray-600">
-            Made with passion for authentic marketing
-          </p>
+        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-[var(--vl-line)] pt-8 text-sm text-[var(--vl-muted)] md:flex-row">
+          <p>© {new Date().getFullYear()} VeroLinkr. All rights reserved.</p>
+          <p className="vl-mono text-xs">Built for authentic marketing.</p>
         </div>
-      </Container>
+      </div>
     </footer>
   );
-};
+}
 
-export default Footer;
+function Wordmark() {
+  return (
+    <span className="vl-display text-xl tracking-tight text-[var(--vl-ink)]">
+      Vero<span className="text-[var(--vl-indigo)]">Linkr</span>
+    </span>
+  );
+}

@@ -1,231 +1,234 @@
 "use client";
-/* eslint-disable react-hooks/rules-of-hooks */
 
-import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
-import { useRef } from 'react';
-import Link from 'next/link';
-import { Button } from '../components/design-system';
+import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface HeroProps {
   mousePosition?: { x: number; y: number };
 }
 
-const Hero = ({ mousePosition }: HeroProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(containerRef, { once: true, amount: 0.3 });
-  
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end start']
-  });
+/** Smoothly counts a number up to `target` once mounted. */
+function useCountUp(target: number, durationMs = 1600) {
+  const [value, setValue] = useState(0);
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (reduce) {
+      setValue(target);
+      return;
+    }
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      setValue(Math.round(target * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, durationMs, reduce]);
+  return value;
+}
 
-  const springConfig = { stiffness: 100, damping: 30, mass: 1 };
-  
-  // Title animations - will track through scroll
-  const titleY = useSpring(useTransform(scrollYProgress, [0, 0.8], [0, -400]), springConfig);
-  const titleOpacity = useTransform(scrollYProgress, [0, 0.5, 0.9, 1], [1, 1, 0.3, 0]);
-  const titleScale = useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.9, 0.7]);
-  
-  // Subheading
-  const subheadingY = useSpring(useTransform(scrollYProgress, [0, 0.8], [0, -300]), springConfig);
-  const subheadingOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
-  
-  // CTA buttons
-  const buttonsY = useSpring(useTransform(scrollYProgress, [0, 0.8], [0, -200]), springConfig);
-  const buttonsOpacity = useTransform(scrollYProgress, [0, 0.4, 0.8, 1], [0, 1, 1, 0]);
+const platforms = [
+  { id: "ig", label: "Instagram", handle: "@maya.creates", reach: "128K", tint: "#ff5436" },
+  { id: "yt", label: "YouTube", handle: "Maya Makes", reach: "54K", tint: "#ff2f2f" },
+  { id: "fb", label: "Facebook", handle: "Maya Creates", reach: "22K", tint: "#4f2bff" },
+];
+
+const Hero = (_props: HeroProps) => {
+  const earnings = useCountUp(4820);
+  const views = useCountUp(1240532);
 
   return (
-    <section 
-      ref={containerRef}
-      className="min-h-screen flex items-center justify-center bg-white relative overflow-hidden"
-    >
-      {/* Subtle gradient background */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `radial-gradient(circle at ${mousePosition?.x || '50%'} ${mousePosition?.y || '50%'}, rgba(37, 99, 235, 0.02), transparent 70%)`,
-        }}
+    <section className="vl-section relative overflow-hidden">
+      {/* ambient brand wash — quiet, two soft blobs only */}
+      <div
+        className="vl-blob"
+        style={{ width: 520, height: 520, top: -140, right: -80, background: "rgba(79,43,255,0.18)" }}
+      />
+      <div
+        className="vl-blob"
+        style={{ width: 440, height: 440, bottom: -160, left: -120, background: "rgba(255,84,54,0.14)" }}
       />
 
-      {/* Floating particles */}
-      {[...Array(60)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-gray-300 rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -50, 0],
-            opacity: [0.2, 0.6, 0.2],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            delay: Math.random() * 4,
-          }}
-        />
-      ))}
+      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-16 px-6 pb-24 pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:pb-32 lg:pt-28">
+        {/* ---- Left: the thesis ---- */}
+        <div>
+          <motion.span
+            className="vl-eyebrow inline-block"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            Verified creator marketing
+          </motion.span>
 
-      {/* Animated geometric shapes */}
-      {[...Array(12)].map((_, i) => {
-        const size = 30 + i * 8;
-        const x = useTransform(scrollYProgress, [0, 1], [i * 80, i * 80 + 100]);
-        const y = useTransform(scrollYProgress, [0, 1], [i * 50, i * 50 - 80]);
-        const rotate = useTransform(scrollYProgress, [0, 1], [0, 180]);
-        
-        return (
-          <motion.div
-            key={i}
-            className="absolute border-2 border-gray-200"
-            style={{
-              width: size,
-              height: size,
-              x,
-              y,
-              rotate,
-              opacity: useTransform(scrollYProgress, [0, 1], [0.2, 0]),
-            }}
-          />
-        );
-      })}
-
-      {/* Floating orbs with different sizes */}
-      {[...Array(8)].map((_, i) => (
-        <motion.div
-          key={`orb-${i}`}
-          className="absolute border-2 border-gray-200 rounded-full"
-          style={{
-            width: 40 + i * 15,
-            height: 40 + i * 15,
-            left: `${(i * 12) % 100}%`,
-            top: `${Math.sin(i) * 30 + 50}%`,
-            opacity: useTransform(scrollYProgress, [0, 1], [0.15, 0]),
-          }}
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 360],
-          }}
-          transition={{
-            duration: 8 + i * 2,
-            repeat: Infinity,
-            delay: i * 0.5,
-          }}
-        />
-      ))}
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 text-center">
-        {/* Main Heading - Larger and more prominent */}
-        <motion.div
-          style={{
-            y: titleY,
-            opacity: titleOpacity,
-            scale: titleScale,
-          }}
-          className="mb-16"
-        >
           <motion.h1
-            className="text-[90px] md:text-[160px] lg:text-[200px] xl:text-[220px] font-black tracking-tighter leading-none text-black"
-            initial={{ opacity: 0, y: 80 }}
-            animate={isInView ? { 
-              opacity: 1, 
-              y: 0, 
-            } : {}}
-            transition={{ duration: 1.2, ease: [0.6, -0.05, 0.01, 0.99] }}
+            className="vl-display mt-6 text-[clamp(2.6rem,6vw,5.2rem)] text-[var(--vl-ink)]"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.05 }}
           >
-            {/* Individual letters with stagger */}
-            {'VeroLinkr'.split('').map((letter, index) => (
-              <motion.span
-                key={index}
-                className="inline-block"
-                initial={{ 
-                  y: 100, 
-                  opacity: 0,
-                  rotateX: -90 
-                }}
-                animate={isInView ? { 
-                  y: 0, 
-                  opacity: 1,
-                  rotateX: 0
-                } : {}}
-                transition={{ 
-                  duration: 0.6, 
-                  delay: index * 0.04,
-                  ease: [0.6, -0.05, 0.01, 0.99]
-                }}
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                {letter === ' ' ? '\u00A0' : letter}
-              </motion.span>
-            ))}
+            Get paid for <span className="vl-aurora-text">proof</span>,<br />
+            not promises.
           </motion.h1>
-        </motion.div>
 
-        {/* Subheading - Cleaner and more refined */}
-        <motion.div
-          style={{
-            y: subheadingY,
-            opacity: subheadingOpacity,
-          }}
-        >
           <motion.p
-            className="text-2xl md:text-4xl lg:text-5xl font-light text-gray-600 max-w-4xl mx-auto mb-20 leading-tight"
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 1, delay: 0.8 }}
+            className="mt-7 max-w-xl text-lg leading-relaxed text-[var(--vl-muted)]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
           >
-            The Premium Platform for
-            <br />
-            <span className="font-black text-black">Authentic Influencer Marketing</span>
+            Connect Instagram, YouTube and Facebook once. VeroLinkr verifies your
+            real reach and pays you for every genuine view — no fake metrics, no
+            chasing invoices.
           </motion.p>
-        </motion.div>
 
-        {/* CTA Buttons */}
+          <motion.div
+            className="mt-9 flex flex-col gap-3 sm:flex-row"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.25 }}
+          >
+            <Link href="/auth?role=creator" className="vl-btn vl-btn-primary">
+              Start earning <span aria-hidden>→</span>
+            </Link>
+            <Link href="/auth?role=brand" className="vl-btn vl-btn-ghost">
+              Find creators
+            </Link>
+          </motion.div>
+
+          <motion.div
+            className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-[var(--vl-muted)]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+          >
+            <span className="inline-flex items-center gap-2">
+              <span className="vl-seal" style={{ width: "1.1rem", height: "1.1rem" }}>
+                <CheckIcon className="h-2.5 w-2.5" />
+              </span>
+              Escrow-protected payouts
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="vl-seal" style={{ width: "1.1rem", height: "1.1rem" }}>
+                <CheckIcon className="h-2.5 w-2.5" />
+              </span>
+              Real engagement, verified
+            </span>
+          </motion.div>
+        </div>
+
+        {/* ---- Right: the signature verification receipt ---- */}
         <motion.div
-          style={{
-            y: buttonsY,
-            opacity: buttonsOpacity,
-          }}
-          className="flex flex-col sm:flex-row gap-8 justify-center items-center"
+          className="relative"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Link href="/auth">
-            <motion.button
-              className="px-12 py-5 bg-black text-white rounded-full font-black text-xl hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl relative overflow-hidden group"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <span className="relative z-10">Get Started</span>
-            </motion.button>
-          </Link>
+          <div className="vl-card relative mx-auto max-w-md overflow-hidden p-6">
+            {/* header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="vl-eyebrow" style={{ fontSize: "0.62rem" }}>
+                  Payout verified
+                </p>
+                <p className="mt-2 vl-display text-2xl text-[var(--vl-ink)]">@maya.creates</p>
+              </div>
+              <span className="vl-seal">
+                <CheckIcon className="h-3.5 w-3.5" />
+              </span>
+            </div>
+
+            {/* connected platforms */}
+            <div className="mt-6 space-y-3">
+              {platforms.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between rounded-xl border border-[var(--vl-line)] bg-[var(--vl-mist)] px-3.5 py-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold text-white"
+                      style={{ background: p.tint }}
+                    >
+                      {p.label[0]}
+                    </span>
+                    <div className="leading-tight">
+                      <p className="text-sm font-semibold text-[var(--vl-ink)]">{p.label}</p>
+                      <p className="text-xs text-[var(--vl-muted)]">{p.handle}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="vl-mono text-sm font-semibold text-[var(--vl-ink)]">{p.reach}</p>
+                    <p className="text-[0.65rem] uppercase tracking-wider text-[var(--vl-mint-ink)]">
+                      verified
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* proof line connecting reach → payout */}
+            <div className="my-5 flex items-center gap-3">
+              <span className="vl-mono text-[0.65rem] uppercase tracking-wider text-[var(--vl-muted)]">
+                reach
+              </span>
+              <span className="vl-proof h-0.5 flex-1 rounded-full" />
+              <span className="vl-mono text-[0.65rem] uppercase tracking-wider text-[var(--vl-muted)]">
+                payout
+              </span>
+            </div>
+
+            {/* totals */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-[var(--vl-mist)] p-4">
+                <p className="text-xs text-[var(--vl-muted)]">Verified views</p>
+                <p className="vl-mono mt-1 text-xl font-semibold text-[var(--vl-ink)]">
+                  {views.toLocaleString()}
+                </p>
+              </div>
+              <div className="rounded-xl p-4 text-white" style={{ background: "var(--vl-ink)" }}>
+                <p className="text-xs text-white/60">This month</p>
+                <p className="vl-mono mt-1 text-xl font-semibold">${earnings.toLocaleString()}</p>
+              </div>
+            </div>
+
+            <button className="vl-btn vl-btn-primary mt-4 w-full">Withdraw to bank</button>
+          </div>
+
+          {/* floating verified pill — anchored outside the card's right edge */}
+          <motion.div
+            className="vl-tag absolute -bottom-4 -left-3 shadow-lg"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.9 }}
+          >
+            <span className="vl-seal" style={{ width: "1rem", height: "1rem" }}>
+              <CheckIcon className="h-2 w-2" />
+            </span>
+            No fake followers
+          </motion.div>
         </motion.div>
       </div>
-
-      {/* Enhanced scroll indicator */}
-      <motion.div
-        className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 2 }}
-      >
-        <motion.div
-          className="flex flex-col items-center gap-3"
-          animate={{ y: [0, 15, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">Scroll</span>
-          <div className="w-8 h-14 border-2 border-gray-400 rounded-full flex justify-center">
-            <motion.div
-              className="w-2 h-4 bg-gray-400 rounded-full mt-2"
-              animate={{ y: [0, 16, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-          </div>
-        </motion.div>
-      </motion.div>
     </section>
   );
 };
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
+      <path
+        d="M4 10.5l4 4 8-9"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default Hero;

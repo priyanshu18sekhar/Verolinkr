@@ -1,184 +1,99 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import { 
-  Bars3Icon, 
-  XMarkIcon,
-  HomeIcon,
-  UserIcon,
-  ChatBubbleLeftRightIcon,
-  ArrowRightOnRectangleIcon
-} from '@heroicons/react/24/outline';
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
-interface NavigationProps {
-  userType?: 'brand' | 'creator' | null;
-  isLoggedIn?: boolean;
-}
+const links = [
+  { name: "How it works", href: "/#how" },
+  { name: "For creators", href: "/auth?role=creator" },
+  { name: "For brands", href: "/auth?role=brand" },
+  { name: "Contact", href: "/contact" },
+];
 
-export default function Navigation({ userType, isLoggedIn = false }: NavigationProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+export default function Navigation() {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const navigationItems = [
-    { name: 'Home', href: '/' },
-    { name: 'Contact', href: '/contact' },
-  ];
-
-  const authItems = [
-    { name: 'Login', href: '/auth' },
-  ];
-
-  const userItems = userType === 'brand' 
-    ? [
-        { name: 'Dashboard', href: '/brand-dashboard' },
-        { name: 'Creators', href: '/brand-dashboard/creators' },
-        { name: 'Campaigns', href: '/brand-dashboard/campaigns' },
-      ]
-    : userType === 'creator'
-    ? [
-        { name: 'Dashboard', href: '/creator-dashboard' },
-        { name: 'Campaigns', href: '/creator-dashboard/campaigns' },
-        { name: 'Gigs', href: '/creator-dashboard/gigs' },
-      ]
-    : [];
-
-  const itemsToShow = isLoggedIn ? userItems : [...navigationItems, ...authItems];
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
-      <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo - Smaller refined text */}
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center">
-              <span className="text-[18px] font-black text-black tracking-tighter">VeroLinkr</span>
-            </Link>
-          </div>
+    <nav
+      className={`sticky top-0 z-50 border-b transition-all duration-300 ${
+        scrolled
+          ? "border-[var(--vl-line)] bg-white/85 backdrop-blur-md"
+          : "border-transparent bg-transparent"
+      }`}
+    >
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
+        <Link href="/" className="vl-display text-lg tracking-tight text-[var(--vl-ink)]">
+          Vero<span className="text-[var(--vl-indigo)]">Linkr</span>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            {itemsToShow.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-gray-600 hover:text-black text-[13px] font-medium transition-colors duration-200"
-              >
-                {item.name}
-              </Link>
-            ))}
-            
-            {!isLoggedIn && (
-              <div className="flex items-center space-x-3 ml-3">
-                <Link href="/auth" className="text-gray-600 hover:text-black text-[13px] font-medium transition-colors duration-200">
-                  Login
-                </Link>
-                <Link href="/auth">
-                  <motion.button
-                    suppressHydrationWarning
-                    className="px-6 py-2.5 bg-black text-white rounded-full font-bold text-[13px] relative premium-glow-button"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <span className="relative z-10">Get Started</span>
-                  </motion.button>
-                </Link>
-              </div>
-            )}
-            
-            {isLoggedIn && (
-              <div className="flex items-center space-x-3 ml-3">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                    <UserIcon className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <span className="text-[13px] font-medium text-gray-700">
-                    {userType === 'brand' ? 'Brand' : 'Creator'}
-                  </span>
-                </div>
-                <button className="text-gray-600 hover:text-black text-[13px] font-medium transition-colors duration-200">
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-600 hover:text-black p-1.5 transition-colors duration-200"
+        <div className="hidden items-center gap-8 md:flex">
+          {links.map((l) => (
+            <Link
+              key={l.name}
+              href={l.href}
+              className="text-sm font-medium text-[var(--vl-ink)]/70 transition-colors hover:text-[var(--vl-ink)]"
             >
-              {isMenuOpen ? (
-                <XMarkIcon className="w-5 h-5" />
-              ) : (
-                <Bars3Icon className="w-5 h-5" />
-              )}
-            </button>
-          </div>
+              {l.name}
+            </Link>
+          ))}
+          <Link href="/auth" className="text-sm font-medium text-[var(--vl-ink)]/70 transition-colors hover:text-[var(--vl-ink)]">
+            Log in
+          </Link>
+          <Link href="/auth?role=creator" className="vl-btn vl-btn-primary !px-5 !py-2 !text-sm">
+            Start earning
+          </Link>
         </div>
 
-        {/* Mobile Navigation */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-gray-200 py-4"
-            >
-              <div className="space-y-1">
-                {itemsToShow.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="text-gray-600 hover:text-black block py-2.5 text-[13px] font-medium transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-                
-                {!isLoggedIn && (
-                  <div className="pt-3 border-t border-gray-200 space-y-2">
-                    <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
-                      <button className="w-full text-gray-600 hover:text-black py-2.5 text-[13px] font-medium transition-colors duration-200 text-left">
-                        Login
-                      </button>
-                    </Link>
-                    <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
-                      <motion.button
-                        suppressHydrationWarning
-                        className="w-full px-6 py-2.5 bg-black text-white rounded-full font-bold text-[13px] relative premium-glow-button"
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                      >
-                        <span className="relative z-10">Get Started</span>
-                      </motion.button>
-                    </Link>
-                  </div>
-                )}
-                
-                {isLoggedIn && (
-                  <div className="pt-3 border-t border-gray-200 space-y-2">
-                    <div className="flex items-center space-x-2 py-2">
-                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                        <UserIcon className="w-4 h-4 text-gray-600" />
-                      </div>
-                      <span className="text-[13px] font-medium text-gray-700">
-                        {userType === 'brand' ? 'Brand' : 'Creator'}
-                      </span>
-                    </div>
-                    <button className="text-gray-600 hover:text-black block py-2.5 text-[13px] font-medium transition-colors duration-200">
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <button
+          className="text-[var(--vl-ink)] md:hidden"
+          onClick={() => setOpen((o) => !o)}
+          aria-label="Toggle menu"
+        >
+          {open ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+        </button>
       </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden border-t border-[var(--vl-line)] bg-white md:hidden"
+          >
+            <div className="space-y-1 px-6 py-4">
+              {links.map((l) => (
+                <Link
+                  key={l.name}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="block py-2.5 text-sm font-medium text-[var(--vl-ink)]/80"
+                >
+                  {l.name}
+                </Link>
+              ))}
+              <div className="flex flex-col gap-2 pt-3">
+                <Link href="/auth" onClick={() => setOpen(false)} className="vl-btn vl-btn-ghost">
+                  Log in
+                </Link>
+                <Link href="/auth?role=creator" onClick={() => setOpen(false)} className="vl-btn vl-btn-primary">
+                  Start earning
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
