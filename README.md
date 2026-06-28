@@ -1,3 +1,36 @@
+# VeroLinkr
+
+Verified creator marketing — creators connect Instagram, YouTube and Facebook,
+get their real reach verified, and earn per genuine view; brands pay for proof,
+not vanity metrics.
+
+## Platform map
+
+- **Landing** (`/`) — marketing site with the verification-receipt hero.
+- **Auth** (`/auth`) — Google + passwordless email-link sign in.
+- **Onboarding** — `/onboarding/role-selection` → `/onboarding/creator/*` (7 steps)
+  or `/onboarding/brand/*` (5 steps). Completion writes `profiles/{uid}.userType`
+  + `onboardingCompleted`, which the session route reads for routing.
+- **Creator dashboard** (`/creator-dashboard`) incl. **Connections**
+  (`/creator-dashboard/connections`) to link platforms, and withdrawals.
+- **Brand dashboard** (`/brand-dashboard`).
+- **Admin console** (`/admin`) — role-gated control center: overview stats,
+  creators (approve/suspend), brands (KYC + verify), campaigns, and payouts.
+
+## Social connect: demo vs live
+
+Platform connections run in **demo mode** out of the box (realistic simulated
+data so the whole product works immediately). Add the Meta / Google OAuth keys
+in `.env.local` (see `.env.example`) and they automatically flip to **live**
+OAuth — no code change. Connection is read-only; we never post on a user's behalf.
+
+## Admin access
+
+Set `ADMIN_EMAILS` (comma-separated) in `.env.local`, or set a user's
+`profiles/{uid}.role` to `admin` in Firestore. Then sign in and open `/admin`.
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Environment and secrets
