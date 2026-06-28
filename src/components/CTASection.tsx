@@ -15,18 +15,18 @@ export default function CTASection() {
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          {/* aurora wash */}
+          {/* soft monochrome wash */}
           <div
             className="vl-blob"
-            style={{ width: 600, height: 600, top: -200, left: "50%", transform: "translateX(-50%)", background: "rgba(79,43,255,0.45)", opacity: 0.5 }}
+            style={{ width: 600, height: 600, top: -220, left: "50%", transform: "translateX(-50%)", background: "rgba(255,255,255,0.16)", opacity: 0.7 }}
           />
           <div
             className="vl-blob"
-            style={{ width: 380, height: 380, bottom: -160, right: -60, background: "rgba(255,84,54,0.4)", opacity: 0.45 }}
+            style={{ width: 360, height: 360, bottom: -160, right: -60, background: "rgba(255,255,255,0.1)", opacity: 0.6 }}
           />
 
           <div className="relative z-10">
-            <span className="vl-tag mx-auto" style={{ background: "rgba(255,255,255,0.1)", color: "#d6fbef" }}>
+            <span className="vl-tag mx-auto" style={{ background: "rgba(255,255,255,0.12)", color: "#e7e6f0" }}>
               <span className="vl-seal" style={{ width: "1rem", height: "1rem" }}>
                 <svg viewBox="0 0 20 20" fill="none" className="h-2 w-2" aria-hidden>
                   <path d="M4 10.5l4 4 8-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -46,7 +46,7 @@ export default function CTASection() {
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href="/auth?role=creator"
-                className="vl-btn"
+                className="vl-btn premium-glow-button"
                 style={{ background: "#fff", color: "var(--vl-ink)" }}
               >
                 Start as creator <span aria-hidden>→</span>

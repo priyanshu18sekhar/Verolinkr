@@ -49,7 +49,7 @@ export default function Navigation() {
           <Link href="/auth" className="text-sm font-medium text-[var(--vl-ink)]/70 transition-colors hover:text-[var(--vl-ink)]">
             Log in
           </Link>
-          <Link href="/auth?role=creator" className="vl-btn vl-btn-primary !px-5 !py-2 !text-sm">
+          <Link href="/auth?role=creator" className="vl-btn vl-btn-primary premium-glow-button !px-5 !py-2 !text-sm">
             Start earning
           </Link>
         </div>

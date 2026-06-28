@@ -50,7 +50,7 @@ function Column({
     >
       <span
         className="vl-eyebrow"
-        style={dark ? { color: "#a99bff" } : undefined}
+        style={dark ? { color: "#cfcfd6" } : undefined}
       >
         {data.eyebrow}
       </span>
@@ -85,7 +85,7 @@ function Column({
       </ul>
       <Link
         href={data.cta.href}
-        className={`vl-btn mt-8 self-start ${dark ? "" : "vl-btn-primary"}`}
+        className={`vl-btn premium-glow-button mt-8 self-start ${dark ? "" : "vl-btn-primary"}`}
         style={dark ? { background: "#fff", color: "var(--vl-ink)" } : undefined}
       >
         {data.cta.label} <span aria-hidden>→</span>
