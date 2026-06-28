@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import ConditionalNavigation from "../components/ConditionalNavigation";
@@ -17,9 +17,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Characterful display face — used with restraint for headlines and the wordmark.
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
 export const metadata: Metadata = {
-  title: "VeroLinkr - Connect Brands with Authentic Creators",
-  description: "The premier platform connecting brands with verified creators for authentic influencer marketing campaigns.",
+  title: "VeroLinkr — Get paid for proof, not promises",
+  description:
+    "Connect Instagram, YouTube and Facebook once. VeroLinkr verifies your real reach and pays you for every genuine view — no fake metrics, no chasing invoices.",
 };
 
 export default function RootLayout({
@@ -31,7 +39,7 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth">
       <body
         suppressHydrationWarning={true}
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${bricolage.variable} antialiased`}
       >
         {/* Load error suppression BEFORE React hydration */}
         <Script 
