@@ -733,3 +733,79 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .vl-marquee, .vl-proof { animation: none !important; }
 }
+
+/* =================================================================
+   Landing — dark, cinematic, liquid-metal theme (giant type)
+   Scoped to .lp-wrap so dashboards/admin keep the light system.
+   ================================================================= */
+.lp-wrap {
+  background: #060608;
+  color: #edeef2;
+}
+.lp-eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #8a8f9c;
+}
+.lp-giant {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  font-size: clamp(3.2rem, 11vw, 12rem);
+}
+.lp-h2 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  font-size: clamp(2.4rem, 6.5vw, 6rem);
+}
+.lp-muted { color: #9a9fad; }
+.lp-faint { color: #6b7080; }
+.lp-card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 22px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.lp-hair { height: 1px; background: rgba(255, 255, 255, 0.1); }
+
+/* Liquid-chrome text fill */
+.lp-chrome {
+  background: linear-gradient(180deg, #ffffff 0%, #cdd2dc 42%, #8b91a1 72%, #babfca 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Light pill button on dark, with the kept glow on hover */
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.98rem;
+  padding: 0.95rem 1.7rem;
+  background: #fff;
+  color: #060608;
+  transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out);
+  cursor: pointer;
+}
+.lp-btn:hover { transform: translateY(-2px); }
+.lp-btn-ghost {
+  background: transparent;
+  color: #edeef2;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+.lp-btn-ghost:hover { border-color: rgba(255, 255, 255, 0.55); }
+
+/* Big reveal for scroll sections */
+@keyframes lpRise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }

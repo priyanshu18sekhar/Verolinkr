@@ -8,7 +8,7 @@ import Footer from "../components/Footer";
 
 export default function LandingPage() {
   return (
-    <main className="bg-[var(--vl-paper)] text-[var(--vl-ink)] antialiased">
+    <main className="lp-wrap antialiased">
       <Hero />
       <ConnectStrip />
       <div id="how" className="scroll-mt-20">
