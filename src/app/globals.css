@@ -1008,3 +1008,31 @@ html {
   will-change: transform, color, text-shadow;
 }
 
+/* --- Text: aurora glow + gradient shimmer on hover (non-letter headings) --- */
+.cine-mid,
+.cine-lead,
+.cine-serif {
+  transition: text-shadow .5s var(--ease-out), color .5s var(--ease-out);
+  cursor: default;
+}
+.cine-mid:hover,
+.cine-lead:hover {
+  text-shadow:
+    0 0 24px rgba(79, 43, 255, 0.38),
+    0 0 48px rgba(43, 184, 255, 0.30),
+    0 0 80px rgba(0, 224, 192, 0.22);
+}
+/* the serif accent words melt into a drifting aurora gradient on hover */
+.cine-serif:hover {
+  background-image: linear-gradient(
+    100deg,
+    #4f2bff, #2bb8ff, #00e0c0, #ec4899, #4f2bff
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgba(79, 43, 255, 0.35));
+  animation: auroraDrift 4s ease-in-out infinite;
+}
