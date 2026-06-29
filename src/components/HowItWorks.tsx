@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Reveal, Words, EASE } from "./cinematic/Cine";
+import { Reveal, EASE } from "./cinematic/Cine";
+import { AuroraTitle } from "./cinematic/AuroraTitle";
 
 /**
  * Act 02 — Verify. The signature moment: a verification seal that stamps and
@@ -15,7 +16,7 @@ export default function HowItWorks() {
       <p className="cine-eyebrow">Step 02 — Verify</p>
 
       <h2 className="cine-giant mt-6 px-4">
-        <Words text="Get verified." accent={["verified"]} />
+        <AuroraTitle text="Get verified." accent={["verified"]} />
       </h2>
 
       {/* The seal */}
