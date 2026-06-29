@@ -1045,8 +1045,10 @@ html {
   position: relative;
   display: inline-block;
   --g: 0;
-  font-family: var(--font-serif), Georgia, serif;
-  font-style: italic;
+  /* !important so the cursive face wins over the inherited display font of the
+     surrounding .cine-giant / .cine-mid heading */
+  font-family: var(--font-serif), "Instrument Serif", Georgia, serif !important;
+  font-style: italic !important;
   font-weight: 400;
   letter-spacing: -0.005em;
   /* solid black at rest */
