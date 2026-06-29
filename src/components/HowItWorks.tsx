@@ -39,7 +39,7 @@ export default function HowItWorks() {
         <svg viewBox="0 0 220 220" className="h-full w-full">
           {/* rotating circular caption */}
           <motion.g
-            style={{ transformOrigin: "110px 110px" }}
+            style={{ transformBox: "view-box", transformOrigin: "110px 110px" }}
             animate={reduce ? {} : { rotate: 360 }}
             transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
           >
