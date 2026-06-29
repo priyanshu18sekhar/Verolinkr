@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Reveal, Words } from "./cinematic/Cine";
+import { Reveal } from "./cinematic/Cine";
+import { AuroraTitle } from "./cinematic/AuroraTitle";
 
 export default function CTASection() {
   return (
@@ -12,7 +13,7 @@ export default function CTASection() {
       <p className="cine-eyebrow relative">Free to start</p>
 
       <h2 className="cine-giant relative mt-6 px-4">
-        <Words text="Your reach is real." accent={["real"]} />
+        <AuroraTitle text="Your reach is real." accent={["real"]} />
       </h2>
 
       <Reveal delay={0.2} className="relative mt-5">
