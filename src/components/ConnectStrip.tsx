@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Reveal, Words, EASE } from "./cinematic/Cine";
+import { Reveal, EASE } from "./cinematic/Cine";
+import { AuroraTitle } from "./cinematic/AuroraTitle";
 
 const platforms = ["Instagram", "YouTube", "Facebook"];
 const brands = ["NIKE", "SPOTIFY", "AIRBNB", "NOTION", "DUOLINGO", "CANVA", "RED BULL", "GYMSHARK", "HBO", "REVOLUT"];
@@ -12,7 +13,7 @@ export default function ConnectStrip() {
       <p className="cine-eyebrow">Step 01 — Connect</p>
 
       <h2 className="cine-giant mt-6 px-4">
-        <Words text="Connect once." accent={["once"]} />
+        <AuroraTitle text="Connect once." accent={["once"]} />
       </h2>
 
       <div className="mt-14 flex w-full max-w-5xl flex-col items-center gap-3 px-6 sm:flex-row sm:justify-center sm:gap-10">
