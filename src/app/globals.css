@@ -915,7 +915,8 @@ html {
 }
 
 /* Dark pill button, refined for the cinematic surface. */
-.cine-btn {
+.cine-btn,
+.cine-btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
