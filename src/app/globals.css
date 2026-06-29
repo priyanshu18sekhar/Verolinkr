@@ -104,7 +104,7 @@ body {
    readable black text. */
 .aurora-bg {
   position: absolute;
-  top: 0;
+  top: -3cm;
   left: 0;
   right: 0;
   height: 100vh;
@@ -956,3 +956,4 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .cine-giant, .cine-mid { letter-spacing: -0.04em; }
 }
+
