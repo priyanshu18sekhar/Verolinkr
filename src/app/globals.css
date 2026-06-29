@@ -958,3 +958,12 @@ html {
   .cine-giant, .cine-mid { letter-spacing: -0.04em; }
 }
 
+/* ============================================================
+   Aurora hover — multicolor glaze glow on landing buttons & text
+   ============================================================ */
+@keyframes auroraSpin { to { transform: rotate(360deg); } }
+@keyframes auroraDrift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
