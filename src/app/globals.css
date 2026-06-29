@@ -1078,3 +1078,6 @@ html {
   animation: auroraDrift 5s ease-in-out infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .cine-serif:hover { animation: none; }
+}
