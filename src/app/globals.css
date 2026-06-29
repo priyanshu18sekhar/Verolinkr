@@ -1036,3 +1036,45 @@ html {
   filter: drop-shadow(0 0 18px rgba(79, 43, 255, 0.35));
   animation: auroraDrift 4s ease-in-out infinite;
 }
+/* --- God-mode whole-word glow for cursive accent words ---
+   The entire word is one serif unit filled with a live, drifting aurora
+   gradient. --g (set per frame by AuroraTitle) blooms its halo + lift as the
+   pointer nears, so the word glows as a single object — distinct from the
+   ink-to-neon per-letter treatment. */
+.god-word {
+  position: relative;
+  display: inline-block;
+  --g: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  /* solid black at rest */
+  color: #08080c;
+  -webkit-text-fill-color: #08080c;
+  transform: translateY(calc(var(--g) * -0.13em)) scale(calc(1 + var(--g) * 0.05));
+  filter:
+    drop-shadow(0 0 calc(var(--g) * 24px) hsl(265 100% 66% / calc(var(--g) * 0.6)))
+    drop-shadow(0 0 calc(var(--g) * 46px) hsl(190 100% 60% / calc(var(--g) * 0.4)));
+  will-change: transform, filter;
+}
+/* aurora-gradient duplicate, perfectly overlaid, faded in by the glow level */
+.god-word::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-image: linear-gradient(
+    100deg,
+    #4f2bff, #7c3aed, #2bb8ff, #00e0c0, #ec4899, #4f2bff
+  );
+  background-size: 280% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  opacity: var(--g);
+  pointer-events: none;
+  animation: auroraDrift 5s ease-in-out infinite;
+}
+
