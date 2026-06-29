@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Reveal } from "./cinematic/Cine";
+import { AuroraTitle } from "./cinematic/AuroraTitle";
 
 const sides = [
   {
@@ -38,7 +39,9 @@ export default function DualValue() {
               <p className="cine-mono text-[0.68rem] uppercase tracking-[0.24em] text-[#6b6a7b]">
                 {s.eyebrow}
               </p>
-              <h3 className="cine-mid mt-4">{s.title}</h3>
+              <h3 className="cine-mid mt-4">
+                <AuroraTitle text={s.title} />
+              </h3>
               <p className="cine-body mt-5 max-w-sm text-[1.05rem]">{s.line}</p>
               <Link href={s.cta.href} className="cine-btn-ghost mt-8 self-start">
                 {s.cta.label} <span aria-hidden>→</span>
