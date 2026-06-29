@@ -991,3 +991,20 @@ html {
     0 0 60px -8px rgba(236, 72, 153, 0.32);
 }
 
+/* --- God-mode per-letter aurora glow (driven by AuroraTitle JS) ---
+   Each letter carries its own --g (0..1 glow energy) and --h (hue). The glow
+   lifts the glyph, melts its colour toward neon, and stacks three offset
+   aurora halos for depth. No transition — the component lerps --g per frame. */
+.god-letter {
+  display: inline-block;
+  --g: 0;
+  --h: 255;
+  transform: translateY(calc(var(--g) * -0.17em)) scale(calc(1 + var(--g) * 0.07));
+  color: color-mix(in srgb, #08080c, hsl(var(--h) 96% 60%) calc(var(--g) * 90%));
+  text-shadow:
+    0 0 calc(var(--g) * 20px) hsl(var(--h) 100% 62% / calc(var(--g) * 0.92)),
+    0 0 calc(var(--g) * 44px) hsl(calc(var(--h) + 42) 100% 62% / calc(var(--g) * 0.6)),
+    0 0 calc(var(--g) * 82px) hsl(calc(var(--h) - 42) 100% 60% / calc(var(--g) * 0.38));
+  will-change: transform, color, text-shadow;
+}
+
