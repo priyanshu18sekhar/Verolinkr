@@ -77,14 +77,16 @@ export function AuroraTitle({
     let raf = 0;
     const RADIUS = 180;
 
-    const tick = () => {
+    const tick = (t: number) => {
+      const time = t * 0.001;
       const p = pointer.current;
       const els = refs.current;
       for (let i = 0; i < els.length; i++) {
         const el = els[i];
         if (!el) continue;
-        // rest state is pure black — glow only blooms in pointer proximity
-        let target = 0;
+        // gentle ambient shimmer so the titles stay alive at rest, each unit
+        // phase-shifted; pointer proximity then blooms the full glow on top
+        let target = (Math.sin(time * 1.1 + i * 0.45) * 0.5 + 0.5) * 0.14;
         if (p.on) {
           const r = el.getBoundingClientRect();
           const cx = r.left + r.width / 2;
