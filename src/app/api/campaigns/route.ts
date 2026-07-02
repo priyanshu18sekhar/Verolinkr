@@ -53,9 +53,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const allowed = ['title', 'description', 'budget', 'startDate', 'endDate', 'status'];
+  const allowed = ['title', 'description', 'budget', 'startDate', 'endDate', 'status', 'cpv'];
   const data: Record<string, unknown> = {
     ownerId: auth.uid,
+    views: 0,
+    creatorsJoined: 0,
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
   };
@@ -66,6 +68,13 @@ export async function POST(request: NextRequest) {
   }
 
   const db = getAdminFirestore();
+
+  // stamp the brand's display name so marketplace cards can show it
+  const brandSnap = await db.collection('brands').doc(auth.uid).get();
+  if (brandSnap.exists) {
+    data.brandName = brandSnap.data()?.companyName ?? null;
+  }
+
   const ref = await db.collection('campaigns').add(data);
 
   const doc = await ref.get();
