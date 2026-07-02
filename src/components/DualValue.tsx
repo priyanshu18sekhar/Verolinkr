@@ -10,12 +10,14 @@ const sides = [
     title: "Creators",
     line: "Turn real reach into real income — paid per verified view, on time.",
     cta: { label: "Start earning", href: "/auth?role=creator" },
+    more: { label: "See the receipt", href: "#for-creators" },
   },
   {
     eyebrow: "For brands",
     title: "Brands",
     line: "Pay for proof, not vanity metrics. Verified audiences, escrow-protected.",
     cta: { label: "Find creators", href: "/auth?role=brand" },
+    more: { label: "See the audit", href: "#for-brands" },
   },
 ];
 
@@ -43,9 +45,17 @@ export default function DualValue() {
                 <AuroraTitle text={s.title} />
               </h3>
               <p className="cine-body mt-5 max-w-sm text-[1.05rem]">{s.line}</p>
-              <Link href={s.cta.href} className="cine-btn-ghost mt-8 self-start">
-                {s.cta.label} <span aria-hidden>→</span>
-              </Link>
+              <div className="mt-8 flex flex-wrap items-center gap-5">
+                <Link href={s.cta.href} className="cine-btn-ghost self-start">
+                  {s.cta.label} <span aria-hidden>→</span>
+                </Link>
+                <a
+                  href={s.more.href}
+                  className="cine-mono text-[0.66rem] uppercase tracking-[0.2em] text-[#6b6a7b] transition-colors hover:text-[#08080c]"
+                >
+                  {s.more.label} ↓
+                </a>
+              </div>
             </Reveal>
           ))}
         </div>

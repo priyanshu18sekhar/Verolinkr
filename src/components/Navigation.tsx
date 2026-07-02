@@ -10,6 +10,8 @@ const links = [
   { name: "Connect", href: "/#connect" },
   { name: "Verify", href: "/#verify" },
   { name: "Earn", href: "/#earn" },
+  { name: "Creators", href: "/#for-creators" },
+  { name: "Brands", href: "/#for-brands" },
 ];
 
 export default function Navigation() {
