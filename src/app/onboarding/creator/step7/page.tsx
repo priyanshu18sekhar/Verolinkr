@@ -134,7 +134,7 @@ export default function CreatorOnboardingStep7() {
   };
 
   const icon = (
-    <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+    <div className="w-20 h-20 rounded-2xl flex items-center justify-center bg-[#08080c]">
       <BanknotesIcon className="w-10 h-10 text-white" />
     </div>
   );
@@ -149,7 +149,7 @@ export default function CreatorOnboardingStep7() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
-            className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto mb-8 flex items-center justify-center"
+            className="w-24 h-24 rounded-full mx-auto mb-8 flex items-center justify-center bg-[#08080c]"
           >
             <CheckCircleIcon className="w-14 h-14 text-white" />
           </motion.div>

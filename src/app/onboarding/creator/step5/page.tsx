@@ -31,7 +31,7 @@ export default function CreatorOnboardingStep5() {
   const handleBack = () => router.push('/onboarding/creator/step4');
 
   const icon = (
-    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500">
+    <div className="w-20 h-20 rounded-2xl flex items-center justify-center bg-[#08080c]">
       <LinkIcon className="h-10 w-10 text-white" />
     </div>
   );

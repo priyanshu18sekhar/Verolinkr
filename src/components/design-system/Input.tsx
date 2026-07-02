@@ -14,7 +14,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={props.id}
-            className="block text-sm font-bold text-gray-900 mb-2"
+            className="block text-[12px] font-semibold uppercase tracking-[0.1em] mb-2"
+            style={{ color: '#6b6a7b' }}
           >
             {label}
           </label>
@@ -29,16 +30,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             suppressHydrationWarning
             ref={ref}
             className={`
-              w-full py-4 text-lg
-              border-2 rounded-xl
+              w-full py-4 text-[15px] font-medium
+              border rounded-xl bg-white/70
               transition-all duration-200
-              focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent
-              disabled:opacity-50 disabled:cursor-not-allowed
-              ${icon ? 'pl-12 pr-6' : 'px-6'}
+              focus:outline-none focus:ring-1 focus:ring-[#08080c] focus:border-[#08080c]
+              disabled:opacity-40 disabled:cursor-not-allowed
+              ${icon ? 'pl-12 pr-6' : 'px-5'}
               ${
                 error
-                  ? 'border-red-500'
-                  : 'border-gray-200 hover:border-black'
+                  ? 'border-red-400 focus:ring-red-500 focus:border-red-500'
+                  : 'border-[rgba(11,11,18,0.18)] hover:border-[rgba(11,11,18,0.38)]'
               }
               ${className}
             `}

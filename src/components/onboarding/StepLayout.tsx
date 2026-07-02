@@ -1,10 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Container, Typography } from '../design-system';
 import ProgressIndicator from './ProgressIndicator';
-import AnimatedParticles from './AnimatedParticles';
-import { fadeInUp } from '../../utils/animations';
 
 interface StepLayoutProps {
   currentStep: number;
@@ -38,12 +35,10 @@ export default function StepLayout({
   showBack = true,
 }: StepLayoutProps) {
   return (
-    <div className="min-h-screen bg-white py-20 px-4 relative overflow-hidden">
-      {/* Subtle background elements matching Hero */}
-      <AnimatedParticles count={50} />
+    <div className="cine-wrap min-h-screen py-16 px-5">
+      <div className="w-full max-w-xl mx-auto">
 
-      <Container size="md">
-        {/* Progress Indicator */}
+        {/* Progress */}
         <ProgressIndicator
           currentStep={currentStep}
           totalSteps={totalSteps}
@@ -52,85 +47,95 @@ export default function StepLayout({
 
         {/* Header */}
         <motion.div
-          className="text-center mb-16"
-          initial="initial"
-          animate="animate"
-          variants={fadeInUp}
+          className="text-center mb-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
         >
           {icon && (
             <motion.div
-              className="mb-8 flex justify-center"
-              initial={{ opacity: 0, scale: 0.8 }}
+              className="mb-6 flex justify-center"
+              initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
             >
               {icon}
             </motion.div>
           )}
-          <Typography variant="h2" className="mb-6 font-black">
+          <h1
+            style={{
+              fontSize: 'clamp(1.6rem, 4vw, 2.2rem)',
+              fontWeight: 700,
+              letterSpacing: '-0.035em',
+              lineHeight: 1.1,
+              color: '#08080c',
+            }}
+          >
             {title}
-          </Typography>
+          </h1>
           {subtitle && (
-            <Typography variant="lead" className="text-gray-600 font-light max-w-2xl mx-auto">
+            <p
+              className="mt-3 max-w-md mx-auto"
+              style={{ color: '#6b6a7b', fontSize: '0.875rem', lineHeight: 1.6 }}
+            >
               {subtitle}
-            </Typography>
+            </p>
           )}
         </motion.div>
 
-        {/* Content */}
+        {/* Form card */}
         <motion.div
-          className="bg-white border-2 border-gray-200 rounded-3xl p-12 max-w-2xl mx-auto relative z-10"
-          initial="initial"
-          animate="animate"
-          variants={fadeInUp}
+          className="lp-card px-7 py-8 sm:px-9 sm:py-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
         >
           {children}
 
-          {/* Navigation Buttons */}
+          {/* Navigation */}
           {(onNext || onBack || onSkip) && (
-            <div className={`flex gap-4 mt-12 items-center ${showBack ? 'justify-between' : 'justify-end'}`}>
+            <div
+              className={`flex gap-3 mt-10 items-center pt-8 ${showBack && onBack ? 'justify-between' : 'justify-end'}`}
+              style={{ borderTop: '1px solid rgba(11,11,18,0.08)' }}
+            >
               {showBack && onBack && (
-                <motion.button
+                <button
                   type="button"
                   onClick={onBack}
-                  className="px-8 py-4 text-lg font-bold text-gray-600 hover:text-black transition-colors"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="text-[13px] font-semibold hover:opacity-60 transition-opacity"
+                  style={{ color: '#6b6a7b' }}
                 >
                   ← Back
-                </motion.button>
+                </button>
               )}
-              
-              <div className="flex gap-4 ml-auto">
+
+              <div className="flex items-center gap-3 ml-auto">
                 {onSkip && (
-                  <motion.button
+                  <button
                     type="button"
                     onClick={onSkip}
-                    className="px-8 py-4 text-lg font-bold text-gray-500 hover:text-black transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="text-[13px] font-semibold hover:opacity-60 transition-opacity"
+                    style={{ color: '#8a899a' }}
                   >
                     {skipLabel}
-                  </motion.button>
+                  </button>
                 )}
 
                 {onNext && (
-                  <motion.button
+                  <button
                     type="button"
                     onClick={onNext}
-                    className="px-12 py-5 bg-black text-white rounded-full font-black text-xl hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="cine-btn"
                   >
-                    {nextLabel} →
-                  </motion.button>
+                    {nextLabel}
+                    <span className="ml-1">→</span>
+                  </button>
                 )}
               </div>
             </div>
           )}
         </motion.div>
-      </Container>
+      </div>
     </div>
   );
 }
-

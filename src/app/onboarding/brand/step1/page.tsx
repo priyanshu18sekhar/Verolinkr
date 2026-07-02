@@ -62,7 +62,7 @@ export default function BrandOnboardingStep1() {
   };
 
   const icon = (
-    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
+    <div className="w-20 h-20 rounded-2xl flex items-center justify-center bg-[#08080c]">
       <PhoneIcon className="w-10 h-10 text-white" />
     </div>
   );

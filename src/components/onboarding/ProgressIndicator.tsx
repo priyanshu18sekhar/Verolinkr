@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Typography } from '../design-system';
 
 interface ProgressIndicatorProps {
   currentStep: number;
@@ -18,33 +17,46 @@ export default function ProgressIndicator({
 
   return (
     <motion.div
-      className="mb-16"
-      initial={{ opacity: 0, y: 20 }}
+      className="mb-12"
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center text-lg font-black">
-            {currentStep}
-          </div>
-          <Typography variant="h6" className="font-black">
-            {stepTitle}
-          </Typography>
+      {/* Step counter + label */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <span
+            className="cine-mono text-[11px] font-semibold tabular-nums"
+            style={{ color: '#6b6a7b' }}
+          >
+            {String(currentStep).padStart(2, '0')}
+            <span style={{ color: '#d1d0d8', margin: '0 4px' }}>/</span>
+            {String(totalSteps).padStart(2, '0')}
+          </span>
+          <div style={{ width: '1px', height: '12px', background: 'rgba(11,11,18,0.15)' }} />
+          <p className="cine-eyebrow" style={{ color: '#6b6a7b' }}>{stepTitle}</p>
         </div>
-        <span className="text-sm font-medium text-gray-500">
-          Step {currentStep} of {totalSteps}
+        <span
+          className="cine-mono text-[11px]"
+          style={{ color: '#8a899a' }}
+        >
+          {Math.round(progress)}%
         </span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
+
+      {/* Progress track */}
+      <div
+        className="w-full rounded-full overflow-hidden"
+        style={{ height: '2px', background: 'rgba(11,11,18,0.08)' }}
+      >
         <motion.div
-          className="bg-black h-2 rounded-full"
+          className="h-full rounded-full"
+          style={{ background: '#08080c' }}
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         />
       </div>
     </motion.div>
   );
 }
-
