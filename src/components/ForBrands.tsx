@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Reveal } from "./cinematic/Cine";
+import { AuroraTitle } from "./cinematic/AuroraTitle";
 
 const POINTS = [
   {
@@ -21,11 +22,21 @@ const POINTS = [
 /** The brand side, argued as an audit. */
 export default function ForBrands() {
   return (
-    <section className="cine-act scroll-mt-24">
+    <section id="for-brands" className="cine-act scroll-mt-24">
       <div className="mx-auto grid w-full max-w-6xl items-center gap-14 px-6 lg:grid-cols-2">
         {/* The audit artifact — order flips on desktop so the sides alternate */}
         <Reveal delay={0.25} className="order-last lg:order-first">
-          <div className="lp-card mx-auto w-full max-w-md p-8">
+          <div className="relative mx-auto w-full max-w-md">
+            {/* aurora halo — the same treatment as the verification seal */}
+            <div
+              className="absolute inset-6 -z-10 rounded-full blur-3xl"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(43,184,255,0.18), rgba(79,43,255,0.14) 45%, transparent 72%)",
+              }}
+              aria-hidden
+            />
+            <div className="lp-card w-full p-8">
             <div className="flex items-baseline justify-between">
               <p className="cine-mono text-[0.62rem] uppercase tracking-[0.28em] text-[#8a899a]">
                 Campaign audit
@@ -93,6 +104,7 @@ export default function ForBrands() {
                 ₹0.45
               </p>
             </div>
+            </div>
           </div>
         </Reveal>
 
@@ -101,11 +113,9 @@ export default function ForBrands() {
           <Reveal>
             <p className="cine-eyebrow">For brands · Side B</p>
           </Reveal>
-          <Reveal delay={0.08}>
-            <h2 className="cine-mid mt-6">
-              Buy views that <span className="cine-serif">exist</span>.
-            </h2>
-          </Reveal>
+          <h2 className="cine-mid mt-6">
+            <AuroraTitle text="Buy views that exist." accent={["exist"]} />
+          </h2>
           <Reveal delay={0.16}>
             <p className="cine-body mt-6 max-w-md text-[1.02rem]">
               Impressions are a promise; verified views are a receipt. Set a

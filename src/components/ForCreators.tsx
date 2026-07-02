@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Reveal } from "./cinematic/Cine";
+import { AuroraTitle } from "./cinematic/AuroraTitle";
 
 const POINTS = [
   {
@@ -21,18 +22,16 @@ const POINTS = [
 /** The creator side, argued as a literal receipt. */
 export default function ForCreators() {
   return (
-    <section className="cine-act scroll-mt-24">
+    <section id="for-creators" className="cine-act scroll-mt-24">
       <div className="mx-auto grid w-full max-w-6xl items-center gap-14 px-6 lg:grid-cols-2">
         {/* Claim */}
         <div>
           <Reveal>
             <p className="cine-eyebrow">For creators · Side A</p>
           </Reveal>
-          <Reveal delay={0.08}>
-            <h2 className="cine-mid mt-6">
-              Your views become <span className="cine-serif">line items</span>.
-            </h2>
-          </Reveal>
+          <h2 className="cine-mid mt-6">
+            <AuroraTitle text="Your views become line items." accent={["line", "items"]} />
+          </h2>
           <Reveal delay={0.16}>
             <p className="cine-body mt-6 max-w-md text-[1.02rem]">
               No media kits, no rate haggling, no "exposure". Connect your
@@ -68,7 +67,17 @@ export default function ForCreators() {
 
         {/* The receipt artifact */}
         <Reveal delay={0.25}>
-          <div className="lp-card mx-auto w-full max-w-md p-8">
+          <div className="relative mx-auto w-full max-w-md">
+            {/* aurora halo — the same treatment as the verification seal */}
+            <div
+              className="absolute inset-6 -z-10 rounded-full blur-3xl"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(79,43,255,0.2), rgba(0,224,192,0.14) 45%, transparent 72%)",
+              }}
+              aria-hidden
+            />
+            <div className="lp-card w-full p-8">
             <div className="flex items-baseline justify-between">
               <p className="cine-mono text-[0.62rem] uppercase tracking-[0.28em] text-[#8a899a]">
                 Payout receipt
@@ -113,6 +122,7 @@ export default function ForCreators() {
               >
                 ₹52,500
               </p>
+            </div>
             </div>
           </div>
         </Reveal>
