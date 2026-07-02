@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/lib/api/client';
+import { fundCampaignWithRazorpay } from '@/lib/payments/checkout';
+import { useUser } from '@/contexts/UserContext';
 import {
   DashHeader,
   Serif,
@@ -29,6 +31,7 @@ interface Campaign {
   creatorsJoined?: number;
   startDate?: any;
   endDate?: any;
+  funded?: boolean;
 }
 
 const STATUS_FILTERS = ['all', 'active', 'draft', 'completed'] as const;
@@ -196,8 +199,30 @@ function CampaignRow({
   c: Campaign;
   onChanged: () => void;
 }) {
+  const { profile, userEmail } = useUser();
   const [busy, setBusy] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
   const spent = estimatedSpend(c);
+
+  const fund = async () => {
+    setBusy(true);
+    setPayError(null);
+    await fundCampaignWithRazorpay({
+      campaignId: c.id,
+      campaignTitle: c.title,
+      brandName: profile?.companyName,
+      email: profile?.businessEmail ?? userEmail,
+      onSuccess: () => {
+        setBusy(false);
+        onChanged();
+      },
+      onError: (message) => {
+        setBusy(false);
+        setPayError(message);
+      },
+      onDismiss: () => setBusy(false),
+    });
+  };
 
   const setStatus = async (status: string) => {
     setBusy(true);
@@ -228,6 +253,7 @@ function CampaignRow({
               {c.title}
             </h3>
             <StatusPill status={c.status || 'draft'} />
+            {c.funded && <span className="dash-pill-solid">funded</span>}
           </div>
           {c.description && <p className="cine-body mb-3 line-clamp-1 text-[0.85rem]">{c.description}</p>}
           <p className="dash-receipt !text-[0.56rem]">
@@ -258,7 +284,12 @@ function CampaignRow({
         </div>
       )}
 
-      <div className="mt-4 flex items-center gap-3 border-t border-[rgba(11,11,18,0.06)] pt-4">
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[rgba(11,11,18,0.06)] pt-4">
+        {!c.funded && (c.status === 'active' || c.status === 'draft') && Number(c.budget) > 0 && (
+          <button onClick={fund} disabled={busy} className="dash-pill-solid cursor-pointer disabled:opacity-50">
+            {busy ? 'Opening payment…' : `Fund ${formatINR(c.budget)}`}
+          </button>
+        )}
         {c.status === 'active' && (
           <button onClick={() => setStatus('paused')} disabled={busy} className="dash-pill cursor-pointer hover:border-[#08080c] disabled:opacity-50">
             Pause
@@ -280,6 +311,7 @@ function CampaignRow({
           </button>
         )}
       </div>
+      {payError && <p className="mt-3 text-sm font-medium text-[#08080c]">{payError}</p>}
     </article>
   );
 }
