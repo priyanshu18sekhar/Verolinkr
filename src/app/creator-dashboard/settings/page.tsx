@@ -1,241 +1,216 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import ConnectPlatforms from '@/components/connect/ConnectPlatforms';
+import { apiGet, apiPost, apiPatch } from '@/lib/api/client';
 import { useUser } from '@/contexts/UserContext';
-import { motion } from 'framer-motion';
-import { 
-  UserCircleIcon, 
-  ShieldCheckIcon, 
-  CreditCardIcon, 
-  BellIcon, 
-  LinkIcon,
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-  PencilIcon
-} from '@heroicons/react/24/outline';
-import { apiGet, apiPatch } from '@/lib/api/client';
+import {
+  DashHeader,
+  Serif,
+  SectionTitle,
+  LedgerLoading,
+} from '@/components/dashboard/Ledger';
 
-function SettingsContent() {
-  const [activeTab, setActiveTab] = useState('platforms');
-  const { profile, refreshProfile, loading: contextLoading } = useUser();
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ displayName: '', bio: '' });
-  const [saving, setSaving] = useState(false);
+type Tab = 'platforms' | 'payout' | 'account';
 
-  useEffect(() => {
-    if (profile) {
-      setFormData({
-        displayName: profile.displayName || '',
-        bio: profile.bio || ''
-      });
-    }
-  }, [profile]);
-
-  async function handleSave() {
-    setSaving(true);
-    try {
-      await apiPatch('/api/creators/me', formData);
-      await refreshProfile();
-      setIsEditing(false);
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('Failed to update profile');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  const connectedPlatforms = profile?.platforms || [];
-  
-  const allPlatforms = [
-    { id: 'instagram', name: 'Instagram', icon: '📸', color: 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500' },
-    { id: 'youtube', name: 'YouTube', icon: '▶️', color: 'bg-red-600' },
-    { id: 'tiktok', name: 'TikTok', icon: '🎵', color: 'bg-black' },
-    { id: 'twitter', name: 'Twitter / X', icon: '❌', color: 'bg-black' },
-    { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: 'bg-blue-600' }
-  ];
-
-  const isConnected = (platformId: string) => {
-    return connectedPlatforms.some((p: any) => p.id === platformId || p.platform === platformId);
-  };
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 }
-  };
-
-  if (contextLoading && !profile) return <div className="p-8">Loading settings...</div>;
-
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  error,
+  readOnly,
+}: {
+  label: string;
+  value: string;
+  onChange?: (v: string) => void;
+  placeholder?: string;
+  error?: string;
+  readOnly?: boolean;
+}) {
   return (
-    <motion.div 
-      className="p-8 max-w-4xl mx-auto"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
-      <div className="mb-8">
-        <h1 className="text-2xl font-black text-black mb-2">Settings</h1>
-        <p className="text-gray-600">Manage your account, connections, and preferences.</p>
-      </div>
-
-      <div className="flex space-x-2 mb-8 bg-gray-100 p-1 rounded-lg w-fit">
-        {[
-          { id: 'platforms', label: 'Social Platforms', icon: LinkIcon },
-          { id: 'profile', label: 'Profile', icon: UserCircleIcon },
-          { id: 'notifications', label: 'Notifications', icon: BellIcon },
-          { id: 'billing', label: 'Billing', icon: CreditCardIcon },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-bold transition-all ${
-              activeTab === tab.id ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-900'
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {activeTab === 'platforms' && (
-        <motion.div {...fadeInUp} className="space-y-6">
-          <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-black mb-1">Connected Platforms</h2>
-            <p className="text-sm text-gray-500 mb-6">Link your social media accounts to verify your stats and get more deals.</p>
-
-            <div className="space-y-4">
-              {allPlatforms.map((platform) => {
-                const connected = isConnected(platform.id);
-                return (
-                  <div key={platform.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:border-gray-300 transition-colors">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-lg ${platform.color}`}>
-                        {platform.icon}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-black">{platform.name}</h3>
-                        {connected ? (
-                          <div className="flex items-center text-xs text-green-600 font-medium mt-0.5">
-                            <CheckCircleIcon className="w-3 h-3 mr-1" />
-                            Connected
-                          </div>
-                        ) : (
-                          <p className="text-xs text-gray-400 mt-0.5">Not connected</p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {connected ? (
-                      <button className="px-4 py-2 text-sm font-semibold text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-200 rounded-lg transition-colors">
-                        Disconnect
-                      </button>
-                    ) : (
-                      <button className="px-4 py-2 text-sm font-bold text-white bg-black hover:bg-gray-800 rounded-lg transition-colors">
-                        Connect
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {activeTab === 'profile' && (
-        <motion.div {...fadeInUp} className="bg-white border border-gray-200 rounded-xl p-6">
-           <div className="flex justify-between items-center mb-6">
-             <h2 className="text-lg font-bold text-black">Profile Information</h2>
-             {!isEditing ? (
-               <button 
-                 onClick={() => setIsEditing(true)}
-                 className="flex items-center space-x-2 text-sm font-bold text-black hover:text-gray-600 transition-colors"
-               >
-                 <PencilIcon className="w-4 h-4" />
-                 <span>Edit Profile</span>
-               </button>
-             ) : (
-               <div className="flex space-x-2">
-                 <button 
-                   onClick={() => setIsEditing(false)}
-                   className="px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-                 >
-                   Cancel
-                 </button>
-                 <button 
-                   onClick={handleSave}
-                   disabled={saving}
-                   className="px-4 py-2 text-sm font-bold text-white bg-black hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
-                 >
-                   {saving ? 'Saving...' : 'Save Changes'}
-                 </button>
-               </div>
-             )}
-           </div>
-
-           <div className="space-y-4">
-             <div>
-               <label className="block text-sm font-bold text-gray-700 mb-1">Display Name</label>
-               <input 
-                 type="text" 
-                 value={isEditing ? formData.displayName : (profile?.displayName || '')} 
-                 onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                 readOnly={!isEditing}
-                 className={`w-full px-4 py-2 border rounded-lg transition-colors ${
-                   isEditing 
-                     ? 'border-gray-300 bg-white focus:ring-2 focus:ring-black focus:border-transparent' 
-                     : 'border-gray-200 bg-gray-50'
-                 }`}
-               />
-             </div>
-             <div>
-               <label className="block text-sm font-bold text-gray-700 mb-1">Bio</label>
-               <textarea 
-                 value={isEditing ? formData.bio : (profile?.bio || '')} 
-                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                 readOnly={!isEditing}
-                 rows={3}
-                 className={`w-full px-4 py-2 border rounded-lg transition-colors ${
-                   isEditing 
-                     ? 'border-gray-300 bg-white focus:ring-2 focus:ring-black focus:border-transparent' 
-                     : 'border-gray-200 bg-gray-50'
-                 }`}
-               />
-             </div>
-             <div>
-               <label className="block text-sm font-bold text-gray-700 mb-1">Email</label>
-               <input 
-                 type="email" 
-                 value={profile?.email || ''} 
-                 readOnly 
-                 className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed" 
-               />
-               <p className="mt-1 text-xs text-gray-500">Email cannot be changed.</p>
-             </div>
-           </div>
-        </motion.div>
-      )}
-
-      {activeTab === 'notifications' && (
-        <motion.div {...fadeInUp} className="bg-white border border-gray-200 rounded-xl p-6 text-center text-gray-500 py-12">
-            <BellIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p className="font-medium">Notification settings coming soon</p>
-        </motion.div>
-      )}
-
-      {activeTab === 'billing' && (
-        <motion.div {...fadeInUp} className="bg-white border border-gray-200 rounded-xl p-6 text-center text-gray-500 py-12">
-            <CreditCardIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p className="font-medium">Billing & Payout settings coming soon</p>
-        </motion.div>
-      )}
-
-    </motion.div>
+    <div>
+      <p className="dash-label mb-2">{label}</p>
+      <input
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        placeholder={placeholder}
+        readOnly={readOnly}
+        className={`dash-input ${readOnly ? 'opacity-60' : ''}`}
+      />
+      {error && <p className="mt-1.5 text-xs font-medium text-[#08080c]">{error}</p>}
+    </div>
   );
 }
 
-export default function SettingsPage() {
+function PayoutTab({ profile, onSaved }: { profile: any; onSaved: () => void }) {
+  const [bankName, setBankName] = useState(profile?.bankName ?? '');
+  const [accountNumber, setAccountNumber] = useState(profile?.accountNumber ?? '');
+  const [ifscCode, setIfscCode] = useState(profile?.ifscCode ?? '');
+  const [pan, setPan] = useState(profile?.pan ?? '');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const submit = async () => {
+    setBusy(true);
+    setErrors({});
+    setSaved(false);
+    try {
+      await apiPost('/api/creators/me/bank-details', { bankName, accountNumber, ifscCode, pan });
+      setSaved(true);
+      onSaved();
+    } catch (e: any) {
+      setErrors({ form: e.message || 'Could not save bank details.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="dash-card max-w-2xl p-7">
+      <SectionTitle>Payout account</SectionTitle>
+      <p className="cine-body mb-6 text-[0.88rem]">
+        Withdrawals land in this account. Details are stored encrypted and used only for payouts.
+      </p>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label="Bank name" value={bankName} onChange={setBankName} placeholder="HDFC Bank" />
+        <Field label="Account number" value={accountNumber} onChange={setAccountNumber} placeholder="50100…" />
+        <Field label="IFSC code" value={ifscCode} onChange={(v) => setIfscCode(v.toUpperCase())} placeholder="HDFC0001234" />
+        <Field label="PAN" value={pan} onChange={(v) => setPan(v.toUpperCase())} placeholder="ABCDE1234F" />
+      </div>
+      {errors.form && <p className="mt-4 text-sm font-medium text-[#08080c]">{errors.form}</p>}
+      {saved && <p className="mt-4 text-sm font-medium text-[#08080c]">Saved — you can withdraw to this account.</p>}
+      <button onClick={submit} disabled={busy} className="cine-btn mt-6 disabled:opacity-50">
+        {busy ? 'Saving…' : 'Save payout details'}
+      </button>
+    </section>
+  );
+}
+
+function AccountTab({ profile, onSaved }: { profile: any; onSaved: () => void }) {
+  const router = useRouter();
+  const { signOut } = useUser();
+  const [displayName, setDisplayName] = useState(profile?.displayName ?? '');
+  const [phone, setPhone] = useState(profile?.phone ?? '');
+  const [city, setCity] = useState(profile?.city ?? '');
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    setBusy(true);
+    setError(null);
+    setSaved(false);
+    try {
+      await apiPatch('/api/creators/me', { displayName, phone, city });
+      setSaved(true);
+      onSaved();
+    } catch (e: any) {
+      setError(e.message || 'Could not save changes.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <section className="dash-card p-7">
+        <SectionTitle>Account</SectionTitle>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Display name" value={displayName} onChange={setDisplayName} />
+          <Field label="Email" value={profile?.email ?? ''} readOnly />
+          <Field label="Phone" value={phone} onChange={setPhone} placeholder="+91 …" />
+          <Field label="City" value={city} onChange={setCity} placeholder="Mumbai" />
+        </div>
+        {error && <p className="mt-4 text-sm font-medium text-[#08080c]">{error}</p>}
+        {saved && <p className="mt-4 text-sm font-medium text-[#08080c]">Saved.</p>}
+        <button onClick={submit} disabled={busy} className="cine-btn mt-6 disabled:opacity-50">
+          {busy ? 'Saving…' : 'Save changes'}
+        </button>
+      </section>
+
+      <section className="dash-card p-7">
+        <SectionTitle>Session</SectionTitle>
+        <p className="cine-body mb-5 text-[0.88rem]">Sign out of VeroLinkr on this device.</p>
+        <button
+          onClick={async () => {
+            await signOut();
+            router.push('/');
+          }}
+          className="cine-btn-ghost"
+        >
+          Log out
+        </button>
+      </section>
+    </div>
+  );
+}
+
+function SettingsContent() {
+  const [tab, setTab] = useState<Tab>('platforms');
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    try {
+      const data = await apiGet<{ creator: any }>('/api/creators/me');
+      setProfile(data.creator ?? null);
+    } catch {
+      setProfile(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  if (loading) return <LedgerLoading label="Opening settings" />;
+
+  return (
+    <div className="dash-shell">
+      <DashHeader
+        receipt="Ledger · Settings"
+        title={
+          <>
+            Your terms, <Serif>settled</Serif>.
+          </>
+        }
+        sub="Platforms, payout account and profile details — everything that keeps the ledger accurate."
+      />
+
+      <div className="dash-tabs mb-8">
+        <button className="dash-tab" data-active={tab === 'platforms'} onClick={() => setTab('platforms')}>
+          Platforms
+        </button>
+        <button className="dash-tab" data-active={tab === 'payout'} onClick={() => setTab('payout')}>
+          Payout
+        </button>
+        <button className="dash-tab" data-active={tab === 'account'} onClick={() => setTab('account')}>
+          Account
+        </button>
+      </div>
+
+      {tab === 'platforms' && (
+        <section className="dash-card max-w-2xl p-7">
+          <SectionTitle>Connected platforms</SectionTitle>
+          <p className="cine-body mb-4 text-[0.88rem]">
+            Connections are read-only. Disconnecting removes the verified badge from your reach.
+          </p>
+          <ConnectPlatforms returnTo="/creator-dashboard/settings" />
+        </section>
+      )}
+      {tab === 'payout' && <PayoutTab profile={profile} onSaved={load} />}
+      {tab === 'account' && <AccountTab profile={profile} onSaved={load} />}
+    </div>
+  );
+}
+
+export default function CreatorSettingsPage() {
   return (
     <DashboardLayout userType="creator">
       <SettingsContent />
