@@ -5,7 +5,9 @@ import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ConnectPlatforms from '@/components/connect/ConnectPlatforms';
+import { apiPost } from '@/lib/api/client';
 import { DashHeader, Serif, SectionTitle } from '@/components/dashboard/Ledger';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 function ConnectionsContent() {
   const searchParams = useSearchParams();
@@ -13,6 +15,30 @@ function ConnectionsContent() {
   const connected = searchParams.get('connected');
   const mode = searchParams.get('mode');
   const [banner, setBanner] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const syncStats = async () => {
+    setSyncing(true);
+    try {
+      const res = await apiPost<{ synced: number; results: { status: string }[] }>(
+        '/api/creators/me/platforms/sync'
+      );
+      const skipped = res.results.filter((r) => r.status === 'skipped').length;
+      setBanner(
+        res.synced > 0
+          ? `Refreshed ${res.synced} platform${res.synced > 1 ? 's' : ''} from the source APIs.`
+          : skipped > 0
+            ? 'Demo connections don’t sync — connect a real account to pull live stats.'
+            : 'Nothing to sync yet.'
+      );
+      setReloadKey((k) => k + 1);
+    } catch (e: any) {
+      setBanner(e.message || 'Sync failed. Try again.');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (connected) {
@@ -37,6 +63,16 @@ function ConnectionsContent() {
             </>
           }
           sub="Link Instagram, YouTube and Facebook so VeroLinkr can verify your real reach. Connection is read-only — we never post on your behalf."
+          aside={
+            <button
+              onClick={syncStats}
+              disabled={syncing}
+              className="cine-btn-ghost !px-5 !py-2.5 !text-[0.85rem] disabled:opacity-50"
+            >
+              <ArrowPathIcon className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+              {syncing ? 'Syncing…' : 'Sync stats'}
+            </button>
+          }
         />
 
         {banner && (
@@ -50,7 +86,11 @@ function ConnectionsContent() {
             <SectionTitle aside={<span className="dash-receipt">{count} linked</span>}>
               Connected accounts
             </SectionTitle>
-            <ConnectPlatforms returnTo="/creator-dashboard/connections" onChange={setCount} />
+            <ConnectPlatforms
+              key={reloadKey}
+              returnTo="/creator-dashboard/connections"
+              onChange={setCount}
+            />
           </section>
 
           <section className="dash-card p-6 lg:col-span-2">
