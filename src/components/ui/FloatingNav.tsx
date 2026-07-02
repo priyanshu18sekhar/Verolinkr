@@ -1,167 +1,61 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
-import { 
+import {
   HomeIcon,
   UserIcon,
   ChartBarIcon,
   BriefcaseIcon,
-  ChatBubbleLeftRightIcon,
   GiftIcon,
-  ArrowTrendingUpIcon,
-  BanknotesIcon,
-  CogIcon,
-  BellIcon,
-  ShieldCheckIcon,
-  DocumentTextIcon,
-  IdentificationIcon
+  LinkIcon,
+  IdentificationIcon,
 } from '@heroicons/react/24/outline';
-import { 
+import {
   HomeIcon as HomeIconSolid,
   UserIcon as UserIconSolid,
   ChartBarIcon as ChartBarIconSolid,
   BriefcaseIcon as BriefcaseIconSolid,
-  ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
   GiftIcon as GiftIconSolid,
-  ArrowTrendingUpIcon as ArrowTrendingUpIconSolid,
-  BanknotesIcon as BanknotesIconSolid,
-  CogIcon as CogIconSolid,
-  BellIcon as BellIconSolid,
-  ShieldCheckIcon as ShieldCheckIconSolid,
-  DocumentTextIcon as DocumentTextIconSolid,
-  IdentificationIcon as IdentificationIconSolid
+  LinkIcon as LinkIconSolid,
+  IdentificationIcon as IdentificationIconSolid,
 } from '@heroicons/react/24/solid';
 
 interface FloatingNavProps {
   userType: 'brand' | 'creator';
 }
 
+interface NavEntry {
+  id: string;
+  label: string;
+  path: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  activeIcon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}
+
+const BRAND_ITEMS: NavEntry[] = [
+  { id: 'dashboard', label: 'Dashboard', path: '/brand-dashboard', icon: HomeIcon, activeIcon: HomeIconSolid },
+  { id: 'campaigns', label: 'Campaigns', path: '/brand-dashboard/campaigns', icon: BriefcaseIcon, activeIcon: BriefcaseIconSolid },
+  { id: 'creators', label: 'Creators', path: '/brand-dashboard/creators', icon: UserIcon, activeIcon: UserIconSolid },
+  { id: 'analytics', label: 'Analytics', path: '/brand-dashboard/analytics', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
+  { id: 'profile', label: 'Profile', path: '/brand-dashboard/profile', icon: IdentificationIcon, activeIcon: IdentificationIconSolid },
+];
+
+const CREATOR_ITEMS: NavEntry[] = [
+  { id: 'dashboard', label: 'Dashboard', path: '/creator-dashboard', icon: HomeIcon, activeIcon: HomeIconSolid },
+  { id: 'campaigns', label: 'Campaigns', path: '/creator-dashboard/campaigns', icon: BriefcaseIcon, activeIcon: BriefcaseIconSolid },
+  { id: 'gigs', label: 'Gigs', path: '/creator-dashboard/gigs', icon: GiftIcon, activeIcon: GiftIconSolid },
+  { id: 'connections', label: 'Connections', path: '/creator-dashboard/connections', icon: LinkIcon, activeIcon: LinkIconSolid },
+  { id: 'analytics', label: 'Analytics', path: '/creator-dashboard/analytics', icon: ChartBarIcon, activeIcon: ChartBarIconSolid },
+  { id: 'profile', label: 'Profile', path: '/creator-dashboard/profile', icon: UserIcon, activeIcon: UserIconSolid },
+];
+
 const FloatingNav: React.FC<FloatingNavProps> = ({ userType }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [isVisible, setIsVisible] = useState(true);
-  const lastScrollY = useRef(0);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Always show at the top
-      if (currentScrollY < 10) {
-        setIsVisible(true);
-      } 
-      // Hide when scrolling down (after 100px), show when scrolling up
-      else if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-        setIsVisible(false);
-      } 
-      // Show when scrolling up
-      else if (currentScrollY < lastScrollY.current) {
-        setIsVisible(true);
-      }
-      
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  const brandNavItems = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      path: '/brand-dashboard',
-      icon: HomeIcon,
-      activeIcon: HomeIconSolid,
-      tooltip: 'Overview & Stats'
-    },
-    {
-      id: 'campaigns',
-      label: 'Campaigns',
-      path: '/brand-dashboard/campaigns',
-      icon: BriefcaseIcon,
-      activeIcon: BriefcaseIconSolid,
-      tooltip: 'Manage Campaigns'
-    },
-    {
-      id: 'analytics',
-      label: 'Analytics',
-      path: '/brand-dashboard/analytics',
-      icon: ChartBarIcon,
-      activeIcon: ChartBarIconSolid,
-      tooltip: 'Performance Analytics'
-    },
-    {
-      id: 'creators',
-      label: 'Creators',
-      path: '/brand-dashboard/creators',
-      icon: UserIcon,
-      activeIcon: UserIconSolid,
-      tooltip: 'Discover Creators'
-    },
-    {
-      id: 'profile',
-      label: 'Profile',
-      path: '/brand-dashboard/profile',
-      icon: IdentificationIcon,
-      activeIcon: IdentificationIconSolid,
-      tooltip: 'Brand Profile'
-    }
-  ];
-
-  const creatorNavItems = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      path: '/creator-dashboard',
-      icon: HomeIcon,
-      activeIcon: HomeIconSolid,
-      tooltip: 'Overview & Earnings'
-    },
-    {
-      id: 'campaigns',
-      label: 'Campaigns',
-      path: '/creator-dashboard/campaigns',
-      icon: BriefcaseIcon,
-      activeIcon: BriefcaseIconSolid,
-      tooltip: 'Available Campaigns'
-    },
-    {
-      id: 'gigs',
-      label: 'Gigs',
-      path: '/creator-dashboard/gigs',
-      icon: GiftIcon,
-      activeIcon: GiftIconSolid,
-      tooltip: 'Gigs Marketplace'
-    },
-    {
-      id: 'analytics',
-      label: 'Analytics',
-      path: '/creator-dashboard/analytics',
-      icon: ChartBarIcon,
-      activeIcon: ChartBarIconSolid,
-      tooltip: 'Performance Stats'
-    },
-    {
-      id: 'profile',
-      label: 'Profile',
-      path: '/creator-dashboard/profile',
-      icon: UserIcon,
-      activeIcon: UserIconSolid,
-      tooltip: 'Edit Profile'
-    }
-  ];
-
-  const navItems = userType === 'brand' ? brandNavItems : creatorNavItems;
-
-  const handleNavClick = (path: string) => {
-    router.push(path);
-  };
+  const navItems = userType === 'brand' ? BRAND_ITEMS : CREATOR_ITEMS;
 
   const isActive = (path: string) => {
     if (path === '/brand-dashboard' || path === '/creator-dashboard') {
@@ -171,79 +65,48 @@ const FloatingNav: React.FC<FloatingNavProps> = ({ userType }) => {
   };
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.nav 
-          className="fixed bottom-4 lg:bottom-8 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-50"
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 100 }}
-          transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
-        >
-      <div className="relative">
-        {/* Background with glassmorphism effect */}
-        <div className="absolute inset-0 bg-white/10 backdrop-blur-2xl rounded-full border border-white/20 shadow-2xl" />
-        
-        {/* Navigation items */}
-        <div className="relative flex justify-between items-center h-16 px-6">
-          {navItems.map((item, index) => {
-            const active = isActive(item.path);
-            const IconComponent = active ? item.activeIcon : item.icon;
-            
-            return (
-              <motion.button
-                key={item.id}
-                onClick={() => handleNavClick(item.path)}
-                className={`relative group flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${
-                  active 
-                    ? 'bg-black text-white shadow-lg' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/20'
-                }`}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                {/* Active indicator */}
-                {active && (
-                  <motion.div
-                    className="absolute inset-0 bg-black rounded-full"
-                    layoutId="activeTab"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                
-                {/* Icon */}
-                <div className="relative z-10">
-                  <IconComponent className={`w-6 h-6 transition-colors duration-300 ${
-                    active ? 'text-white' : 'text-gray-600 group-hover:text-gray-900'
-                  }`} />
-                </div>
+    <motion.nav
+      className="fixed bottom-4 lg:bottom-7 left-1/2 -translate-x-1/2 z-50 px-4"
+      initial={{ opacity: 0, y: 60 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.22, 0.9, 0.3, 1] }}
+      aria-label="Dashboard navigation"
+    >
+      <div className="glass-nav flex items-center gap-1 rounded-full px-2.5 h-14">
+        {navItems.map((item) => {
+          const active = isActive(item.path);
+          const IconComponent = active ? item.activeIcon : item.icon;
 
-                {/* Tooltip */}
-                <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <div className="bg-black text-white text-xs font-medium px-3 py-2 rounded-lg whitespace-nowrap">
-                    {item.tooltip}
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black" />
-                  </div>
-                </div>
-
-                {/* Ripple effect on click */}
-                <motion.div
-                  className="absolute inset-0 bg-white/30 rounded-full"
-                  initial={{ scale: 0, opacity: 0 }}
-                  whileTap={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.2 }}
+          return (
+            <button
+              key={item.id}
+              onClick={() => router.push(item.path)}
+              className="group relative flex h-11 w-11 items-center justify-center rounded-full"
+              aria-label={item.label}
+              aria-current={active ? 'page' : undefined}
+            >
+              {active && (
+                <motion.span
+                  className="absolute inset-0 rounded-full bg-[#08080c]"
+                  layoutId="dash-nav-active"
+                  transition={{ type: 'spring', bounce: 0.18, duration: 0.5 }}
                 />
-              </motion.button>
-            );
-          })}
-        </div>
+              )}
+              <IconComponent
+                className={`relative z-10 h-[1.35rem] w-[1.35rem] transition-colors duration-200 ${
+                  active ? 'text-white' : 'text-[#6b6a7b] group-hover:text-[#08080c]'
+                }`}
+              />
+
+              {/* label tooltip */}
+              <span className="pointer-events-none absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#08080c] px-3 py-1.5 font-mono text-[0.58rem] font-medium uppercase tracking-[0.16em] text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
-      </motion.nav>
-      )}
-    </AnimatePresence>
+    </motion.nav>
   );
 };
 
