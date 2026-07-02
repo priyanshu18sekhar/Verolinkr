@@ -1,6 +1,8 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
+import { signOut as firebaseSignOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase/client';
 import { apiGet } from '@/lib/api/client';
 
 export type UserType = 'brand' | 'creator';
@@ -42,18 +44,24 @@ export function UserProvider({
   
   const fetchProfile = useCallback(async () => {
     if (!userType) return;
-    try {
-      const endpoint = userType === 'creator' ? '/api/creators/me' : '/api/brands/me';
-      const data = await apiGet<{ creator?: any; brand?: any }>(endpoint);
-      setProfile(data.creator || data.brand);
-    } catch (error: any) {
-      // If profile not found (404), it just means user needs to complete onboarding
-      // Don't log as a console error to avoid alarm
-      if (error.message === 'Brand profile not found' || error.message === 'Creator profile not found') {
-        console.log('User profile not found in DB (onboarding pending)');
-        setProfile(null);
-      } else {
-        console.error('Error fetching user profile:', error);
+    const endpoint = userType === 'creator' ? '/api/creators/me' : '/api/brands/me';
+    // one retry: the first call can race token propagation right after login
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const data = await apiGet<{ creator?: any; brand?: any }>(endpoint);
+        setProfile(data.creator || data.brand);
+        return;
+      } catch (error: any) {
+        // a missing profile just means onboarding is pending
+        if (error.message === 'Brand profile not found' || error.message === 'Creator profile not found') {
+          setProfile(null);
+          return;
+        }
+        if (attempt === 1) {
+          console.warn('Could not fetch user profile:', error?.message ?? error);
+        } else {
+          await new Promise((r) => setTimeout(r, 800));
+        }
       }
     }
   }, [userType]);
@@ -76,7 +84,9 @@ export function UserProvider({
         platformsLinked: 0,
         profile,
         refreshProfile: fetchProfile,
-        signOut: async () => {},
+        signOut: async () => {
+          await firebaseSignOut(auth);
+        },
       }}
     >
       {children}
