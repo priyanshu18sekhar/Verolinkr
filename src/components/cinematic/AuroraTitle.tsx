@@ -131,6 +131,21 @@ export function AuroraTitle({
       ? { animate: "show" as const }
       : { whileInView: "show" as const, viewport: { once: true, amount: 0.5 } };
 
+  // Group each word's units so lines can only break BETWEEN words — letters
+  // are individual inline-blocks and would otherwise wrap mid-word.
+  type GlyphUnit = Exclude<Unit, { kind: "space" }>;
+  const groups: GlyphUnit[][] = [];
+  let current: GlyphUnit[] = [];
+  for (const u of units) {
+    if (u.kind === "space") {
+      if (current.length) groups.push(current);
+      current = [];
+    } else {
+      current.push(u);
+    }
+  }
+  if (current.length) groups.push(current);
+
   let refIdx = -1;
   return (
     <motion.span
@@ -142,30 +157,36 @@ export function AuroraTitle({
       onPointerLeave={onLeave}
       {...viewProps}
     >
-      {units.map((u, i) => {
-        if (u.kind === "space") return <span key={i}> </span>;
-        refIdx++;
-        const idx = refIdx;
-        const isWord = u.kind === "word";
-        return (
-          <motion.span
-            key={i}
-            variants={item}
-            style={{ display: "inline-block", willChange: "transform, filter" }}
-          >
-            <span
-              ref={(el) => {
-                refs.current[idx] = el;
-              }}
-              className={isWord ? "god-word" : "god-letter"}
-              data-text={isWord ? u.ch : undefined}
-              style={isWord ? undefined : ({ ["--h" as string]: (u as { hue: number }).hue })}
-            >
-              {u.ch}
-            </span>
-          </motion.span>
-        );
-      })}
+      {groups.map((group, gi) => (
+        <span key={gi}>
+          <span style={{ display: "inline-block", whiteSpace: "nowrap" }}>
+            {group.map((u, i) => {
+              refIdx++;
+              const idx = refIdx;
+              const isWord = u.kind === "word";
+              return (
+                <motion.span
+                  key={i}
+                  variants={item}
+                  style={{ display: "inline-block", willChange: "transform, filter" }}
+                >
+                  <span
+                    ref={(el) => {
+                      refs.current[idx] = el;
+                    }}
+                    className={isWord ? "god-word" : "god-letter"}
+                    data-text={isWord ? u.ch : undefined}
+                    style={isWord ? undefined : ({ ["--h" as string]: (u as { hue: number }).hue })}
+                  >
+                    {u.ch}
+                  </span>
+                </motion.span>
+              );
+            })}
+          </span>
+          {gi < groups.length - 1 ? " " : ""}
+        </span>
+      ))}
     </motion.span>
   );
 }
