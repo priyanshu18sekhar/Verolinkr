@@ -32,9 +32,11 @@ export async function GET(request: NextRequest) {
 
         const platforms: Platform[] = [];
         platformsSnap.forEach((doc) => {
+            // never ship OAuth tokens to the browser
+            const { accessToken, refreshToken, ...safe } = doc.data();
             platforms.push({
                 id: doc.id,
-                ...doc.data(),
+                ...safe,
             } as Platform);
         });
 
