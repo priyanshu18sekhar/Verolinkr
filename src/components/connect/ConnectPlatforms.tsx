@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { apiFetch, apiGet } from '@/lib/api/client';
+import { StatusPill, formatCompact } from '@/components/dashboard/Ledger';
 
 type ProviderId = 'instagram' | 'facebook' | 'youtube';
 
@@ -16,18 +17,11 @@ interface Platform {
   verified?: boolean;
 }
 
-const PROVIDERS: { id: ProviderId; label: string; tint: string }[] = [
-  { id: 'instagram', label: 'Instagram', tint: '#ff5436' },
-  { id: 'youtube', label: 'YouTube', tint: '#ff2f2f' },
-  { id: 'facebook', label: 'Facebook', tint: '#4f2bff' },
+const PROVIDERS: { id: ProviderId; label: string }[] = [
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'youtube', label: 'YouTube' },
+  { id: 'facebook', label: 'Facebook' },
 ];
-
-function fmt(n?: number) {
-  if (!n) return '0';
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return `${n}`;
-}
 
 interface Props {
   /** Where the OAuth round-trip should return to (defaults to current path). */
@@ -86,51 +80,40 @@ export default function ConnectPlatforms({ returnTo, onChange }: Props) {
   const byType = (id: ProviderId) => platforms.find((p) => p.platformType === id);
 
   return (
-    <div className="space-y-3">
-      {PROVIDERS.map(({ id, label, tint }) => {
+    <ul>
+      {PROVIDERS.map(({ id, label }) => {
         const linked = byType(id);
         const isConnecting = connecting === id;
         return (
-          <div
+          <li
             key={id}
-            className="flex items-center justify-between rounded-xl border border-[var(--vl-line)] bg-[var(--vl-paper)] px-4 py-3"
+            className="flex items-center justify-between gap-4 border-b border-[rgba(11,11,18,0.06)] py-4 last:border-b-0"
           >
-            <div className="flex items-center gap-3">
-              <span
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold text-white"
-                style={{ background: tint }}
-              >
+            <div className="flex items-center gap-4 min-w-0">
+              <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#08080c] font-mono text-sm font-semibold text-white">
                 {label[0]}
               </span>
-              <div className="leading-tight">
-                <p className="text-sm font-semibold text-[var(--vl-ink)]">{label}</p>
+              <div className="min-w-0 leading-tight">
+                <p className="text-[0.95rem] font-semibold text-[#08080c]">{label}</p>
                 {linked ? (
-                  <p className="text-xs text-[var(--vl-muted)]">
-                    {linked.username || 'Connected'} · {fmt(linked.followers)} followers
+                  <p className="mt-0.5 truncate text-xs text-[#8a899a]">
+                    {linked.username || 'Connected'} · {formatCompact(linked.followers)} followers
+                    {linked.engagement ? ` · ${linked.engagement}% eng` : ''}
                   </p>
                 ) : (
-                  <p className="text-xs text-[var(--vl-muted)]">Not connected</p>
+                  <p className="mt-0.5 text-xs text-[#8a899a]">Not connected</p>
                 )}
               </div>
             </div>
 
             {loading ? (
-              <span className="text-xs text-[var(--vl-muted)]">…</span>
+              <span className="dash-receipt">…</span>
             ) : linked ? (
-              <div className="flex items-center gap-2">
-                <span
-                  className="vl-tag"
-                  style={
-                    linked.connectionType === 'demo'
-                      ? { background: 'var(--vl-indigo-soft)', color: 'var(--vl-indigo-ink)' }
-                      : undefined
-                  }
-                >
-                  {linked.connectionType === 'demo' ? 'Demo' : 'Live'}
-                </span>
+              <div className="flex flex-shrink-0 items-center gap-3">
+                <StatusPill status={linked.connectionType === 'demo' ? 'demo' : 'connected'} />
                 <button
                   onClick={() => disconnect(id)}
-                  className="text-xs font-medium text-[var(--vl-muted)] hover:text-[var(--vl-coral)]"
+                  className="dash-label cursor-pointer transition-colors hover:text-[#08080c]"
                 >
                   Disconnect
                 </button>
@@ -139,14 +122,14 @@ export default function ConnectPlatforms({ returnTo, onChange }: Props) {
               <button
                 onClick={() => connect(id)}
                 disabled={isConnecting}
-                className="vl-btn vl-btn-primary !px-4 !py-2 !text-sm disabled:opacity-60"
+                className="cine-btn flex-shrink-0 !px-4 !py-2 !text-[0.82rem] disabled:opacity-60"
               >
                 {isConnecting ? 'Connecting…' : 'Connect'}
               </button>
             )}
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }

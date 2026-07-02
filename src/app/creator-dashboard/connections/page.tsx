@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
-import DashboardLayout from '../../../components/layout/DashboardLayout';
-import FloatingNav from '../../../components/ui/FloatingNav';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import ConnectPlatforms from '@/components/connect/ConnectPlatforms';
+import { DashHeader, Serif, SectionTitle } from '@/components/dashboard/Ledger';
 
 function ConnectionsContent() {
   const searchParams = useSearchParams();
@@ -27,63 +27,63 @@ function ConnectionsContent() {
   }, [connected, mode]);
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-      <div className="mx-auto w-full max-w-[1100px] px-6 py-12 lg:px-10">
-        <span className="vl-eyebrow">Your platforms</span>
-        <h1 className="vl-display mt-3 text-4xl text-[var(--vl-ink)] md:text-5xl">
-          Connect once, earn everywhere
-        </h1>
-        <p className="mt-4 max-w-2xl text-[var(--vl-muted)]">
-          Link Instagram, YouTube and Facebook so VeroLinkr can verify your real
-          reach. Brands discover you by verified audience — connection is
-          read-only and we never post on your behalf.
-        </p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35 }}>
+      <div className="dash-shell">
+        <DashHeader
+          receipt={`Ledger · Connections · ${count} linked`}
+          title={
+            <>
+              Connect once, earn <Serif>everywhere</Serif>.
+            </>
+          }
+          sub="Link Instagram, YouTube and Facebook so VeroLinkr can verify your real reach. Connection is read-only — we never post on your behalf."
+        />
 
         {banner && (
-          <div
-            className="vl-tag mt-6"
-            style={{ background: 'var(--vl-mint-soft)', color: 'var(--vl-mint-ink)' }}
-          >
-            {banner}
+          <div className="dash-card mb-6 px-6 py-4">
+            <p className="text-sm font-medium text-[#08080c]">{banner}</p>
           </div>
         )}
 
-        <div className="vl-card mt-8 p-6 md:p-8">
-          <div className="mb-5 flex items-center justify-between">
-            <h2 className="vl-display text-xl text-[var(--vl-ink)]">Connected accounts</h2>
-            <span className="text-sm text-[var(--vl-muted)]">{count} linked</span>
-          </div>
-          <ConnectPlatforms returnTo="/creator-dashboard/connections" onChange={setCount} />
-        </div>
+        <div className="grid gap-6 lg:grid-cols-5">
+          <section className="dash-card p-6 lg:col-span-3">
+            <SectionTitle aside={<span className="dash-receipt">{count} linked</span>}>
+              Connected accounts
+            </SectionTitle>
+            <ConnectPlatforms returnTo="/creator-dashboard/connections" onChange={setCount} />
+          </section>
 
-        <div className="vl-card mt-6 p-6 md:p-8">
-          <h2 className="vl-display text-xl text-[var(--vl-ink)]">How verification works</h2>
-          <ol className="mt-4 space-y-3 text-sm text-[var(--vl-muted)]">
-            <li>
-              <span className="vl-mono text-[var(--vl-indigo)]">01</span> &nbsp;Connect a
-              platform — we read your public profile and audience stats.
-            </li>
-            <li>
-              <span className="vl-mono text-[var(--vl-indigo)]">02</span> &nbsp;Your reach is
-              sealed as <strong>verified</strong> and shown to matched brands.
-            </li>
-            <li>
-              <span className="vl-mono text-[var(--vl-indigo)]">03</span> &nbsp;You earn per
-              verified view, paid into your connected bank account.
-            </li>
-          </ol>
+          <section className="dash-card p-6 lg:col-span-2">
+            <SectionTitle>How verification works</SectionTitle>
+            <ol className="space-y-5 pt-1">
+              {[
+                'Connect a platform — we read your public profile and audience stats.',
+                'Your reach is sealed as verified and shown to matched brands.',
+                'You earn per verified view, paid into your connected bank account.',
+              ].map((step, i) => (
+                <li key={i} className="flex gap-4">
+                  <span className="dash-num flex-shrink-0 text-lg font-semibold text-[#c9c8d4]">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <p className="cine-body pt-0.5 text-[0.88rem]">{step}</p>
+                </li>
+              ))}
+            </ol>
+            <div className="dash-thread mt-7" aria-hidden />
+            <p className="dash-receipt mt-4">Read-only · revocable anytime</p>
+          </section>
         </div>
       </div>
-
-      <FloatingNav userType="creator" />
     </motion.div>
   );
 }
 
 export default function CreatorConnections() {
   return (
-    <DashboardLayout userType="creator" userName="Creator" userEmail="">
-      <ConnectionsContent />
+    <DashboardLayout userType="creator">
+      <Suspense fallback={null}>
+        <ConnectionsContent />
+      </Suspense>
     </DashboardLayout>
   );
 }
