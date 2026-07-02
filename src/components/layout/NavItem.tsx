@@ -27,8 +27,8 @@ export default function NavItem({ id, label, icon: Icon, path, badge, isCollapse
       onClick={handleClick}
       className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
         isActive
-          ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-black font-bold'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-black'
+          ? 'bg-[rgba(11,11,18,0.06)] text-[#08080c] font-bold'
+          : 'text-gray-500 hover:bg-[rgba(11,11,18,0.04)] hover:text-[#08080c]'
       }`}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
@@ -37,14 +37,14 @@ export default function NavItem({ id, label, icon: Icon, path, badge, isCollapse
       {isActive && (
         <motion.div
           layoutId="activeNavItem"
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-r-full"
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#08080c] rounded-r-full"
           transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
         />
       )}
 
       {/* Icon */}
       <div className="relative">
-        <Icon className={`w-6 h-6 ${isActive ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-900'}`} />
+        <Icon className={`w-5 h-5 ${isActive ? 'text-[#08080c]' : 'text-gray-400 group-hover:text-[#08080c]'} transition-colors`} />
       </div>
 
       {/* Label - hidden when collapsed */}
