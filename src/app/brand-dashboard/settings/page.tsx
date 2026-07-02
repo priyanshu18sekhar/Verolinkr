@@ -1,360 +1,203 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  BellIcon,
-  ShieldCheckIcon,
-  CreditCardIcon,
-  UsersIcon,
-  CodeBracketIcon,
-  GlobeAltIcon,
-  CheckCircleIcon
-} from '@heroicons/react/24/outline';
-import FloatingNav from '../../../components/ui/FloatingNav';
-import DashboardLayout from '../../../components/layout/DashboardLayout';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { apiGet, apiPatch } from '@/lib/api/client';
+import { useUser } from '@/contexts/UserContext';
+import {
+  DashHeader,
+  Serif,
+  SectionTitle,
+  LedgerLoading,
+} from '@/components/dashboard/Ledger';
 
-function BrandSettingsContent() {
-  const [activeTab, setActiveTab] = useState('notifications');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
+type Tab = 'notifications' | 'account';
 
-  // Settings State
-  const [notifications, setNotifications] = useState({
-    email: true,
-    sms: false,
-    push: true,
+const NOTIFICATION_PREFS: { key: string; label: string; hint: string }[] = [
+  { key: 'campaignUpdates', label: 'Campaign updates', hint: 'Creator joins, delivery milestones' },
+  { key: 'creatorMessages', label: 'Creator messages', hint: 'When a creator writes to you' },
+  { key: 'paymentAlerts', label: 'Payment alerts', hint: 'Invoices and payout confirmations' },
+  { key: 'weeklyDigest', label: 'Weekly digest', hint: 'A Monday summary of your ledger' },
+];
+
+function NotificationsTab({ brand, onSaved }: { brand: any; onSaved: () => void }) {
+  const [prefs, setPrefs] = useState<Record<string, boolean>>({
     campaignUpdates: true,
     creatorMessages: true,
     paymentAlerts: true,
-    reportReady: true,
-    weeklyDigest: false
+    weeklyDigest: false,
+    ...(brand?.notifications ?? {}),
   });
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [privacy, setPrivacy] = useState({
-    profileVisibility: 'public',
-    showStats: true,
-    showCampaigns: true,
-    allowMessages: true
-  });
+  const toggle = (key: string) => setPrefs((p) => ({ ...p, [key]: !p[key] }));
 
-  const [preferences, setPreferences] = useState({
-    language: 'en',
-    timezone: 'Asia/Kolkata',
-    currency: 'INR',
-    dashboardView: 'grid'
-  });
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 }
-  };
-
-  const tabs = [
-    { id: 'notifications', label: 'Notifications', icon: BellIcon },
-    { id: 'privacy', label: 'Privacy', icon: ShieldCheckIcon },
-    { id: 'billing', label: 'Billing', icon: CreditCardIcon },
-    { id: 'team', label: 'Team Access', icon: UsersIcon },
-    { id: 'api', label: 'API & Integrations', icon: CodeBracketIcon },
-    { id: 'preferences', label: 'Preferences', icon: GlobeAltIcon }
-  ];
-
-  const handleSave = () => {
-    // Here you would call the API to save settings
-    setSuccessMessage('Settings saved successfully!');
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+  const submit = async () => {
+    setBusy(true);
+    setError(null);
+    setSaved(false);
+    try {
+      await apiPatch('/api/brands/me', { notifications: prefs });
+      setSaved(true);
+      onSaved();
+    } catch (e: any) {
+      setError(e.message || 'Could not save preferences.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      {/* Header */}
-      <motion.div
-        className="bg-white border-b border-gray-200"
-        {...fadeInUp}
-      >
-        <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto">
-          <div className="flex justify-between items-start py-8">
-            <div className="flex-1">
-              <h1 className="text-[48px] md:text-[56px] font-black text-black tracking-tighter leading-none mb-3">
-                Settings
-              </h1>
-              <p className="text-[14px] text-gray-600 font-normal max-w-lg">
-                Manage your account preferences, notifications, and integrations
-              </p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      <div className="w-full px-8 md:px-16 lg:px-24 max-w-[1600px] mx-auto py-8">
-        {/* Success Message */}
-        {showSuccess && (
-          <motion.div
-            className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-3"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+    <section className="dash-card max-w-2xl p-7">
+      <SectionTitle>Notifications</SectionTitle>
+      <p className="cine-body mb-4 text-[0.88rem]">Choose what lands in your inbox.</p>
+      <div>
+        {NOTIFICATION_PREFS.map((n) => (
+          <div
+            key={n.key}
+            className="flex items-center justify-between gap-4 border-b border-[rgba(11,11,18,0.06)] py-4 last:border-b-0"
           >
-            <CheckCircleIcon className="w-5 h-5 text-green-600" />
-            <span className="text-green-800 font-medium">{successMessage}</span>
-          </motion.div>
-        )}
-
-        {/* Settings Container */}
-        <motion.div
-          className="bg-white border border-gray-200 rounded-lg"
-          {...fadeInUp}
-        >
-          {/* Tab Navigation */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6 overflow-x-auto">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`py-4 px-1 border-b-2 font-semibold text-[13px] flex items-center space-x-2 transition-all duration-200 whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'border-black text-black'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-6">
-            {/* Notifications Tab */}
-            {activeTab === 'notifications' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-[20px] font-bold text-black mb-6">Notification Preferences</h3>
-                  <div className="space-y-4">
-                    {Object.entries(notifications).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-black transition-colors">
-                        <div>
-                          <p className="text-[14px] font-semibold text-black capitalize">
-                            {key.replace(/([A-Z])/g, ' $1').trim()}
-                          </p>
-                          <p className="text-[12px] text-gray-600 mt-1">
-                            Receive notifications about {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
-                          </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={value}
-                            onChange={(e) => {
-                              setNotifications({
-                                ...notifications,
-                                [key]: e.target.checked
-                              });
-                            }}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-black peer-focus:ring-opacity-20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Privacy Tab */}
-            {activeTab === 'privacy' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-[20px] font-bold text-black mb-6">Privacy Settings</h3>
-                  <div className="space-y-4">
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <label className="block text-[14px] font-semibold text-black mb-2">
-                        Profile Visibility
-                      </label>
-                      <select
-                        value={privacy.profileVisibility}
-                        onChange={(e) => setPrivacy({ ...privacy, profileVisibility: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
-                      >
-                        <option value="public">Public - Visible to all creators</option>
-                        <option value="verified">Verified Only - Only verified creators</option>
-                        <option value="private">Private - Hidden from search</option>
-                      </select>
-                    </div>
-
-                    {Object.entries(privacy).filter(([key]) => key !== 'profileVisibility').map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-black transition-colors">
-                        <div>
-                          <p className="text-[14px] font-semibold text-black capitalize">
-                            {key.replace(/([A-Z])/g, ' $1').trim()}
-                          </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={value as boolean}
-                            onChange={(e) => {
-                              setPrivacy({
-                                ...privacy,
-                                [key]: e.target.checked
-                              });
-                            }}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-black peer-focus:ring-opacity-20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Billing Tab */}
-            {activeTab === 'billing' && (
-              <div className="space-y-6">
-                <h3 className="text-[20px] font-bold text-black">Billing & Payments</h3>
-                <p className="text-gray-600">Payment method management will be available here.</p>
-                <div className="p-6 border border-gray-200 rounded-lg">
-                  <p className="text-[14px] text-gray-600">Coming soon: Manage payment methods, view invoices, and billing history.</p>
-                </div>
-              </div>
-            )}
-
-            {/* Team Tab */}
-            {activeTab === 'team' && (
-              <div className="space-y-6">
-                <h3 className="text-[20px] font-bold text-black">Team Access Control</h3>
-                <p className="text-gray-600">Manage team member permissions and access levels.</p>
-                <div className="p-6 border border-gray-200 rounded-lg">
-                  <p className="text-[14px] text-gray-600">Team management features are available in the Profile section.</p>
-                </div>
-              </div>
-            )}
-
-            {/* API Tab */}
-            {activeTab === 'api' && (
-              <div className="space-y-6">
-                <h3 className="text-[20px] font-bold text-black">API & Integrations</h3>
-                <p className="text-gray-600">API keys and webhook management for integrations.</p>
-                <div className="p-6 border border-gray-200 rounded-lg">
-                  <p className="text-[14px] text-gray-600">Coming soon: Generate API keys and configure webhooks.</p>
-                </div>
-              </div>
-            )}
-
-            {/* Preferences Tab */}
-            {activeTab === 'preferences' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-[20px] font-bold text-black mb-6">App Preferences</h3>
-                  <div className="space-y-4">
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <label className="block text-[14px] font-semibold text-black mb-2">
-                        Language
-                      </label>
-                      <select
-                        value={preferences.language}
-                        onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
-                      >
-                        <option value="en">English</option>
-                        <option value="hi">हिन्दी (Hindi)</option>
-                      </select>
-                    </div>
-
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <label className="block text-[14px] font-semibold text-black mb-2">
-                        Timezone
-                      </label>
-                      <select
-                        value={preferences.timezone}
-                        onChange={(e) => setPreferences({ ...preferences, timezone: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
-                      >
-                        <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
-                        <option value="America/New_York">America/New_York (EST)</option>
-                        <option value="Europe/London">Europe/London (GMT)</option>
-                      </select>
-                    </div>
-
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <label className="block text-[14px] font-semibold text-black mb-2">
-                        Currency
-                      </label>
-                      <select
-                        value={preferences.currency}
-                        onChange={(e) => setPreferences({ ...preferences, currency: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black text-[13px]"
-                      >
-                        <option value="INR">₹ INR (Indian Rupee)</option>
-                        <option value="USD">$ USD (US Dollar)</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Save Button */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <motion.button
-                onClick={handleSave}
-                className="bg-black text-white px-8 py-3 rounded-lg font-bold text-[13px] hover:bg-gray-900 transition-all duration-200 premium-glow-button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Save Changes
-              </motion.button>
+            <div>
+              <p className="text-sm font-semibold text-[#08080c]">{n.label}</p>
+              <p className="text-xs text-[#8a899a]">{n.hint}</p>
             </div>
+            <button
+              onClick={() => toggle(n.key)}
+              className="dash-switch"
+              data-on={!!prefs[n.key]}
+              role="switch"
+              aria-checked={!!prefs[n.key]}
+              aria-label={n.label}
+            />
           </div>
-        </motion.div>
+        ))}
       </div>
-
-      <style jsx>{`
-        .premium-glow-button {
-          position: relative;
-          overflow: hidden;
-        }
-        .premium-glow-button:hover::before {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 100%;
-          height: 100%;
-          background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-          transform: translate(-50%, -50%);
-          animation: glow-pulse 1.5s ease-in-out infinite;
-        }
-        @keyframes glow-pulse {
-          0%, 100% {
-            opacity: 0.5;
-          }
-          50% {
-            opacity: 1;
-          }
-        }
-      `}</style>
-    </motion.div>
+      {error && <p className="mt-4 text-sm font-medium text-[#08080c]">{error}</p>}
+      {saved && <p className="mt-4 text-sm font-medium text-[#08080c]">Saved.</p>}
+      <button onClick={submit} disabled={busy} className="cine-btn mt-6 disabled:opacity-50">
+        {busy ? 'Saving…' : 'Save preferences'}
+      </button>
+    </section>
   );
 }
 
-export default function BrandSettings() {
+function AccountTab({ brand }: { brand: any }) {
+  const router = useRouter();
+  const { signOut } = useUser();
+  const [businessEmail, setBusinessEmail] = useState(brand?.businessEmail ?? '');
+  const [phone, setPhone] = useState(brand?.phone ?? '');
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    setBusy(true);
+    setError(null);
+    setSaved(false);
+    try {
+      await apiPatch('/api/brands/me', { businessEmail, phone });
+      setSaved(true);
+    } catch (e: any) {
+      setError(e.message || 'Could not save changes.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <section className="dash-card p-7">
+        <SectionTitle>Contact</SectionTitle>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <p className="dash-label mb-2">Business email</p>
+            <input value={businessEmail} onChange={(e) => setBusinessEmail(e.target.value)} className="dash-input" />
+          </div>
+          <div>
+            <p className="dash-label mb-2">Phone</p>
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 …" className="dash-input" />
+          </div>
+        </div>
+        {error && <p className="mt-4 text-sm font-medium text-[#08080c]">{error}</p>}
+        {saved && <p className="mt-4 text-sm font-medium text-[#08080c]">Saved.</p>}
+        <button onClick={submit} disabled={busy} className="cine-btn mt-6 disabled:opacity-50">
+          {busy ? 'Saving…' : 'Save changes'}
+        </button>
+      </section>
+
+      <section className="dash-card p-7">
+        <SectionTitle>Session</SectionTitle>
+        <p className="cine-body mb-5 text-[0.88rem]">Sign out of VeroLinkr on this device.</p>
+        <button
+          onClick={async () => {
+            await signOut();
+            router.push('/');
+          }}
+          className="cine-btn-ghost"
+        >
+          Log out
+        </button>
+      </section>
+    </div>
+  );
+}
+
+function BrandSettingsContent() {
+  const [loading, setLoading] = useState(true);
+  const [brand, setBrand] = useState<any>(null);
+  const [tab, setTab] = useState<Tab>('notifications');
+
+  const load = async () => {
+    try {
+      const data = await apiGet<{ brand: any }>('/api/brands/me');
+      setBrand(data.brand ?? null);
+    } catch {
+      setBrand(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  if (loading) return <LedgerLoading label="Opening settings" />;
+
+  return (
+    <div className="dash-shell">
+      <DashHeader
+        receipt="Ledger · Settings"
+        title={
+          <>
+            Your terms, <Serif>settled</Serif>.
+          </>
+        }
+        sub="Notifications and account details — everything that keeps the ledger accurate."
+      />
+
+      <div className="dash-tabs mb-8">
+        <button className="dash-tab" data-active={tab === 'notifications'} onClick={() => setTab('notifications')}>
+          Notifications
+        </button>
+        <button className="dash-tab" data-active={tab === 'account'} onClick={() => setTab('account')}>
+          Account
+        </button>
+      </div>
+
+      {tab === 'notifications' && <NotificationsTab brand={brand} onSaved={load} />}
+      {tab === 'account' && <AccountTab brand={brand} />}
+    </div>
+  );
+}
+
+export default function BrandSettingsPage() {
   return (
     <DashboardLayout userType="brand">
       <BrandSettingsContent />
-      <FloatingNav userType="brand" />
     </DashboardLayout>
   );
 }
