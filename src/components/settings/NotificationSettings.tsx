@@ -1,33 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BellIcon } from '@heroicons/react/24/outline';
 
 interface NotificationPreference {
   id: string;
   label: string;
   enabled: boolean;
-  category: 'campaign' | 'payment' | 'opportunity' | 'system';
 }
 
+const DEFAULTS: NotificationPreference[] = [
+  { id: 'campaign_updates', label: 'Campaign updates', enabled: true },
+  { id: 'payment_notifications', label: 'Payment alerts', enabled: true },
+  { id: 'new_opportunities', label: 'New opportunities', enabled: true },
+  { id: 'system_announcements', label: 'Announcements', enabled: true },
+  { id: 'email_notifications', label: 'Email', enabled: false },
+  { id: 'push_notifications', label: 'Push', enabled: false },
+];
+
 export default function NotificationSettings() {
-  const [preferences, setPreferences] = useState<NotificationPreference[]>([
-    { id: 'campaign_updates', label: 'Campaign Updates', enabled: true, category: 'campaign' },
-    { id: 'payment_notifications', label: 'Payment Notifications', enabled: true, category: 'payment' },
-    { id: 'new_opportunities', label: 'New Opportunities', enabled: true, category: 'opportunity' },
-    { id: 'system_announcements', label: 'System Announcements', enabled: true, category: 'system' },
-    { id: 'email_notifications', label: 'Email Notifications', enabled: false, category: 'system' },
-    { id: 'push_notifications', label: 'Push Notifications', enabled: false, category: 'system' },
-  ]);
+  const [preferences, setPreferences] = useState<NotificationPreference[]>(DEFAULTS);
 
   useEffect(() => {
-    // Load preferences from localStorage
     const saved = localStorage.getItem('notificationPreferences');
     if (saved) {
       try {
         setPreferences(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to parse notification preferences');
+      } catch {
+        // keep defaults when the stored value is unreadable
       }
     }
   }, []);
@@ -41,34 +40,23 @@ export default function NotificationSettings() {
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <BellIcon className="w-5 h-5 text-gray-500" />
-        <h4 className="text-sm font-bold text-gray-900">Notifications</h4>
-      </div>
-      <div className="space-y-2">
+    <div>
+      <p className="dash-label mb-3">Notifications</p>
+      <div className="space-y-1">
         {preferences.map((pref) => (
-          <div
-            key={pref.id}
-            className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
-          >
-            <span className="text-sm font-medium text-gray-700">{pref.label}</span>
+          <div key={pref.id} className="flex items-center justify-between py-2.5 border-b border-[rgba(11,11,18,0.05)] last:border-b-0">
+            <span className="text-sm text-[#46455a]">{pref.label}</span>
             <button
               onClick={() => togglePreference(pref.id)}
-              className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-                pref.enabled ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ${
-                  pref.enabled ? 'translate-x-6' : 'translate-x-0'
-                }`}
-              />
-            </button>
+              className="dash-switch"
+              data-on={pref.enabled}
+              role="switch"
+              aria-checked={pref.enabled}
+              aria-label={pref.label}
+            />
           </div>
         ))}
       </div>
     </div>
   );
 }
-
